@@ -1,0 +1,10 @@
+POSIX-Thread:
+WIN32-Thread:
+	*** etk-thread.cpp : needed to improve "etk_set_thread_priority"
+
+AppKit:
+	*** commumication between different team
+
+SupportKit:
+	*** Archive/Instantiate
+
