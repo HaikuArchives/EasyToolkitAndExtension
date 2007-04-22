@@ -31,7 +31,9 @@ libetk_storage_la_SOURCES =		\
 		File.h			\
 		File.cpp		\
 		FindDirectory.h		\
-		FindDirectory.cpp
+		FindDirectory.cpp	\
+		FilePanel.h		\
+		FilePanel.cpp
 
 etk_storageincludedir=$(includedir)/etkxx/etk/storage
 etk_storageinclude_HEADERS =		\
@@ -42,7 +44,8 @@ etk_storageinclude_HEADERS =		\
 		Volume.h		\
 		VolumeRoster.h		\
 		File.h			\
-		FindDirectory.h
+		FindDirectory.h		\
+		FilePanel.h
 
 DISTCLEANFILES =	\
 	Makefile.in
