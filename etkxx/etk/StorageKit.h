@@ -35,4 +35,5 @@
 #include <etk/storage/FindDirectory.h>
 #include <etk/storage/Volume.h>
 #include <etk/storage/VolumeRoster.h>
+#include <etk/storage/FilePanel.h>
 

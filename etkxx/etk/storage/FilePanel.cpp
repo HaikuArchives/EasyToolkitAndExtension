@@ -27,44 +27,121 @@
  *
  * --------------------------------------------------------------------------*/
 
+#include <etk/support/Autolock.h>
+
 #include "FilePanel.h"
 
-EFilePanel::EFilePanel(EMessenger *target,
-		       EMessage *message,
-		       const EDirectory *directory)
-	: fWindow(NULL), fTarget(target), fMessage(message)
+
+_LOCAL class EFilePanelWindow : public EWindow {
+public:
+	EFilePanelWindow();
+	virtual ~EFilePanelWindow();
+
+	virtual void	MessageReceived(EMessage *msg);
+
+	EMessenger	*Target() const;
+
+	void		SetTarget(EMessenger *target);
+	void		SetMessage(EMessage *msg);
+
+private:
+	EMessenger *fTarget;
+	EMessage *fMessage;
+};
+
+
+EFilePanelWindow::EFilePanelWindow()
+	: EWindow(ERect(-100, -100, -10, -10), NULL, E_TITLED_WINDOW, 0),
+	  fTarget(NULL), fMessage(NULL)
 {
 	// TODO
-	SetPanelDirectory(directory);
+	MoveToCenter();
 }
 
 
-EFilePanel::~EFilePanel()
+EFilePanelWindow::~EFilePanelWindow()
 {
-	// TODO
 	if(fTarget) delete fTarget;
 	if(fMessage) delete fMessage;
 }
 
 
 void
-EFilePanel::Show()
+EFilePanelWindow::MessageReceived(EMessage *msg)
 {
 	// TODO
+	switch(msg->what)
+	{
+		default:
+			EWindow::MessageReceived(msg);
+			break;
+	}
+}
+
+
+EMessenger*
+EFilePanelWindow::Target() const
+{
+	return fTarget;
+}
+
+
+void
+EFilePanelWindow::SetTarget(EMessenger *target)
+{
+	if(fTarget) delete fTarget;
+	fTarget = target;
+}
+
+
+void
+EFilePanelWindow::SetMessage(EMessage *msg)
+{
+	if(fMessage) delete fMessage;
+	fMessage = msg;
+}
+
+
+EFilePanel::EFilePanel(EMessenger *target,
+		       EMessage *message,
+		       const EDirectory *directory)
+{
+	fWindow = new EFilePanelWindow();
+	SetPanelDirectory(directory);
+	SetTarget(target);
+	SetMessage(message);
+}
+
+
+EFilePanel::~EFilePanel()
+{
+	fWindow->Lock();
+	fWindow->Quit();
+}
+
+
+void
+EFilePanel::Show()
+{
+	EAutolock <EWindow> autolock(fWindow);
+
+	fWindow->Show();
 }
 
 
 void
 EFilePanel::Hide()
 {
-	// TODO
+	EAutolock <EWindow> autolock(fWindow);
+
+	fWindow->Hide();
 }
 
 
 bool
 EFilePanel::IsHidden() const
 {
-	return (fWindow ? fWindow->IsHidden() : true);
+	return fWindow->IsHidden();
 }
 
 
@@ -79,30 +156,61 @@ EFilePanel::Window() const
 EMessenger*
 EFilePanel::Target() const
 {
-	return fTarget;
-}
-
-
-void
-EFilePanel::GetPanelDirectory(EDirectory *directory) const
-{
-	// TODO
+	EFilePanelWindow *win = (EFilePanelWindow*)fWindow;
+	return win->Target();
 }
 
 
 void
 EFilePanel::SetTarget(EMessenger *target)
 {
-	if(fTarget) delete fTarget;
-	fTarget = target;
+	EFilePanelWindow *win = (EFilePanelWindow*)fWindow;
+	EAutolock <EFilePanelWindow> autolock(win);
+
+	win->SetTarget(target);
 }
 
 
 void
 EFilePanel::SetMessage(EMessage *msg)
 {
-	if(fMessage) delete fMessage;
-	fMessage = msg;
+	EFilePanelWindow *win = (EFilePanelWindow*)fWindow;
+	EAutolock <EFilePanelWindow> autolock(win);
+
+	win->SetMessage(msg);
+}
+
+
+void
+EFilePanel::GetPanelDirectory(EEntry *entry) const
+{
+	// TODO
+}
+
+
+void
+EFilePanel::GetPanelDirectory(EPath *path) const
+{
+	EEntry aEntry;
+
+	if(path == NULL) return;
+
+	path->Unset();
+	GetPanelDirectory(&aEntry);
+	aEntry.GetPath(path);
+}
+
+
+void
+EFilePanel::GetPanelDirectory(EDirectory *directory) const
+{
+	EPath aPath;
+
+	if(directory == NULL) return;
+
+	directory->Unset();
+	GetPanelDirectory(&aPath);
+	directory->SetTo(aPath.Path());
 }
 
 

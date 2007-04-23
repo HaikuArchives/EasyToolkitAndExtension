@@ -21,7 +21,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	cd .. && \
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --enable-xft-x11=yes --enable-debug=minimum
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --enable-xft-x11=yes --enable-debug=minimum --with-built-in-graphics=none
 
 	touch $@
 

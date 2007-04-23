@@ -155,6 +155,7 @@ public:
 
 	void		MoveBy(float dx, float dy);
 	void		MoveTo(EPoint leftTop);
+	void		MoveToCenter();
 	void		ResizeBy(float dx, float dy);
 	void		ResizeTo(float width, float height);
 

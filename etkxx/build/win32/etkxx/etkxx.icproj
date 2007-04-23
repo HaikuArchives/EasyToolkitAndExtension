@@ -292,6 +292,8 @@
 		<File 
 			RelativePath="..\..\..\etk\storage\VolumeRoster.cpp"/>
 		<File 
+			RelativePath="..\..\..\etk\storage\FilePanel.cpp"/>
+		<File 
 			RelativePath="..\..\..\etk\render\ArcGenerator.cpp"/>
 		<File 
 			RelativePath="..\..\..\etk\render\LineGenerator.cpp"/>
@@ -475,6 +477,8 @@
 			RelativePath="..\..\..\etk\storage\Volume.h"/>
 		<File 
 			RelativePath="..\..\..\etk\storage\VolumeRoster.h"/>
+		<File 
+			RelativePath="..\..\..\etk\storage\FilePanel.h"/>
 		<File 
 			RelativePath="..\..\..\etk\render\ArcGenerator.h"/>
 		<File 

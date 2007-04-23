@@ -48,10 +48,13 @@ public:
 
 	EWindow		*Window() const;
 	EMessenger	*Target() const;
-	void		GetPanelDirectory(EDirectory *directory) const;
 
 	void		SetTarget(EMessenger *target);
 	void		SetMessage(EMessage *msg);
+
+	void		GetPanelDirectory(EEntry *entry) const;
+	void		GetPanelDirectory(EPath *path) const;
+	void		GetPanelDirectory(EDirectory *directory) const;
 
 	void		SetPanelDirectory(const EEntry *entry);
 	void		SetPanelDirectory(const EDirectory *directory);
@@ -63,8 +66,6 @@ public:
 
 private:
 	EWindow *fWindow;
-	EMessenger *fTarget;
-	EMessage *fMessage;
 };
 
 #endif /* __cplusplus */

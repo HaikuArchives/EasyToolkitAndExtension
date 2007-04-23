@@ -395,6 +395,9 @@
 				<File
 					RelativePath="..\..\..\etk\storage\VolumeRoster.cpp">
 				</File>
+				<File
+					RelativePath="..\..\..\etk\storage\FilePanel.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="render"
@@ -710,6 +713,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\storage\VolumeRoster.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\storage\FilePanel.h">
 				</File>
 			</Filter>
 			<Filter

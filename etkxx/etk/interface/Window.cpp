@@ -1774,6 +1774,16 @@ EWindow::MoveTo(EPoint where)
 
 
 void
+EWindow::MoveToCenter()
+{
+	euint32 scrW = 0, scrH = 0;
+	etk_app->fGraphicsEngine->GetDesktopBounds(&scrW, &scrH);
+
+	MoveTo(EPoint(((float)scrW - Frame().Width()) / 2, ((float)scrH - Frame().Height()) / 2));
+}
+
+
+void
 EWindow::ResizeTo(float w, float h)
 {
 	euint32 min_h = E_MAXUINT32, max_h = E_MAXUINT32, min_v = E_MAXUINT32, max_v = E_MAXUINT32;

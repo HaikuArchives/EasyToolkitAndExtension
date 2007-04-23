@@ -277,10 +277,7 @@ EAlert::EAlert(const char *title,
 
 	fTextView->SetTextBackground(btns_view->ViewColor());
 
-	euint32 scrW = 0, scrH = 0;
-	etk_app->fGraphicsEngine->GetDesktopBounds(&scrW, &scrH);
-
-	MoveTo(EPoint(((float)scrW - Frame().Width()) / 2, ((float)scrH - Frame().Height()) / 2));
+	MoveToCenter();
 }
 
 

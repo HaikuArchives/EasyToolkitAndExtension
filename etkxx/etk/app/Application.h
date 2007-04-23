@@ -81,7 +81,6 @@ private:
 	friend class EMessageRunner;
 	friend class EWindow;
 	friend class EView;
-	friend class EAlert;
 	friend class EBitmap;
 
 	friend _IMPEXP_ETK bool etk_update_font_families(bool);
