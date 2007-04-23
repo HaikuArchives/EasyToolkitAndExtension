@@ -29,6 +29,12 @@
 
 #include <etk/support/Autolock.h>
 
+#include <etk/interface/Button.h>
+#include <etk/interface/MenuField.h>
+#include <etk/interface/ListView.h>
+#include <etk/interface/ScrollView.h>
+#include <etk/interface/TextView.h>
+
 #include "FilePanel.h"
 
 
@@ -38,6 +44,7 @@ public:
 	virtual ~EFilePanelWindow();
 
 	virtual void	MessageReceived(EMessage *msg);
+	virtual bool	QuitRequested();
 
 	EMessenger	*Target() const;
 
@@ -51,10 +58,84 @@ private:
 
 
 EFilePanelWindow::EFilePanelWindow()
-	: EWindow(ERect(-100, -100, -10, -10), NULL, E_TITLED_WINDOW, 0),
+	: EWindow(ERect(-400, -400, -10, -10), "FilePanel: uncompleted", E_TITLED_WINDOW, 0),
 	  fTarget(NULL), fMessage(NULL)
 {
-	// TODO
+	EView *topView, *aView;
+	EMenuBar *menuBar;
+	EMenu *menu;
+	EMenuField *menuField;
+	ETextView *textView;
+	EButton *button;
+	EListView *listView;
+	EScrollView *scrollView;
+
+	ERect rect = Bounds();
+
+	topView = new EView(rect, NULL, E_FOLLOW_ALL, 0);
+	topView->SetViewColor(e_ui_color(E_PANEL_BACKGROUND_COLOR));
+	AddChild(topView);
+
+	menu = new EMenu("File", E_ITEMS_IN_COLUMN);
+	menu->AddSeparatorItem();
+	menu->AddItem(new EMenuItem("Quit", new EMessage(E_QUIT_REQUESTED), 'q', E_COMMAND_KEY));
+
+	menuBar = new EMenuBar(rect, NULL,
+			       E_FOLLOW_LEFT_RIGHT | E_FOLLOW_TOP,
+			       E_ITEMS_IN_ROW, false);
+	menuBar->SetName("MenuBar");
+	menuBar->AddItem(menu);
+	menuBar->GetPreferredSize(NULL, &rect.bottom);
+	menuBar->ResizeTo(rect.Width(), rect.Height());
+	topView->AddChild(menuBar);
+
+	rect.top = rect.bottom + 1;
+	rect.bottom = Bounds().bottom;
+	rect.InsetBy(5, 5);
+	aView = new EView(rect, NULL, E_FOLLOW_ALL, 0);
+	topView->AddChild(aView);
+
+	rect.OffsetTo(E_ORIGIN);
+
+	menu = new EMenu(NULL, E_ITEMS_IN_COLUMN);
+	menu->SetLabelFromMarked(true);
+	menu->AddItem(new EMenuItem("home", NULL));
+	menu->ItemAt(0)->SetMarked(true);
+	menuField = new EMenuField(rect, "DirMenuField", NULL, menu, false);
+	menuField->GetPreferredSize(NULL, &rect.bottom);
+	menuField->ResizeTo(rect.Width(), rect.Height());
+	aView->AddChild(menuField);
+
+	rect.bottom = aView->Bounds().bottom;
+	rect.top = rect.bottom - 20;
+	textView = new ETextView(rect, "text view",
+				 rect.OffsetToCopy(E_ORIGIN).InsetBySelf(2, 2),
+				 E_FOLLOW_LEFT | E_FOLLOW_BOTTOM);
+	textView->ResizeTo(100, rect.Height());
+	aView->AddChild(textView);
+
+	rect.left = rect.right - 100;
+	button = new EButton(rect, "default button", "OK",
+			     NULL, E_FOLLOW_RIGHT | E_FOLLOW_BOTTOM);
+	aView->AddChild(button);
+
+	rect.OffsetBy(-110, 0);
+	button = new EButton(rect, "cancel button", "Cancel",
+			     NULL, E_FOLLOW_RIGHT | E_FOLLOW_BOTTOM);
+	aView->AddChild(button);
+
+	rect = aView->Bounds();
+	rect.top = menuField->Frame().bottom + 5;
+	rect.bottom -= 25;
+	listView = new EListView(rect.OffsetToCopy(E_ORIGIN), "PoseView",
+				 E_SINGLE_SELECTION_LIST, E_FOLLOW_NONE);
+	scrollView = new EScrollView(rect, NULL, listView,
+				     E_FOLLOW_ALL, 0,
+				     true, true);
+	scrollView->ScrollBar(E_HORIZONTAL)->SetName("HScrollBar");
+	scrollView->ScrollBar(E_VERTICAL)->SetName("VScrollBar");
+	aView->AddChild(scrollView);
+
 	MoveToCenter();
 }
 
@@ -63,6 +144,14 @@ EFilePanelWindow::~EFilePanelWindow()
 {
 	if(fTarget) delete fTarget;
 	if(fMessage) delete fMessage;
+}
+
+
+bool
+EFilePanelWindow::QuitRequested()
+{
+	Hide();
+	return false;
 }
 
 

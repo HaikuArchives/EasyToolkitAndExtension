@@ -253,10 +253,8 @@ EMenuField::GetPreferredSize(float *width, float *height)
 
 
 void
-EMenuField::ResizeToPreferred()
+EMenuField::FrameResized(float new_width, float new_height)
 {
-	EView::ResizeToPreferred();
-
 	if(fMenuBar == NULL) return;
 
 	EFont font;

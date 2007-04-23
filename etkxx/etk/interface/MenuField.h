@@ -43,7 +43,7 @@ public:
 		   EMenu *menu,
 		   bool fixedSize = false,
 		   euint32 resizeMode = E_FOLLOW_LEFT | E_FOLLOW_TOP,
-		   euint32 flags = E_WILL_DRAW | E_NAVIGABLE);
+		   euint32 flags = E_WILL_DRAW | E_NAVIGABLE | E_FRAME_EVENTS);
 	virtual ~EMenuField();
 
 	virtual void	SetLabel(const char *label);
@@ -64,7 +64,7 @@ public:
 
 	virtual void	Draw(ERect updateRect);
 	virtual void	GetPreferredSize(float *width, float *height);
-	virtual void	ResizeToPreferred();
+	virtual void	FrameResized(float new_width, float new_height);
 	virtual void	WindowActivated(bool state);
 	virtual void	MakeFocus(bool focusState = true);
 	virtual void	SetFont(const EFont *font, euint8 mask = E_FONT_ALL);
