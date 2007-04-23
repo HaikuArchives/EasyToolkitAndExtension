@@ -17,13 +17,6 @@
 		<publishername>Savager Workroom</publishername>
 	</publisher>
 </bookinfo>
-<!--
-<preface>
-	<title>序言</title>
-	<para>　　刚开始我希望能编写一些交互性较强又可以帮助我工作的程序，于是我学了多种开发库，但那些开发库或多或少都存在一些不尽人意之处。直至有一天在LinuxFab上因看到有些BeOS用户为了一个从cxterm修改过来的输入法程序在争吵，当时我刚刚接触BeOS，所以结合对X Window的了解并参考Chinput写了一个能载入Unicon输入法的Addon。随后通过细心品读BeBook，我觉得BeOS的C++开发库有一些比其它类似开发库更优秀的地方，例如线程处理、开发结构性、消息传递及其过滤机制等等。后来，由于BeOS在我的新机器上因为不兼容无法再比较顺利运行了，我萌发了在我所能使用的操作系统中参照BeOS的C++库写一个满足我平时需要功能的C++开发库。于是就有了现在的ETK++...</para>
-	<para align="right">Anthony Lee</para>
-</preface>
--->
 <part>
 	<title>ETK++ 的部件</title>
 	<chapter>
