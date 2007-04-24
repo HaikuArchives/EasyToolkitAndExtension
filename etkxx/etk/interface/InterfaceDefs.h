@@ -183,8 +183,8 @@ extern "C" {
 #endif
 
 _IMPEXP_ETK e_rgb_color e_ui_color(e_color_which which);
-_IMPEXP_ETK float e_ui_get_scrollbar_horizontal_width();
-_IMPEXP_ETK float e_ui_get_scrollbar_vertical_height();
+_IMPEXP_ETK float e_ui_get_scrollbar_horizontal_height();
+_IMPEXP_ETK float e_ui_get_scrollbar_vertical_width();
 
 #ifdef __cplusplus /* Just for C++ */
 } /* extern "C" */

@@ -68,15 +68,18 @@ _IMPEXP_ETK e_rgb_color e_ui_color(e_color_which which)
 			break;
 
 		case E_BUTTON_BORDER_COLOR:
-			color.set_to(200, 150, 150);
+//			color.set_to(200, 150, 150);
+			color.set_to(50, 50, 50);
 			break;
 
 		case E_NAVIGATION_BASE_COLOR:
-			color.set_to(225, 140, 190);
+//			color.set_to(225, 140, 190);
+			color.set_to(170, 210, 240);
 			break;
 
 		case E_NAVIGATION_PULSE_COLOR:
-			color.set_to(190, 120, 160);
+//			color.set_to(190, 120, 160);
+			color.set_to(90, 100, 120);
 			break;
 
 		case E_MENU_BACKGROUND_COLOR:
@@ -84,11 +87,13 @@ _IMPEXP_ETK e_rgb_color e_ui_color(e_color_which which)
 			break;
 
 		case E_MENU_BORDER_COLOR:
-			color.set_to(200, 150, 150);
+//			color.set_to(200, 150, 150);
+			color.set_to(50, 50, 50);
 			break;
 
 		case E_MENU_SELECTED_BACKGROUND_COLOR:
-			color.set_to(225, 170, 170);
+//			color.set_to(225, 170, 170);
+			color.set_to(170, 210, 240);
 			break;
 
 		case E_MENU_ITEM_TEXT_COLOR:
@@ -100,7 +105,8 @@ _IMPEXP_ETK e_rgb_color e_ui_color(e_color_which which)
 			break;
 
 		case E_MENU_SELECTED_BORDER_COLOR:
-			color.set_to(225, 140, 190);
+//			color.set_to(225, 140, 190);
+			color.set_to(100, 100, 100);
 			break;
 
 		case E_TOOLTIP_BACKGROUND_COLOR:
@@ -127,13 +133,13 @@ _IMPEXP_ETK e_rgb_color e_ui_color(e_color_which which)
 }
 
 
-_IMPEXP_ETK float e_ui_get_scrollbar_horizontal_width()
+_IMPEXP_ETK float e_ui_get_scrollbar_vertical_width()
 {
 	return 16;
 }
 
 
-_IMPEXP_ETK float e_ui_get_scrollbar_vertical_height()
+_IMPEXP_ETK float e_ui_get_scrollbar_horizontal_height()
 {
 	return 16;
 }

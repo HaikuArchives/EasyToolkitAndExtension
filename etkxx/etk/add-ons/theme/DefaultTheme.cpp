@@ -197,13 +197,13 @@ static void get_scrollbar_preferred_size(struct e_theme_engine *engine,
 
 	if(direction == E_HORIZONTAL)
 	{
-		if(width) *width = e_ui_get_scrollbar_horizontal_width();
-		if(height) *height = e_ui_get_scrollbar_horizontal_width() * 2 + 10;
+		if(width) *width = 100;
+		if(height) *height = e_ui_get_scrollbar_horizontal_height();
 	}
 	else
 	{
-		if(width) *width = e_ui_get_scrollbar_vertical_height() * 2 + 10;
-		if(height) *height = e_ui_get_scrollbar_vertical_height();
+		if(width) *width = e_ui_get_scrollbar_vertical_width();
+		if(height) *height = 100;
 	}
 }
 

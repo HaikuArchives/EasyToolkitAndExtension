@@ -40,8 +40,8 @@ EScrollView::TargetValidFrame(bool ignore_scrollbar) const
 
 	if(!ignore_scrollbar)
 	{
-		if(!(fVSB == NULL || fVSB->IsHidden())) r.right -= (E_V_SCROLL_BAR_HEIGHT + UnitsPerPixel());
-		if(!(fHSB == NULL || fHSB->IsHidden())) r.bottom -= (E_H_SCROLL_BAR_WIDTH + UnitsPerPixel());
+		if(!(fVSB == NULL || fVSB->IsHidden())) r.right -= (E_V_SCROLL_BAR_WIDTH + UnitsPerPixel());
+		if(!(fHSB == NULL || fHSB->IsHidden())) r.bottom -= (E_H_SCROLL_BAR_HEIGHT + UnitsPerPixel());
 	}
 
 	return r;
@@ -58,10 +58,10 @@ EScrollView::EScrollView(ERect frame, const char *name, EView *target, euint32 r
 
 	ERect hR = Bounds();
 	ERect vR = Bounds();
-	hR.top = hR.bottom - E_H_SCROLL_BAR_WIDTH;
-	hR.right -= E_V_SCROLL_BAR_HEIGHT;
-	vR.left = vR.right - E_V_SCROLL_BAR_HEIGHT;
-	vR.bottom -= E_H_SCROLL_BAR_WIDTH;
+	hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
+	hR.right -= E_V_SCROLL_BAR_WIDTH;
+	vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
+	vR.bottom -= E_H_SCROLL_BAR_HEIGHT;
 
 	fHSB = new EScrollBar(hR, NULL, 0, 0, 0, E_HORIZONTAL);
 	fVSB = new EScrollBar(vR, NULL, 0, 0, 0, E_VERTICAL);
@@ -95,10 +95,10 @@ EScrollView::EScrollView(EMessage *from)
 {
 	ERect hR = Bounds();
 	ERect vR = Bounds();
-	hR.top = hR.bottom - E_H_SCROLL_BAR_WIDTH;
-	hR.right -= E_V_SCROLL_BAR_HEIGHT;
-	vR.left = vR.right - E_V_SCROLL_BAR_HEIGHT;
-	vR.bottom -= E_H_SCROLL_BAR_WIDTH;
+	hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
+	hR.right -= E_V_SCROLL_BAR_WIDTH;
+	vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
+	vR.bottom -= E_H_SCROLL_BAR_HEIGHT;
 
 	fHSB = new EScrollBar(hR, NULL, 0, 0, 0, E_HORIZONTAL);
 	fVSB = new EScrollBar(vR, NULL, 0, 0, 0, E_VERTICAL);
@@ -265,14 +265,14 @@ EScrollView::FrameResized(float new_width, float new_height)
 		if(vsbHidden && fHSB != NULL)
 		{
 			ERect hR = Bounds();
-			hR.top = hR.bottom - E_H_SCROLL_BAR_WIDTH;
+			hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
 			fHSB->ResizeTo(hR.Width(), hR.Height());
 			fHSB->MoveTo(hR.LeftTop());
 		}
 		else if(hsbHidden && fVSB != NULL)
 		{
 			ERect vR = Bounds();
-			vR.left = vR.right - E_V_SCROLL_BAR_HEIGHT;
+			vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
 			fVSB->ResizeTo(vR.Width(), vR.Height());
 			fVSB->MoveTo(vR.LeftTop());
 		}
@@ -281,10 +281,10 @@ EScrollView::FrameResized(float new_width, float new_height)
 	{
 		ERect hR = Bounds();
 		ERect vR = Bounds();
-		hR.top = hR.bottom - E_H_SCROLL_BAR_WIDTH;
-		hR.right -= E_V_SCROLL_BAR_HEIGHT;
-		vR.left = vR.right - E_V_SCROLL_BAR_HEIGHT;
-		vR.bottom -= E_H_SCROLL_BAR_WIDTH;
+		hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
+		hR.right -= E_V_SCROLL_BAR_WIDTH;
+		vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
+		vR.bottom -= E_H_SCROLL_BAR_HEIGHT;
 
 		fHSB->ResizeTo(hR.Width(), hR.Height());
 		fHSB->MoveTo(hR.LeftTop());

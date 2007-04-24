@@ -33,8 +33,8 @@
 #include <etk/app/MessageRunner.h>
 #include <etk/interface/View.h>
 
-#define E_H_SCROLL_BAR_WIDTH	e_ui_get_scrollbar_horizontal_width()
-#define E_V_SCROLL_BAR_HEIGHT	e_ui_get_scrollbar_vertical_height()
+#define E_V_SCROLL_BAR_WIDTH	e_ui_get_scrollbar_vertical_width()
+#define E_H_SCROLL_BAR_HEIGHT	e_ui_get_scrollbar_horizontal_height()
 
 #ifdef __cplusplus /* Just for C++ */
 

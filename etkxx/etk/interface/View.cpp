@@ -3143,8 +3143,25 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 void
 EView::GetPreferredSize(float *width, float *height)
 {
-	if(width) *width = Bounds().Width();
-	if(height) *height = Bounds().Height();
+	float w = 0, h = 0;
+	EView *aView;
+
+	for(aView = ChildAt(0); aView != NULL; aView = aView->NextSibling())
+	{
+		float cW = 0, cH = 0;
+		euint32 cMode = aView->ResizingMode();
+
+		aView->GetPreferredSize(&cW, &cH);
+
+		if(!(cMode & E_FOLLOW_LEFT_RIGHT)) cW += aView->Frame().left;
+		if(!(cMode & E_FOLLOW_TOP_BOTTOM)) cH += aView->Frame().top;
+
+		w = max_c(w, cW);
+		h = max_c(h, cH);
+	}
+
+	if(width) *width = w;
+	if(height) *height = h;
 }
 
 

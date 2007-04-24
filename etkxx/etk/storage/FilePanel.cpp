@@ -33,9 +33,77 @@
 #include <etk/interface/MenuField.h>
 #include <etk/interface/ListView.h>
 #include <etk/interface/ScrollView.h>
-#include <etk/interface/TextView.h>
+#include <etk/interface/TextControl.h>
+#include <etk/interface/StringView.h>
 
 #include "FilePanel.h"
+
+_LOCAL class EFilePanelLabel : public EStringView {
+public:
+	EFilePanelLabel(ERect frame, const char *name, const char *text, euint32 resizeMode);
+
+	virtual void	Draw(ERect updateRect);
+	virtual void	GetPreferredSize(float *width, float *height);
+};
+
+
+EFilePanelLabel::EFilePanelLabel(ERect frame, const char *name, const char *text, euint32 resizeMode)
+	: EStringView(frame, name, text, resizeMode, E_WILL_DRAW)
+{
+	SetAlignment(E_ALIGN_CENTER);
+	SetVerticalAlignment(E_ALIGN_MIDDLE);
+}
+
+
+void
+EFilePanelLabel::Draw(ERect updateRect)
+{
+	EStringView::Draw(updateRect);
+
+	PushState();
+	SetDrawingMode(E_OP_COPY);
+	SetPenSize(0);
+	SetHighColor(e_ui_color(E_SHINE_COLOR));
+	StrokeRect(Bounds());
+	SetHighColor(e_ui_color(E_SHADOW_COLOR));
+	StrokeLine(Bounds().LeftBottom(), Bounds().RightBottom());
+	StrokeLine(Bounds().RightTop());
+	PopState();
+}
+
+
+void
+EFilePanelLabel::GetPreferredSize(float *width, float *height)
+{
+	EStringView::GetPreferredSize(width, height);
+	if(width != NULL) *width += 2;
+	if(height != NULL) *height += 2;
+}
+
+
+_LOCAL class EFilePanelTitleView : public EView {
+public:
+	EFilePanelTitleView(ERect frame);
+};
+
+
+EFilePanelTitleView::EFilePanelTitleView(ERect frame)
+	: EView(frame, "TitleView", E_FOLLOW_LEFT_RIGHT | E_FOLLOW_TOP, 0)
+{
+	ERect rect;
+
+	rect = Bounds();
+	rect.right = 250;
+	AddChild(new EFilePanelLabel(rect, "TitleView_Name", "Name", E_FOLLOW_NONE));
+
+	rect.OffsetBy(251, 0);
+	rect.right = rect.left + 50;
+	AddChild(new EFilePanelLabel(rect, "TitleView_Size", "Size", E_FOLLOW_NONE));
+
+	rect.OffsetBy(51, 0);
+	rect.right = Bounds().right;
+	AddChild(new EFilePanelLabel(rect, "TitleView_Modified", "Modified", E_FOLLOW_LEFT_RIGHT));
+}
 
 
 _LOCAL class EFilePanelWindow : public EWindow {
@@ -65,10 +133,12 @@ EFilePanelWindow::EFilePanelWindow()
 	EMenuBar *menuBar;
 	EMenu *menu;
 	EMenuField *menuField;
-	ETextView *textView;
+	ETextControl *textControl;
 	EButton *button;
 	EListView *listView;
 	EScrollView *scrollView;
+	EFilePanelTitleView *titleView;
+	EFilePanelLabel *label;
 
 	ERect rect = Bounds();
 
@@ -108,11 +178,11 @@ EFilePanelWindow::EFilePanelWindow()
 
 	rect.bottom = aView->Bounds().bottom;
 	rect.top = rect.bottom - 20;
-	textView = new ETextView(rect, "text view",
-				 rect.OffsetToCopy(E_ORIGIN).InsetBySelf(2, 2),
-				 E_FOLLOW_LEFT | E_FOLLOW_BOTTOM);
-	textView->ResizeTo(100, rect.Height());
-	aView->AddChild(textView);
+	textControl = new ETextControl(rect, "text control",
+				       NULL, NULL, NULL,
+				       E_FOLLOW_LEFT | E_FOLLOW_BOTTOM);
+	textControl->ResizeTo(100, rect.Height());
+	aView->AddChild(textControl);
 
 	rect.left = rect.right - 100;
 	button = new EButton(rect, "default button", "OK",
@@ -127,13 +197,28 @@ EFilePanelWindow::EFilePanelWindow()
 	rect = aView->Bounds();
 	rect.top = menuField->Frame().bottom + 5;
 	rect.bottom -= 25;
-	listView = new EListView(rect.OffsetToCopy(E_ORIGIN), "PoseView",
-				 E_SINGLE_SELECTION_LIST, E_FOLLOW_NONE);
-	scrollView = new EScrollView(rect, NULL, listView,
-				     E_FOLLOW_ALL, 0,
-				     true, true);
+
+	scrollView = new EScrollView(rect, NULL, NULL, E_FOLLOW_ALL, 0, true, true);
 	scrollView->ScrollBar(E_HORIZONTAL)->SetName("HScrollBar");
 	scrollView->ScrollBar(E_VERTICAL)->SetName("VScrollBar");
+
+	titleView = new EFilePanelTitleView(ERect(0, 0, rect.Width(), 16));
+	scrollView->AddChild(titleView);
+
+	rect.OffsetTo(E_ORIGIN);
+	rect.top += titleView->Frame().Height() + 1;
+	listView = new EListView(rect, "PoseView", E_SINGLE_SELECTION_LIST, E_FOLLOW_NONE);
+	scrollView->SetTarget(listView);
+
+#if 0
+	label = new EFilePanelLabel(ERect(0, rect.bottom - E_H_SCROLL_BAR_HEIGHT, 100, rect.bottom),
+				    "CountVw", "0 items",
+				    E_FOLLOW_LEFT | E_FOLLOW_BOTTOM);
+	scrollView->ScrollBar(E_HORIZONTAL)->ResizeBy(-101, 0);
+	scrollView->ScrollBar(E_HORIZONTAL)->MoveBy(101, 0);
+	scrollView->AddChild(label);
+#endif
+
 	aView->AddChild(scrollView);
 
 	MoveToCenter();

@@ -107,12 +107,7 @@ EMenuField::SetDivider(float divider)
 	if(fDivider != divider)
 	{
 		fDivider = divider;
-		if(fMenuBar != NULL)
-		{
-			fMenuBar->MoveTo(fDivider + UnitsPerPixel(), (Frame().Height() - fMenuBar->Frame().Height()) / 2);
-			if(fFixedSize)
-				fMenuBar->ResizeTo(Bounds().right - fMenuBar->Frame().left, fMenuBar->Frame().Height());
-		}
+		EMenuField::FrameResized(Frame().Width(), Frame().Height());
 		Invalidate();
 	}
 }
@@ -138,14 +133,7 @@ EMenuField::SetMenu(EMenu *menu)
 
 	fMenu = menu;
 
-	EFont font;
-	GetFont(&font);
-
-	fMenuBar->ResizeToPreferred();
-	fMenuBar->MoveTo((fDivider >= 0 ? fDivider : max_c(font.StringWidth(fLabel), 0)) + UnitsPerPixel(),
-			 (Frame().Height() - fMenuBar->Frame().Height()) / 2);
-	if(fFixedSize)
-		fMenuBar->ResizeTo(Bounds().right - fMenuBar->Frame().left, fMenuBar->Frame().Height());
+	EMenuField::FrameResized(Frame().Width(), Frame().Height());
 
 	Invalidate();
 
@@ -260,10 +248,11 @@ EMenuField::FrameResized(float new_width, float new_height)
 	EFont font;
 	GetFont(&font);
 
+	fMenuBar->ResizeToPreferred();
 	fMenuBar->MoveTo((fDivider >= 0 ? fDivider : max_c(font.StringWidth(fLabel), 0)) + UnitsPerPixel(),
-			 (Frame().Height() - fMenuBar->Frame().Height()) / 2);
+			 (new_height - fMenuBar->Frame().Height()) / 2);
 	if(fFixedSize)
-		fMenuBar->ResizeTo(Bounds().right - fMenuBar->Frame().left, fMenuBar->Frame().Height());
+		fMenuBar->ResizeTo(new_width - fMenuBar->Frame().left, fMenuBar->Frame().Height());
 }
 
 
@@ -308,17 +297,7 @@ void
 EMenuField::SetFont(const EFont *font, euint8 mask)
 {
 	EView::SetFont(font, mask);
-	if(fMenuBar != NULL)
-	{
-		EFont aFont;
-		GetFont(&aFont);
-
-		fMenuBar->SetFont(&aFont, E_FONT_ALL);
-		fMenuBar->MoveTo((fDivider >= 0 ? fDivider : max_c(aFont.StringWidth(fLabel), 0)) + UnitsPerPixel(),
-				 (Frame().Height() - fMenuBar->Frame().Height()) / 2);
-		if(fFixedSize)
-			fMenuBar->ResizeTo(Bounds().right - fMenuBar->Frame().left, fMenuBar->Frame().Height());
-	}
+	EMenuField::FrameResized(Frame().Width(), Frame().Height());
 	Invalidate();
 }
 
