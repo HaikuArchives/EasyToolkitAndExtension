@@ -49,6 +49,9 @@ public:
 	e_status_t	Rewind();
 	eint32		CountEntries();
 
+	void		DoForEach(bool (*func)(const char *path));
+	void		DoForEach(bool (*func)(const char *path, void *user_data), void *user_data);
+
 private:
 	void *fDir;
 	char *fName;

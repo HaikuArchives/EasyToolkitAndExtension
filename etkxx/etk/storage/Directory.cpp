@@ -393,3 +393,45 @@ EDirectory::CountEntries()
 #endif // HAVE_DIRENT_H
 }
 
+
+void
+EDirectory::DoForEach(bool (*func)(const char *path))
+{
+	EEntry aEntry;
+	EPath aPath;
+
+	if(InitCheck() != E_OK || func == NULL) return;
+
+	Rewind();
+
+	while(GetNextEntry(&aEntry, true) == E_OK)
+	{
+		if(aEntry.GetPath(&aPath) != E_OK) continue;
+
+		if((*func)(aPath.Path())) break;
+	}
+
+	Rewind();
+}
+
+
+void
+EDirectory::DoForEach(bool (*func)(const char *path, void *user_data), void *user_data)
+{
+	EEntry aEntry;
+	EPath aPath;
+
+	if(InitCheck() != E_OK || func == NULL) return;
+
+	Rewind();
+
+	while(GetNextEntry(&aEntry, true) == E_OK)
+	{
+		if(aEntry.GetPath(&aPath) != E_OK) continue;
+
+		if((*func)(aPath.Path(), user_data)) break;
+	}
+
+	Rewind();
+}
+
