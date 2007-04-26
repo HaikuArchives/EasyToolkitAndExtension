@@ -41,89 +41,108 @@
 
 #define MSG_GET_PANEL_DIR	'getd'
 
+_LOCAL class EFilePanelView;
+_LOCAL class EFilePanelWindow;
+
+
+_LOCAL class EFilePanelLabel : public EStringView {
+public:
+	EFilePanelLabel(ERect frame, const char *name, const char *text, euint32 resizeMode);
+
+	virtual void	Draw(ERect updateRect);
+	virtual void	GetPreferredSize(float *width, float *height);
+};
+
 
 _LOCAL class EFilePanelItem : public EListItem {
 public:
-	EFilePanelItem(const char *path);
+	EFilePanelItem(const char *path, EFilePanelView *panel_view);
+
+	const char	*Path() const;
+	const char	*Leaf() const;
 
 private:
 	friend class EFilePanelWindow;
 
 	EPath fPath;
+	EFilePanelView *fPanelView;
 
 	virtual void	DrawItem(EView *owner, ERect itemRect, bool drawEverything);
 	virtual void	Update(EView *owner, const EFont *font);
 };
 
 
-EFilePanelItem::EFilePanelItem(const char *path)
-	: EListItem(), fPath(path)
-{
-}
-
-
-void
-EFilePanelItem::DrawItem(EView *owner, ERect itemRect, bool drawEverything)
-{
-	e_rgb_color bkColor = (IsSelected() ? e_ui_color(E_DOCUMENT_HIGHLIGHT_COLOR): owner->ViewColor());
-	e_rgb_color fgColor = e_ui_color(E_DOCUMENT_TEXT_COLOR);
-
-	if(!IsEnabled())
-	{
-		bkColor.disable(owner->ViewColor());
-		fgColor.disable(owner->ViewColor());
-	}
-
-	if(IsSelected() || !IsEnabled())
-	{
-		owner->SetHighColor(bkColor);
-		owner->FillRect(itemRect);
-	}
-
-	owner->SetHighColor(fgColor);
-	owner->SetLowColor(bkColor);
-
-	DrawLeader(owner, &itemRect);
-	if(itemRect.IsValid() == false) return;
-
-	if(fPath.Leaf())
-	{
-		e_font_height fontHeight;
-		owner->GetFontHeight(&fontHeight);
-
-		float sHeight = fontHeight.ascent + fontHeight.descent;
-
-		EPoint penLocation;
-		penLocation.x = itemRect.left;
-		penLocation.y = itemRect.Center().y - sHeight / 2.f;
-		penLocation.y += fontHeight.ascent + 1;
-
-		owner->DrawString(fPath.Leaf(), penLocation);
-	}
-}
-
-
-void
-EFilePanelItem::Update(EView *owner, const EFont *font)
-{
-	e_font_height fontHeight;
-	font->GetHeight(&fontHeight);
-	SetHeight(fontHeight.ascent + fontHeight.descent);
-
-	float width = 0;
-	GetLeaderSize(&width, NULL);
-	width += 300;
-	SetWidth(width);
-}
-
-
-_LOCAL class EFilePanelLabel : public EStringView {
+_LOCAL class EFilePanelTitleView : public EView {
 public:
-	EFilePanelLabel(ERect frame, const char *name, const char *text, euint32 resizeMode);
-	virtual ~EFilePanelLabel();
+	EFilePanelTitleView(ERect parent_bounds);
 
 	virtual void	Draw(ERect updateRect);
 	virtual void	GetPreferredSize(float *width, float *height);
+	virtual void	ScrollTo(EPoint where);
+};
+
+
+_LOCAL class EFilePanelView : public EView {
+public:
+	EFilePanelView(ERect frame);
+	virtual ~EFilePanelView();
+
+	void		AddColumn(const char *name, float width, void (*draw_func)(EView*, ERect, EFilePanelItem*));
+	void		RemoveColumn(eint32 index);
+	void		SwapColumns(eint32 indexA, eint32 indexB);
+
+	eint32		CountColumns() const;
+	const char	*GetNameOfColumn(eint32 index) const;
+	float		GetWidthOfColumn(eint32 index) const;
+
+	void		DrawRow(EView *owner, ERect itemRect, EFilePanelItem*);
+
+	virtual void	FrameResized(float new_width, float new_height);
+
+private:
+	struct column_data {
+		char *name;
+		float width;
+		void (*draw_func)(EView*, ERect, EFilePanelItem*);
+	};
+
+	EList fColumns;
+	EFilePanelTitleView *fTitleView;
+	EListView *fListView;
+	EScrollBar *fHSB;
+	EScrollBar *fVSB;
+};
+
+
+_LOCAL class EFilePanelWindow : public EWindow {
+public:
+	EFilePanelWindow();
+	virtual ~EFilePanelWindow();
+
+	virtual void	MessageReceived(EMessage *msg);
+	virtual bool	QuitRequested();
+
+	EMessenger	*Target() const;
+
+	void		SetTarget(EMessenger *target);
+	void		SetMessage(EMessage *msg);
+
+	void		Refresh();
+	void		SetPanelDirectory(const char *path);
+
+	void		Rewind();
+	e_status_t	GetNextSelected(EEntry *entry);
+
+private:
+	EPath fPath;
+	EMessenger *fTarget;
+	EMessage *fMessage;
+	EFilePanelView *fPanelView;
+
+	eint32 fSelIndex;
+	bool fShowHidden;
+
+	static bool	RefreshCallback(const char *path, void *data);
 };
 
 
@@ -132,11 +151,6 @@ EFilePanelLabel::EFilePanelLabel(ERect frame, const char *name, const char *text
 {
 	SetAlignment(E_ALIGN_CENTER);
 	SetVerticalAlignment(E_ALIGN_MIDDLE);
-}
-
-
-EFilePanelLabel::~EFilePanelLabel()
-{
 }
 
 
@@ -166,64 +180,412 @@ EFilePanelLabel::GetPreferredSize(float *width, float *height)
 }
 
 
-_LOCAL class EFilePanelTitleView : public EView {
-public:
-	EFilePanelTitleView(ERect frame);
-};
-
-
-EFilePanelTitleView::EFilePanelTitleView(ERect frame)
-	: EView(frame, "TitleView", E_FOLLOW_LEFT_RIGHT | E_FOLLOW_TOP, 0)
+EFilePanelItem::EFilePanelItem(const char *path, EFilePanelView *panel_view)
+	: EListItem(), fPath(path), fPanelView(panel_view)
 {
-	ERect rect;
-
-	rect = Bounds();
-	rect.right = 250;
-	AddChild(new EFilePanelLabel(rect, "TitleView_Name", "Name", E_FOLLOW_LEFT | E_FOLLOW_TOP_BOTTOM));
-
-	rect.OffsetBy(251, 0);
-	rect.right = rect.left + 50;
-	AddChild(new EFilePanelLabel(rect, "TitleView_Size", "Size", E_FOLLOW_LEFT | E_FOLLOW_TOP_BOTTOM));
-
-	rect.OffsetBy(51, 0);
-	rect.right = Bounds().right;
-	AddChild(new EFilePanelLabel(rect, "TitleView_Modified", "Modified", E_FOLLOW_ALL));
 }
 
 
-_LOCAL class EFilePanelWindow : public EWindow {
-public:
-	EFilePanelWindow();
-	virtual ~EFilePanelWindow();
+void
+EFilePanelItem::DrawItem(EView *owner, ERect itemRect, bool drawEverything)
+{
+	e_rgb_color bkColor = (IsSelected() ? e_ui_color(E_DOCUMENT_HIGHLIGHT_COLOR): owner->ViewColor());
+	e_rgb_color fgColor = e_ui_color(E_DOCUMENT_TEXT_COLOR);
 
-	virtual void	MessageReceived(EMessage *msg);
-	virtual bool	QuitRequested();
+	if(!IsEnabled())
+	{
+		bkColor.disable(owner->ViewColor());
+		fgColor.disable(owner->ViewColor());
+	}
 
-	EMessenger	*Target() const;
+	if(IsSelected() || !IsEnabled())
+	{
+		owner->SetHighColor(bkColor);
+		owner->FillRect(itemRect);
+	}
 
-	void		SetTarget(EMessenger *target);
-	void		SetMessage(EMessage *msg);
+	owner->SetHighColor(fgColor);
+	owner->SetLowColor(bkColor);
 
-	void		Refresh();
-	void		SetPanelDirectory(const char *path);
+	DrawLeader(owner, &itemRect);
+	if(itemRect.IsValid() == false) return;
 
-	void		Rewind();
-	e_status_t	GetNextSelected(EEntry *entry);
+	fPanelView->DrawRow(owner, itemRect, this);
+}
 
-private:
-	EPath fPath;
-	EMessenger *fTarget;
-	EMessage *fMessage;
 
-	eint32 fSelIndex;
+void
+EFilePanelItem::Update(EView *owner, const EFont *font)
+{
+	e_font_height fontHeight;
+	font->GetHeight(&fontHeight);
+	SetHeight(fontHeight.ascent + fontHeight.descent + 4);
 
-	static bool	RefreshCallback(const char *path, void *data);
-};
+	float width = 0;
+	GetLeaderSize(&width, NULL);
+	for(eint32 i = 0; i < fPanelView->CountColumns(); i++) width += fPanelView->GetWidthOfColumn(i);
+	SetWidth(width);
+}
+
+
+const char*
+EFilePanelItem::Path() const
+{
+	return fPath.Path();
+}
+
+
+const char*
+EFilePanelItem::Leaf() const
+{
+	return fPath.Leaf();
+}
+
+
+static void column_name_drawing_callback(EView *owner, ERect rect, EFilePanelItem *item)
+{
+	if(!rect.IsValid()) return;
+
+	if(item->Leaf())
+	{
+		e_font_height fontHeight;
+		owner->GetFontHeight(&fontHeight);
+
+		float sHeight = fontHeight.ascent + fontHeight.descent;
+
+		EPoint penLocation;
+		penLocation.x = rect.left + 2;
+		penLocation.y = rect.Center().y - sHeight / 2.f;
+		penLocation.y += fontHeight.ascent + 1;
+
+		owner->DrawString(item->Leaf(), penLocation);
+	}
+}
+
+
+static void column_size_drawing_callback(EView *owner, ERect rect, EFilePanelItem *item)
+{
+	if(!rect.IsValid()) return;
+
+	EEntry aEntry(item->Path());
+	if(aEntry.IsDirectory()) return;
+
+	eint64 fileSize = max_c(aEntry.GetSize(), 0);
+
+	EString str;
+	if(fileSize >= 0x40000000) str << ((float)fileSize / (float)0x40000000) << "G";
+	else if(fileSize >= 0x100000) str << ((float)fileSize / (float)0x100000) << "M";
+	else if(fileSize >= 0x400) str << ((float)fileSize / (float)0x400) << "K";
+	else str << fileSize;
+
+	e_font_height fontHeight;
+	owner->GetFontHeight(&fontHeight);
+
+	float sHeight = fontHeight.ascent + fontHeight.descent;
+
+	EPoint penLocation;
+	penLocation.x = rect.left + 2;
+	penLocation.y = rect.Center().y - sHeight / 2.f;
+	penLocation.y += fontHeight.ascent + 1;
+
+	owner->DrawString(str.String(), penLocation);
+}
+
+
+static void column_modified_drawing_callback(EView *owner, ERect rect, EFilePanelItem *item)
+{
+	if(!rect.IsValid()) return;
+
+	EEntry aEntry(item->Path());
+
+	e_bigtime_t mtime;
+	if(aEntry.GetModifiedTime(&mtime) != E_OK) return;
+
+	EString str;
+
+	// TODO
+	str << mtime;
+
+	e_font_height fontHeight;
+	owner->GetFontHeight(&fontHeight);
+
+	float sHeight = fontHeight.ascent + fontHeight.descent;
+
+	EPoint penLocation;
+	penLocation.x = rect.left + 2;
+	penLocation.y = rect.Center().y - sHeight / 2.f;
+	penLocation.y += fontHeight.ascent + 1;
+
+	owner->DrawString(str.String(), penLocation);
+}
+
+
+EFilePanelView::EFilePanelView(ERect frame)
+	: EView(frame, NULL, E_FOLLOW_ALL, E_FRAME_EVENTS)
+{
+	EFilePanelLabel *label;
+
+	ERect rect = Bounds();
+
+	fTitleView = new EFilePanelTitleView(rect);
+	AddChild(fTitleView);
+
+	fHSB = new EScrollBar(rect, "HScrollBar", 0, 0, 0, E_HORIZONTAL);
+	fHSB->ResizeBy(-(105 + E_V_SCROLL_BAR_WIDTH), E_H_SCROLL_BAR_HEIGHT - rect.Height());
+	fHSB->MoveTo(105, rect.bottom - E_H_SCROLL_BAR_HEIGHT);
+	AddChild(fHSB);
+
+	label = new EFilePanelLabel(ERect(0, rect.bottom - E_H_SCROLL_BAR_HEIGHT, 100, rect.bottom),
+				    "CountVw", NULL,
+				    E_FOLLOW_LEFT | E_FOLLOW_BOTTOM);
+	AddChild(label);
+
+	fVSB = new EScrollBar(rect, "VScrollBar", 0, 0, 0, E_VERTICAL);
+	fVSB->ResizeBy(E_V_SCROLL_BAR_WIDTH - rect.Width(), -E_H_SCROLL_BAR_HEIGHT);
+	fVSB->MoveTo(rect.right - E_V_SCROLL_BAR_WIDTH, 0);
+	AddChild(fVSB);
+
+	rect.right -= E_V_SCROLL_BAR_WIDTH + 1;
+	rect.top += fTitleView->Frame().Height() + 1;
+	rect.bottom -= E_H_SCROLL_BAR_HEIGHT + 1;
+	fListView = new EListView(rect, "PoseView", E_SINGLE_SELECTION_LIST, E_FOLLOW_ALL);
+	AddChild(fListView);
+
+	fHSB->SetTarget(fTitleView);
+	fHSB->SetEnabled(false);
+
+	fVSB->SetTarget(fListView);
+	fVSB->SetEnabled(false);
+
+	AddColumn("Name", 250, column_name_drawing_callback);
+	AddColumn("Size", 100, column_size_drawing_callback);
+	AddColumn("Modified", 200, column_modified_drawing_callback);
+}
+
+
+EFilePanelView::~EFilePanelView()
+{
+	struct column_data *data;
+	while((data = (struct column_data*)fColumns.RemoveItem(0)) != NULL)
+	{
+		if(data->name != NULL) delete[] data->name;
+		delete data;
+	}
+}
+
+
+void
+EFilePanelView::AddColumn(const char *name, float width, void (*draw_func)(EView*, ERect, EFilePanelItem*))
+{
+	struct column_data *data = new struct column_data;
+
+	data->name = EStrdup(name);
+	data->width = width;
+	data->draw_func = draw_func;
+
+	fColumns.AddItem(data);
+
+	FrameResized(Bounds().Width(), Bounds().Height());
+
+	Invalidate();
+}
+
+
+void
+EFilePanelView::RemoveColumn(eint32 index)
+{
+	struct column_data *data = (struct column_data*)fColumns.RemoveItem(index);
+	if(data != NULL)
+	{
+		if(data->name != NULL) delete[] data->name;
+		delete data;
+	}
+
+	FrameResized(Bounds().Width(), Bounds().Height());
+
+	Invalidate();
+}
+
+
+void
+EFilePanelView::SwapColumns(eint32 indexA, eint32 indexB)
+{
+	fColumns.SwapItems(indexA, indexB);
+	Invalidate();
+}
+
+
+eint32
+EFilePanelView::CountColumns() const
+{
+	return fColumns.CountItems();
+}
+
+
+const char*
+EFilePanelView::GetNameOfColumn(eint32 index) const
+{
+	struct column_data *data = (struct column_data*)fColumns.ItemAt(index);
+	return(data != NULL ? data->name : NULL);
+}
+
+
+float
+EFilePanelView::GetWidthOfColumn(eint32 index) const
+{
+	struct column_data *data = (struct column_data*)fColumns.ItemAt(index);
+	return(data != NULL ? data->width : 0);
+}
+
+
+void
+EFilePanelView::DrawRow(EView *owner, ERect itemRect, EFilePanelItem *item)
+{
+	ERect rect = itemRect;
+	rect.right = rect.left;
+
+	for(eint32 i = 0; i < fColumns.CountItems(); i++)
+	{
+		struct column_data *data = (struct column_data*)fColumns.ItemAt(i);
+
+		rect.left = rect.right + (i == 0 ? 0.f : 1.f);
+		rect.right = rect.left + data->width;
+
+		if(data->draw_func == NULL) continue;
+		data->draw_func(owner, rect & itemRect, item);
+	}
+}
+
+
+void
+EFilePanelView::FrameResized(float new_width, float new_height)
+{
+	float w = 0;
+	for(eint32 i = 0; i < CountColumns(); i++) w += GetWidthOfColumn(i);
+	fHSB->SetRange(0, max_c(w - new_width, 0));
+	fHSB->SetEnabled(new_width < w);
+
+	ERect rect;
+	for(eint32 i = 0; i < fListView->CountItems(); i++) rect |= fListView->ItemFrame(i);
+	fVSB->SetRange(0, max_c(rect.Height() - fListView->Bounds().Height(), 0));
+	fVSB->SetEnabled(fListView->Bounds().Height() < rect.Height());
+}
+
+
+EFilePanelTitleView::EFilePanelTitleView(ERect parent_bounds)
+	: EView(parent_bounds, "TitleView", E_FOLLOW_LEFT_RIGHT | E_FOLLOW_TOP, E_WILL_DRAW)
+{
+	e_font_height fontHeight;
+	GetFontHeight(&fontHeight);
+
+	ResizeTo(parent_bounds.Width() - E_V_SCROLL_BAR_WIDTH - 1,
+		 fontHeight.ascent + fontHeight.descent + 4);
+	MoveTo(0, 0);
+}
+
+
+void
+EFilePanelTitleView::Draw(ERect updateRect)
+{
+	EFilePanelView *parent = (EFilePanelView*)Parent();
+	if(parent == NULL) return;
+
+	e_rgb_color textColor = e_ui_color(E_PANEL_TEXT_COLOR);
+	e_rgb_color shineColor = e_ui_color(E_SHINE_COLOR);
+	e_rgb_color shadowColor = e_ui_color(E_SHADOW_COLOR);
+	if(!IsEnabled())
+	{
+		textColor.disable(ViewColor());
+		shineColor.disable(ViewColor());
+		shadowColor.disable(ViewColor());
+	}
+
+	EFont font;
+	e_font_height fontHeight;
+	GetFont(&font);
+	font.GetHeight(&fontHeight);
+
+	PushState();
+
+	SetDrawingMode(E_OP_COPY);
+	SetPenSize(0);
+
+	SetHighColor(ViewColor());
+	FillRect(Bounds());
+
+	ERect rect = Bounds();
+	rect.right = rect.left;
+	for(eint32 i = 0; i <= parent->CountColumns(); i++)
+	{
+		if(i == parent->CountColumns())
+		{
+			if(rect.right >= Bounds().right) break;
+			rect.left = rect.right + (i == 0 ? 0.f : 1.f);
+			rect.right = Bounds().right + 1;
+		}
+		else
+		{
+			const char *name = parent->GetNameOfColumn(i);
+
+			rect.left = rect.right + (i == 0 ? 0.f : 1.f);
+			rect.right = rect.left + parent->GetWidthOfColumn(i);
+
+			if(name)
+			{
+				EPoint penLocation;
+				penLocation.x = rect.Center().x - font.StringWidth(name) / 2.f;
+				penLocation.y = rect.Center().y - (fontHeight.ascent + fontHeight.descent) / 2.f;
+				penLocation.y += fontHeight.ascent + 1;
+
+				SetHighColor(textColor);
+				DrawString(name, penLocation);
+			}
+		}
+
+		SetHighColor(shineColor);
+		StrokeRect(rect);
+		SetHighColor(shadowColor);
+		StrokeLine(rect.LeftBottom(), rect.RightBottom());
+		StrokeLine(rect.RightTop());
+	}
+
+	PopState();
+}
+
+
+void
+EFilePanelTitleView::GetPreferredSize(float *width, float *height)
+{
+	if(width)
+	{
+		*width = 0;
+
+		EFilePanelView *parent = (EFilePanelView*)Parent();
+		for(eint32 i = 0; i < parent->CountColumns(); i++) *width += parent->GetWidthOfColumn(i);
+	}
+
+	if(height)
+	{
+		e_font_height fontHeight;
+		GetFontHeight(&fontHeight);
+		*height = fontHeight.ascent + fontHeight.descent + 4;
+	}
+}
+
+
+void
+EFilePanelTitleView::ScrollTo(EPoint where)
+{
+	EListView *listView = (EListView*)Parent()->FindView("PoseView");
+
+	EView::ScrollTo(where);
+	listView->ScrollTo(where.x, listView->ConvertToParent(EPoint(0, 0)).y - listView->Frame().top);
+}
 
 
 EFilePanelWindow::EFilePanelWindow()
 	: EWindow(ERect(-400, -400, -10, -10), "FilePanel: uncompleted", E_TITLED_WINDOW, 0),
-	  fTarget(NULL), fMessage(NULL), fSelIndex(0)
+	  fTarget(NULL), fMessage(NULL), fSelIndex(0), fShowHidden(false)
 {
 	EView *topView, *aView;
 	EMenuBar *menuBar;
@@ -232,10 +594,6 @@ EFilePanelWindow::EFilePanelWindow()
 	EMenuField *menuField;
 	ETextControl *textControl;
 	EButton *button;
-	EListView *listView;
-	EScrollBar *hScrollBar, *vScrollBar;
-	EFilePanelTitleView *titleView;
-	EFilePanelLabel *label;
 
 	ERect rect = Bounds();
 
@@ -296,32 +654,8 @@ EFilePanelWindow::EFilePanelWindow()
 	rect = aView->Bounds();
 	rect.top = menuField->Frame().bottom + 5;
 	rect.bottom -= 25;
-
-	titleView = new EFilePanelTitleView(rect);
-	titleView->ResizeTo(rect.Width() - E_V_SCROLL_BAR_WIDTH - 1, 16);
-	titleView->MoveTo(0, rect.top);
-	aView->AddChild(titleView);
-
-	hScrollBar = new EScrollBar(rect, "HScrollBar", 0, 0, 0, E_HORIZONTAL);
-	hScrollBar->ResizeBy(-(105 + E_V_SCROLL_BAR_WIDTH), E_H_SCROLL_BAR_HEIGHT - rect.Height());
-	hScrollBar->MoveTo(105, rect.bottom - E_H_SCROLL_BAR_HEIGHT);
-	aView->AddChild(hScrollBar);
-
-	label = new EFilePanelLabel(ERect(0, rect.bottom - E_H_SCROLL_BAR_HEIGHT, 100, rect.bottom),
-				    "CountVw", NULL,
-				    E_FOLLOW_LEFT | E_FOLLOW_BOTTOM);
-	aView->AddChild(label);
-
-	vScrollBar = new EScrollBar(rect, "VScrollBar", 0, 0, 0, E_VERTICAL);
-	vScrollBar->ResizeBy(E_V_SCROLL_BAR_WIDTH - rect.Width(), -E_H_SCROLL_BAR_HEIGHT);
-	vScrollBar->MoveTo(rect.right - E_V_SCROLL_BAR_WIDTH, rect.top);
-	aView->AddChild(vScrollBar);
-
-	rect.right -= E_V_SCROLL_BAR_WIDTH + 1;
-	rect.top += titleView->Frame().Height() + 1;
-	rect.bottom -= E_H_SCROLL_BAR_HEIGHT + 1;
-	listView = new EListView(rect, "PoseView", E_SINGLE_SELECTION_LIST, E_FOLLOW_ALL);
-	aView->AddChild(listView);
+	fPanelView = new EFilePanelView(rect);
+	aView->AddChild(fPanelView);
 
 	MoveToCenter();
 
@@ -388,8 +722,15 @@ bool
 EFilePanelWindow::RefreshCallback(const char *path, void *data)
 {
 	EListView *listView = (EListView*)data;
+	EFilePanelWindow *self = (EFilePanelWindow*)listView->Window();
 
-	listView->AddItem(new EFilePanelItem(path));
+	if(self->fShowHidden == false)
+	{
+		EEntry aEntry(path);
+		if(aEntry.IsHidden()) return false;
+	}
+
+	listView->AddItem(new EFilePanelItem(path, self->fPanelView));
 
 	return false;
 }
@@ -405,13 +746,12 @@ EFilePanelWindow::Refresh()
 	EDirectory dir(fPath.Path());
 	dir.DoForEach(RefreshCallback, (void*)listView);
 
-	EScrollBar *vScrollBar = (EScrollBar*)FindView("VScrollBar");
 	EFilePanelLabel *label = (EFilePanelLabel*)FindView("CountVw");
 	EString str;
-
-	vScrollBar->SetEnabled(listView->CountItems() != 0);
 	str << listView->CountItems() << " items";
 	label->SetText(str.String());
+
+	fPanelView->FrameResized(fPanelView->Frame().Width(), fPanelView->Frame().Height());
 }
 
 
@@ -437,7 +777,7 @@ EFilePanelWindow::GetNextSelected(EEntry *entry)
 	EFilePanelItem *item = (EFilePanelItem*)listView->ItemAt(listView->CurrentSelection(fSelIndex));
 
 	if(item == NULL) return E_ERROR;
-	entry->SetTo(item->fPath.Path());
+	entry->SetTo(item->Path());
 
 	fSelIndex++;
 
@@ -538,8 +878,9 @@ EFilePanel::GetPanelDirectory(EEntry *entry) const
 	const char *path = NULL;
 
 	entry->Unset();
-	if(!(msgr.SendMessage(&msg, &msg) != E_OK ||
-	     msg.FindString("PanelDirectory", &path) != E_OK)) entry->SetTo(path);
+	if(msgr.SendMessage(&msg, &msg) != E_OK) return;
+	if(msg.FindString("PanelDirectory", &path) == false) return;
+	entry->SetTo(path);
 }
 
 

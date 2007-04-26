@@ -3144,17 +3144,21 @@ void
 EView::GetPreferredSize(float *width, float *height)
 {
 	float w = 0, h = 0;
-	EView *aView;
+	EView *child;
 
-	for(aView = ChildAt(0); aView != NULL; aView = aView->NextSibling())
+	for(eint32 i = 0; (child = ChildAt(i)) != NULL; i++)
 	{
 		float cW = 0, cH = 0;
-		euint32 cMode = aView->ResizingMode();
+		euint32 cMode = child->ResizingMode();
 
-		aView->GetPreferredSize(&cW, &cH);
+		if(child->IsHidden()) continue;
+		child->GetPreferredSize(&cW, &cH);
 
-		if(!(cMode & E_FOLLOW_LEFT_RIGHT)) cW += aView->Frame().left;
-		if(!(cMode & E_FOLLOW_TOP_BOTTOM)) cH += aView->Frame().top;
+		if((cMode & E_FOLLOW_LEFT) || cMode == E_FOLLOW_NONE) cW += child->Frame().left;
+		if(cMode & E_FOLLOW_RIGHT) cW += Bounds().right - child->Frame().right;
+
+		if((cMode & E_FOLLOW_TOP) || cMode == E_FOLLOW_NONE) cH += child->Frame().top;
+		if(cMode & E_FOLLOW_BOTTOM) cH += Bounds().bottom - child->Frame().bottom;
 
 		w = max_c(w, cW);
 		h = max_c(h, cH);

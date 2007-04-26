@@ -33,6 +33,9 @@
 #include <io.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <etk/support/String.h>
 
 #include "Entry.h"
@@ -132,6 +135,85 @@ EEntry::Exists() const
 #else
 	return(_access(filename, 0) == 0);
 #endif
+}
+
+
+bool
+EEntry::IsHidden() const
+{
+	// TODO
+	return false;
+}
+
+
+bool
+EEntry::IsDirectory() const
+{
+	if(fName == NULL) return false;
+
+	const char *filename = (const char*)fName;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+	filename = str.String();
+
+	struct _stat stat;
+	if(_stat(filename, &stat) != 0) return false;
+	return(stat.st_mode & _S_IFDIR);
+#else
+	struct stat stat;
+	if(stat(filename, &stat) != 0) return false;
+	return S_ISDIR(stat.st_mode);
+#endif
+}
+
+
+eint64
+EEntry::GetSize() const
+{
+	if(fName == NULL) return E_INT64_CONSTANT(-1);
+
+	const char *filename = (const char*)fName;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+	filename = str.String();
+
+	struct _stati64 stat;
+	if(_stati64(filename, &stat) != 0) return E_INT64_CONSTANT(-1);
+	return (eint64)stat.st_size;
+#else
+	struct stat stat;
+	if(stat(filename, &stat) != 0) return E_INT64_CONSTANT(-1);
+	return (eint64)stat.st_size;
+#endif
+}
+
+
+e_status_t
+EEntry::GetModifiedTime(e_bigtime_t *time) const
+{
+	if(fName == NULL || time == NULL) return E_ERROR;
+
+	const char *filename = (const char*)fName;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+	filename = str.String();
+
+	struct _stat stat;
+	if(_stat(filename, &stat) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)stat.st_mtime;
+#else
+	struct stat stat;
+	if(stat(filename, &stat) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)stat.st_mtime;
+#endif
+
+	return E_OK;
 }
 
 
