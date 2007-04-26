@@ -1668,6 +1668,7 @@ etk/kernel/thread/win32/Makefile
 etk/kernel/thread/beos/Makefile
 etk/support/Makefile
 etk/storage/Makefile
+etk/storage/icons/Makefile
 etk/xml/Makefile
 etk/app/Makefile
 etk/render/Makefile

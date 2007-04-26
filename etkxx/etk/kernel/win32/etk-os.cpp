@@ -126,5 +126,46 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 
 	return TRUE;
 }
+
+
+char* etk_win32_convert_active_to_utf8(const char *str, eint32 length)
+{
+	if(str == NULL || *str == 0 || length == 0) return NULL;
+
+	eint32 nChars = (eint32)strlen(str);
+
+	if(length < 0 || length > nChars) length = nChars;
+
+	WCHAR *wStr = (WCHAR*)malloc(sizeof(WCHAR) * (size_t)(length + 1));
+	if(wStr == NULL) return NULL;
+
+	bzero(wStr, sizeof(WCHAR) * (size_t)(length + 1));
+	MultiByteToWideChar(CP_ACP, 0, str, length, wStr, length);
+
+	char *uStr = e_unicode_convert_to_utf8((const eunichar*)wStr, -1);
+	free(wStr);
+
+	return uStr;
+}
+
+
+char* etk_win32_convert_utf8_to_active(const char *str, eint32 length)
+{
+	eunichar *wStr = e_utf8_convert_to_unicode(str, length);
+	eint32 len = e_unicode_strlen(wStr);
+
+	if(wStr == NULL) return NULL;
+
+	char *aStr = (char*)malloc((size_t)len * 2 + 1);
+	if(aStr == NULL) {free(wStr); return NULL;}
+
+	bzero(aStr, (size_t)len * 2 + 1);
+	WideCharToMultiByte(CP_ACP, 0, (WCHAR*)wStr, -1, aStr, len * 2, NULL, NULL);
+
+	free(wStr);
+
+	return aStr;
+}
+
 } // extern "C"
 

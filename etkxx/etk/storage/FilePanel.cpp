@@ -35,11 +35,30 @@
 #include <etk/interface/ScrollView.h>
 #include <etk/interface/TextControl.h>
 #include <etk/interface/StringView.h>
+#include <etk/interface/Bitmap.h>
+#include <etk/render/Pixmap.h>
 
+#include "VolumeRoster.h"
 #include "FindDirectory.h"
 #include "FilePanel.h"
 
-#define MSG_GET_PANEL_DIR	'getd'
+#define ICON_WIDTH	16
+#define ICON_HEIGHT	16
+
+#include "icons/volume.xpm"
+#include "icons/folder.xpm"
+#include "icons/file.xpm"
+
+#define MSG_PANEL_GET_DIR	'getd'
+#define MSG_PANEL_SELECTED	'sele'
+
+#ifdef ETK_OS_WIN32
+extern "C" {
+// free it by "free"
+extern char* etk_win32_convert_utf8_to_active(const char *str, eint32 length);
+extern char* etk_win32_convert_active_to_utf8(const char *str, eint32 length);
+}
+#endif
 
 _LOCAL class EFilePanelView;
 _LOCAL class EFilePanelWindow;
@@ -56,15 +75,28 @@ public:
 
 _LOCAL class EFilePanelItem : public EListItem {
 public:
-	EFilePanelItem(const char *path, EFilePanelView *panel_view);
+	EFilePanelItem(const char *path, EFilePanelView *panel_view, e_dev_t dev = -1);
+	virtual ~EFilePanelItem();
 
 	const char	*Path() const;
 	const char	*Leaf() const;
+
+	bool		IsVolume() const;
+	bool		IsDirectory() const;
+
+	eint64		Size() const;
+	e_bigtime_t	ModifiedTime() const;
 
 private:
 	friend class EFilePanelWindow;
 
 	EPath fPath;
+	char *fLeaf;
+
+	eint32 fFlags;
+	eint64 fSize;
+	e_bigtime_t fModifiedTime;
+
 	EFilePanelView *fPanelView;
 
 	virtual void	DrawItem(EView *owner, ERect itemRect, bool drawEverything);
@@ -87,7 +119,9 @@ public:
 	EFilePanelView(ERect frame);
 	virtual ~EFilePanelView();
 
-	void		AddColumn(const char *name, float width, void (*draw_func)(EView*, ERect, EFilePanelItem*));
+	void		AddColumn(const char *name, float width,
+				  void (*draw_func)(EView*, ERect, EFilePanelItem*),
+				  int (*sort_func)(const EFilePanelItem**, const EFilePanelItem**));
 	void		RemoveColumn(eint32 index);
 	void		SwapColumns(eint32 indexA, eint32 indexB);
 
@@ -95,7 +129,8 @@ public:
 	const char	*GetNameOfColumn(eint32 index) const;
 	float		GetWidthOfColumn(eint32 index) const;
 
-	void		DrawRow(EView *owner, ERect itemRect, EFilePanelItem*);
+	void		DrawItem(EView *owner, ERect itemRect, EFilePanelItem*);
+	void		SortItems(eint32 columnIndex);
 
 	virtual void	FrameResized(float new_width, float new_height);
 
@@ -104,6 +139,7 @@ private:
 		char *name;
 		float width;
 		void (*draw_func)(EView*, ERect, EFilePanelItem*);
+		int (*sort_func)(const EFilePanelItem**, const EFilePanelItem**);
 	};
 
 	EList fColumns;
@@ -129,6 +165,7 @@ public:
 
 	void		Refresh();
 	void		SetPanelDirectory(const char *path);
+	const char	*PanelDirectory() const;
 
 	void		Rewind();
 	e_status_t	GetNextSelected(EEntry *entry);
@@ -141,6 +178,7 @@ private:
 
 	eint32 fSelIndex;
 	bool fShowHidden;
+	eint32 fSort;
 
 	static bool	RefreshCallback(const char *path, void *data);
 };
@@ -180,9 +218,37 @@ EFilePanelLabel::GetPreferredSize(float *width, float *height)
 }
 
 
-EFilePanelItem::EFilePanelItem(const char *path, EFilePanelView *panel_view)
-	: EListItem(), fPath(path), fPanelView(panel_view)
+EFilePanelItem::EFilePanelItem(const char *path, EFilePanelView *panel_view, e_dev_t dev)
+	: EListItem(), fPath(path), fSize(0), fModifiedTime(0), fPanelView(panel_view)
 {
+	if(dev >= 0)
+	{
+		EVolume vol(dev);
+		EString name;
+		vol.GetName(&name);
+		fFlags = 2;
+		fLeaf = e_strdup(name.String());
+	}
+	else
+	{
+		EEntry aEntry(path);
+		fFlags = (aEntry.IsDirectory() ? 1 : 0);
+
+#ifndef ETK_OS_WIN32
+		fLeaf = e_strdup(fPath.Leaf());
+#else
+		fLeaf = etk_win32_convert_active_to_utf8(fPath.Leaf(), -1);
+#endif
+
+		if(fFlags == 0) aEntry.GetSize(&fSize);
+		aEntry.GetModifiedTime(&fModifiedTime);
+	}
+}
+
+
+EFilePanelItem::~EFilePanelItem()
+{
+	if(fLeaf) free(fLeaf);
 }
 
 
@@ -202,15 +268,20 @@ EFilePanelItem::DrawItem(EView *owner, ERect itemRect, bool drawEverything)
 	{
 		owner->SetHighColor(bkColor);
 		owner->FillRect(itemRect);
-	}
 
-	owner->SetHighColor(fgColor);
-	owner->SetLowColor(bkColor);
+		owner->SetHighColor(fgColor);
+		owner->SetLowColor(bkColor);
+	}
+	else
+	{
+		owner->SetHighColor(fgColor);
+		owner->SetLowColor(owner->ViewColor());
+	}
 
 	DrawLeader(owner, &itemRect);
 	if(itemRect.IsValid() == false) return;
 
-	fPanelView->DrawRow(owner, itemRect, this);
+	fPanelView->DrawItem(owner, itemRect, this);
 }
 
 
@@ -219,7 +290,7 @@ EFilePanelItem::Update(EView *owner, const EFont *font)
 {
 	e_font_height fontHeight;
 	font->GetHeight(&fontHeight);
-	SetHeight(fontHeight.ascent + fontHeight.descent + 4);
+	SetHeight(max_c(fontHeight.ascent + fontHeight.descent, ICON_HEIGHT) + 4);
 
 	float width = 0;
 	GetLeaderSize(&width, NULL);
@@ -238,13 +309,83 @@ EFilePanelItem::Path() const
 const char*
 EFilePanelItem::Leaf() const
 {
-	return fPath.Leaf();
+	return fLeaf;
+}
+
+
+bool
+EFilePanelItem::IsDirectory() const
+{
+	return(fFlags == 1);
+}
+
+
+bool
+EFilePanelItem::IsVolume() const
+{
+	return(fFlags == 2);
+}
+
+
+eint64
+EFilePanelItem::Size() const
+{
+	return fSize;
+}
+
+
+e_bigtime_t
+EFilePanelItem::ModifiedTime() const
+{
+	return fModifiedTime;
+}
+
+
+static int column_name_sort_callback(const EFilePanelItem **_itemA, const EFilePanelItem **_itemB)
+{
+	const EFilePanelItem *itemA = *_itemA;
+	const EFilePanelItem *itemB = *_itemB;
+
+	if(itemA->IsVolume() != itemB->IsVolume() &&
+	   (itemA->IsVolume() || itemB->IsVolume()))
+	{
+		return(itemA->IsVolume() ? -1 : 1);
+	}
+	else if (itemA->IsDirectory() != itemB->IsDirectory() &&
+		 (itemA->IsDirectory() || itemB->IsDirectory()))
+	{
+		return(itemA->IsDirectory() ? -1 : 1);
+	}
+
+	EString strA(itemA->Leaf()), strB(itemB->Leaf());
+	if(strA == strB) return 0;
+	return(strA < strB ? -1 : 1);
 }
 
 
 static void column_name_drawing_callback(EView *owner, ERect rect, EFilePanelItem *item)
 {
 	if(!rect.IsValid()) return;
+
+	const char **xpm_data = (const char**)file_xpm;
+
+	if(item->IsVolume()) xpm_data = (const char**)volume_xpm;
+	else if(item->IsDirectory()) xpm_data = (const char**)folder_xpm;
+
+	if(xpm_data != NULL)
+	{
+		EPixmap *pixmap = new EPixmap(ICON_WIDTH, ICON_HEIGHT, E_RGB24);
+		pixmap->SetDrawingMode(E_OP_COPY);
+		pixmap->SetHighColor(owner->LowColor());
+		pixmap->FillRect(0, 0, ICON_WIDTH, ICON_HEIGHT);
+		pixmap->DrawXPM(xpm_data, 0, 0, 0, 0);
+
+		EBitmap *bitmap = new EBitmap(pixmap);
+		delete pixmap;
+
+		owner->DrawBitmap(bitmap, EPoint(rect.left + 5, rect.Center().y - ICON_HEIGHT / 2));
+		delete bitmap;
+	}
 
 	if(item->Leaf())
 	{
@@ -254,7 +395,7 @@ static void column_name_drawing_callback(EView *owner, ERect rect, EFilePanelIte
 		float sHeight = fontHeight.ascent + fontHeight.descent;
 
 		EPoint penLocation;
-		penLocation.x = rect.left + 2;
+		penLocation.x = rect.left + ICON_WIDTH + 10;
 		penLocation.y = rect.Center().y - sHeight / 2.f;
 		penLocation.y += fontHeight.ascent + 1;
 
@@ -263,20 +404,38 @@ static void column_name_drawing_callback(EView *owner, ERect rect, EFilePanelIte
 }
 
 
+static int column_size_sort_callback(const EFilePanelItem **_itemA, const EFilePanelItem **_itemB)
+{
+	const EFilePanelItem *itemA = *_itemA;
+	const EFilePanelItem *itemB = *_itemB;
+
+	if(itemA->IsVolume() != itemB->IsVolume() &&
+	   (itemA->IsVolume() || itemB->IsVolume()))
+	{
+		return(itemA->IsVolume() ? -1 : 1);
+	}
+	else if (itemA->IsDirectory() != itemB->IsDirectory() &&
+		 (itemA->IsDirectory() || itemB->IsDirectory()))
+	{
+		return(itemA->IsDirectory() ? -1 : 1);
+	}
+
+	if(itemA->Size() == itemB->Size()) return 0;
+	return(itemA->Size() < itemB->Size() ? -1 : 1);
+}
+
+
 static void column_size_drawing_callback(EView *owner, ERect rect, EFilePanelItem *item)
 {
 	if(!rect.IsValid()) return;
 
-	EEntry aEntry(item->Path());
-	if(aEntry.IsDirectory()) return;
-
-	eint64 fileSize = max_c(aEntry.GetSize(), 0);
+	if(item->IsVolume() || item->IsDirectory()) return;
 
 	EString str;
-	if(fileSize >= 0x40000000) str << ((float)fileSize / (float)0x40000000) << "G";
-	else if(fileSize >= 0x100000) str << ((float)fileSize / (float)0x100000) << "M";
-	else if(fileSize >= 0x400) str << ((float)fileSize / (float)0x400) << "K";
-	else str << fileSize;
+	if(item->Size() >= 0x40000000) str << ((float)item->Size() / (float)0x40000000) << "G";
+	else if(item->Size() >= 0x100000) str << ((float)item->Size() / (float)0x100000) << "M";
+	else if(item->Size() >= 0x400) str << ((float)item->Size() / (float)0x400) << "K";
+	else str << item->Size();
 
 	e_font_height fontHeight;
 	owner->GetFontHeight(&fontHeight);
@@ -292,19 +451,35 @@ static void column_size_drawing_callback(EView *owner, ERect rect, EFilePanelIte
 }
 
 
+static int column_modified_sort_callback(const EFilePanelItem **_itemA, const EFilePanelItem **_itemB)
+{
+	const EFilePanelItem *itemA = *_itemA;
+	const EFilePanelItem *itemB = *_itemB;
+
+	if(itemA->IsVolume() != itemB->IsVolume() &&
+	   (itemA->IsVolume() || itemB->IsVolume()))
+	{
+		return(itemA->IsVolume() ? -1 : 1);
+	}
+	else if (itemA->IsDirectory() != itemB->IsDirectory() &&
+		 (itemA->IsDirectory() || itemB->IsDirectory()))
+	{
+		return(itemA->IsDirectory() ? -1 : 1);
+	}
+
+	if(itemA->ModifiedTime() == itemB->ModifiedTime()) return 0;
+	return(itemA->ModifiedTime() < itemB->ModifiedTime() ? -1 : 1);
+}
+
+
 static void column_modified_drawing_callback(EView *owner, ERect rect, EFilePanelItem *item)
 {
-	if(!rect.IsValid()) return;
-
-	EEntry aEntry(item->Path());
-
-	e_bigtime_t mtime;
-	if(aEntry.GetModifiedTime(&mtime) != E_OK) return;
+	if(!rect.IsValid() || item->IsVolume()) return;
 
 	EString str;
 
 	// TODO
-	str << mtime;
+	str << item->ModifiedTime();
 
 	e_font_height fontHeight;
 	owner->GetFontHeight(&fontHeight);
@@ -349,6 +524,7 @@ EFilePanelView::EFilePanelView(ERect frame)
 	rect.top += fTitleView->Frame().Height() + 1;
 	rect.bottom -= E_H_SCROLL_BAR_HEIGHT + 1;
 	fListView = new EListView(rect, "PoseView", E_SINGLE_SELECTION_LIST, E_FOLLOW_ALL);
+	fListView->SetMessage(new EMessage(MSG_PANEL_SELECTED));
 	AddChild(fListView);
 
 	fHSB->SetTarget(fTitleView);
@@ -357,9 +533,9 @@ EFilePanelView::EFilePanelView(ERect frame)
 	fVSB->SetTarget(fListView);
 	fVSB->SetEnabled(false);
 
-	AddColumn("Name", 250, column_name_drawing_callback);
-	AddColumn("Size", 100, column_size_drawing_callback);
-	AddColumn("Modified", 200, column_modified_drawing_callback);
+	AddColumn("Name", 250, column_name_drawing_callback, column_name_sort_callback);
+	AddColumn("Size", 100, column_size_drawing_callback, column_size_sort_callback);
+	AddColumn("Modified", 200, column_modified_drawing_callback, column_modified_sort_callback);
 }
 
 
@@ -375,13 +551,16 @@ EFilePanelView::~EFilePanelView()
 
 
 void
-EFilePanelView::AddColumn(const char *name, float width, void (*draw_func)(EView*, ERect, EFilePanelItem*))
+EFilePanelView::AddColumn(const char *name, float width,
+			  void (*draw_func)(EView*, ERect, EFilePanelItem*),
+			  int (*sort_func)(const EFilePanelItem**, const EFilePanelItem**))
 {
 	struct column_data *data = new struct column_data;
 
 	data->name = EStrdup(name);
 	data->width = width;
 	data->draw_func = draw_func;
+	data->sort_func = sort_func;
 
 	fColumns.AddItem(data);
 
@@ -439,7 +618,7 @@ EFilePanelView::GetWidthOfColumn(eint32 index) const
 
 
 void
-EFilePanelView::DrawRow(EView *owner, ERect itemRect, EFilePanelItem *item)
+EFilePanelView::DrawItem(EView *owner, ERect itemRect, EFilePanelItem *item)
 {
 	ERect rect = itemRect;
 	rect.right = rect.left;
@@ -458,15 +637,27 @@ EFilePanelView::DrawRow(EView *owner, ERect itemRect, EFilePanelItem *item)
 
 
 void
+EFilePanelView::SortItems(eint32 columnIndex)
+{
+	struct column_data *data = (struct column_data*)fColumns.ItemAt(columnIndex);
+	if(data == NULL || data->sort_func == NULL) return;
+
+	fListView->SortItems((int (*)(const EListItem**, const EListItem**))data->sort_func);
+	fListView->Invalidate();
+}
+
+
+void
 EFilePanelView::FrameResized(float new_width, float new_height)
 {
 	float w = 0;
+	ERect rect;
 	for(eint32 i = 0; i < CountColumns(); i++) w += GetWidthOfColumn(i);
+	for(eint32 i = 0; i < fListView->CountItems(); i++) rect |= fListView->ItemFrame(i);
+
 	fHSB->SetRange(0, max_c(w - new_width, 0));
 	fHSB->SetEnabled(new_width < w);
 
-	ERect rect;
-	for(eint32 i = 0; i < fListView->CountItems(); i++) rect |= fListView->ItemFrame(i);
 	fVSB->SetRange(0, max_c(rect.Height() - fListView->Bounds().Height(), 0));
 	fVSB->SetEnabled(fListView->Bounds().Height() < rect.Height());
 }
@@ -583,9 +774,31 @@ EFilePanelTitleView::ScrollTo(EPoint where)
 }
 
 
+static e_filter_result filter_key_down_hook(EMessage *message, EHandler **target, EMessageFilter *filter)
+{
+	eint32 modifiers;
+	const char *bytes;
+
+	EFilePanelWindow *panelWindow = (EFilePanelWindow*)filter->Looper();
+
+	if(message->FindInt32("modifiers", &modifiers) == false) return E_DISPATCH_MESSAGE;
+	if(message->FindString("bytes", &bytes) == false || bytes == NULL) return E_DISPATCH_MESSAGE;
+
+	if((modifiers & (E_COMMAND_KEY | E_CONTROL_KEY)) && !(bytes[0] != E_UP_ARROW || bytes[1] != 0))
+	{
+		EPath aPath(panelWindow->PanelDirectory());
+		if(aPath.GetParent(&aPath) != E_OK) aPath.Unset();
+		panelWindow->SetPanelDirectory(aPath.Path());
+		return E_SKIP_MESSAGE;
+	}
+
+	return E_DISPATCH_MESSAGE;
+}
+
+
 EFilePanelWindow::EFilePanelWindow()
 	: EWindow(ERect(-400, -400, -10, -10), "FilePanel: uncompleted", E_TITLED_WINDOW, 0),
-	  fTarget(NULL), fMessage(NULL), fSelIndex(0), fShowHidden(false)
+	  fTarget(NULL), fMessage(NULL), fSelIndex(0), fShowHidden(false), fSort(0)
 {
 	EView *topView, *aView;
 	EMenuBar *menuBar;
@@ -660,6 +873,7 @@ EFilePanelWindow::EFilePanelWindow()
 	MoveToCenter();
 
 	e_find_directory(E_USER_DIRECTORY, &fPath);
+	AddCommonFilter(new EMessageFilter(E_KEY_DOWN, filter_key_down_hook));
 }
 
 
@@ -681,11 +895,24 @@ EFilePanelWindow::QuitRequested()
 void
 EFilePanelWindow::MessageReceived(EMessage *msg)
 {
+	eint32 index;
+
 	switch(msg->what)
 	{
-		case MSG_GET_PANEL_DIR:
+		case MSG_PANEL_GET_DIR:
 			msg->AddString("PanelDirectory", fPath.Path());
 			msg->SendReply(msg);
+			break;
+
+		case MSG_PANEL_SELECTED:
+			if(msg->FindInt32("index", &index))
+			{
+				EListView *listView = (EListView*)FindView("PoseView");
+				EFilePanelItem *item = (EFilePanelItem*)listView->ItemAt(index);
+				if(item == NULL || !(item->IsVolume() || item->IsDirectory())) break;
+				fPath.SetTo(item->Path());
+				Refresh();
+			}
 			break;
 
 		default:
@@ -743,8 +970,31 @@ EFilePanelWindow::Refresh()
 
 	listView->RemoveItems(0, -1, true);
 
-	EDirectory dir(fPath.Path());
-	dir.DoForEach(RefreshCallback, (void*)listView);
+	if(fPath.Path() != NULL)
+	{
+		EDirectory dir(fPath.Path());
+		dir.DoForEach(RefreshCallback, (void*)listView);
+	}
+	else
+	{
+		EVolumeRoster volRoster;
+		EVolume vol;
+
+		while(volRoster.GetNextVolume(&vol) == E_NO_ERROR)
+		{
+			EDirectory volRootDir;
+			EEntry aEntry;
+			EPath aPath;
+
+			vol.GetRootDirectory(&volRootDir);
+			volRootDir.GetEntry(&aEntry);
+			aEntry.GetPath(&aPath);
+
+			if(aPath.Path() == NULL) continue;
+
+			listView->AddItem(new EFilePanelItem(aPath.Path(), fPanelView, vol.Device()));
+		}
+	}
 
 	EFilePanelLabel *label = (EFilePanelLabel*)FindView("CountVw");
 	EString str;
@@ -752,14 +1002,23 @@ EFilePanelWindow::Refresh()
 	label->SetText(str.String());
 
 	fPanelView->FrameResized(fPanelView->Frame().Width(), fPanelView->Frame().Height());
+	fPanelView->SortItems(fSort);
 }
 
 
 void
 EFilePanelWindow::SetPanelDirectory(const char *path)
 {
+	fPath.Unset();
 	fPath.SetTo(path);
 	Refresh();
+}
+
+
+const char*
+EFilePanelWindow::PanelDirectory() const
+{
+	return fPath.Path();
 }
 
 
@@ -790,7 +1049,7 @@ EFilePanel::EFilePanel(EMessenger *target,
 		       const EDirectory *directory)
 {
 	fWindow = new EFilePanelWindow();
-	SetPanelDirectory(directory);
+	if(directory) SetPanelDirectory(directory);
 	SetTarget(target);
 	SetMessage(message);
 }
@@ -874,7 +1133,7 @@ EFilePanel::GetPanelDirectory(EEntry *entry) const
 	if(entry == NULL) return;
 
 	EMessenger msgr(fWindow, fWindow);
-	EMessage msg(MSG_GET_PANEL_DIR);
+	EMessage msg(MSG_PANEL_GET_DIR);
 	const char *path = NULL;
 
 	entry->Unset();

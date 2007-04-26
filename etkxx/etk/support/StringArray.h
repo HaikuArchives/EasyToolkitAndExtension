@@ -68,7 +68,7 @@ public:
 	bool		ReplaceItem(eint32 index, const char *string, void *attach_data = NULL);
 	bool		ReplaceItem(eint32 index, const EString &string, void *attach_data = NULL);
 
-	EStringArray&	SortItems(int (*cmp)(const EString*, const EString*));
+	EStringArray&	SortItems(int (*cmp)(const EString**, const EString**));
 	bool		SwapItems(eint32 indexA, eint32 indexB);
 	bool		MoveItem(eint32 fromIndex, eint32 toIndex);
 

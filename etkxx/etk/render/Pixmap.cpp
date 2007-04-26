@@ -406,8 +406,8 @@ EPixmap::DrawXPM(const char **xpm_data, eint32 destX, eint32 destY, eint32 srcX,
 			tmp.GetInteger(&bytesColor);
 	}
 
-	ETK_DEBUG("[RENDER]: %s --- xpmWidth: %d, xpmHeight: %d, numColor: %d, bytesColor: %d", __PRETTY_FUNCTION__,
-		  xpmWidth, xpmHeight, numColor, bytesColor);
+//	ETK_DEBUG("[RENDER]: %s --- xpmWidth: %d, xpmHeight: %d, numColor: %d, bytesColor: %d", __PRETTY_FUNCTION__,
+//		  xpmWidth, xpmHeight, numColor, bytesColor);
 
 	if(xpmWidth <= 0 || xpmHeight <= 0 || numColor <= 0 || bytesColor <= 0) return;
 	if(srcX >= xpmWidth || srcY >= xpmHeight) return;

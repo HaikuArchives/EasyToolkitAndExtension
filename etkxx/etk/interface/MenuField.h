@@ -64,6 +64,7 @@ public:
 
 	virtual void	Draw(ERect updateRect);
 	virtual void	GetPreferredSize(float *width, float *height);
+	virtual void	FrameMoved(EPoint new_position);
 	virtual void	FrameResized(float new_width, float new_height);
 	virtual void	WindowActivated(bool state);
 	virtual void	MakeFocus(bool focusState = true);

@@ -963,7 +963,7 @@ EListView::ReplaceItem(eint32 index, EListItem *newItem, EListItem **oldItem)
 
 
 void
-EListView::SortItems(int (*cmp)(const EListItem *a, const EListItem *b))
+EListView::SortItems(int (*cmp)(const EListItem **a, const EListItem **b))
 {
 	if(cmp == NULL) return;
 

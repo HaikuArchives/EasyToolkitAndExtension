@@ -120,10 +120,11 @@ extern bool etk_win32_window_get_rect(HWND hWnd, RECT *r);
 extern bool etk_win32_window_convert_to_screen(HWND hWnd, int *x, int *y);
 extern bool etk_win32_window_convert_window_to_client(HWND hWnd, RECT *wr);
 
+extern "C" {
 // free it by "free"
 extern char* etk_win32_convert_utf8_to_active(const char *str, eint32 length);
 extern char* etk_win32_convert_active_to_utf8(const char *str, eint32 length);
-
+}
 
 class EWin32GraphicsEngine : public EGraphicsEngine {
 public:

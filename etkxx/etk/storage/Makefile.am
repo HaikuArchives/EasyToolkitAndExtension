@@ -1,5 +1,7 @@
 AUTOMAKE_OPTIONS = 1.7
 
+SUBDIRS = icons
+
 DEFAULT_INCLUDES = -I$(top_builddir)
 
 INCLUDES =	$(ETK_THREAD_CFLAGS) 			\

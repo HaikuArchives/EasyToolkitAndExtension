@@ -51,7 +51,7 @@ public:
 
 	bool		IsHidden() const;
 	bool		IsDirectory() const;
-	eint64		GetSize() const;
+	e_status_t	GetSize(eint64 *file_size) const;
 	e_status_t	GetModifiedTime(e_bigtime_t *time) const;
 
 	e_status_t	GetPath(EPath *path) const;

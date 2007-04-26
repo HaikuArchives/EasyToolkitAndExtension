@@ -257,6 +257,13 @@ EMenuField::FrameResized(float new_width, float new_height)
 
 
 void
+EMenuField::FrameMoved(EPoint new_position)
+{
+	EMenuField::FrameResized(Frame().Width(), Frame().Height());
+}
+
+
+void
 EMenuField::WindowActivated(bool state)
 {
 	if(!state && fMenuBar) fMenuBar->SelectItem(NULL);

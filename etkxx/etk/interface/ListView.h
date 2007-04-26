@@ -106,7 +106,7 @@ public:
 	// ReplaceItem(): when "oldItem" assigned to NULL, the old item will be destructed automatically.
 	bool			ReplaceItem(eint32 index, EListItem *newItem, EListItem **oldItem = NULL);
 
-	void			SortItems(int (*cmp)(const EListItem *a, const EListItem *b));
+	void			SortItems(int (*cmp)(const EListItem **a, const EListItem **b));
 	void			DoForEach(bool (*func)(EListItem *item));
 	void			DoForEach(bool (*func)(EListItem *item, void *user_data), void *user_data);
 

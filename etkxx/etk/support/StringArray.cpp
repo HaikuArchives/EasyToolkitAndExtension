@@ -378,7 +378,7 @@ EStringArray::ReplaceItem(eint32 index, const EString &string, void *attach_data
 
 
 EStringArray&
-EStringArray::SortItems(int (*cmp)(const EString*, const EString*))
+EStringArray::SortItems(int (*cmp)(const EString**, const EString**))
 {
 	list.SortItems((int (*)(const void*, const void*))cmp);
 

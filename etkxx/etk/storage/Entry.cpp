@@ -169,10 +169,10 @@ EEntry::IsDirectory() const
 }
 
 
-eint64
-EEntry::GetSize() const
+e_status_t
+EEntry::GetSize(eint64 *file_size) const
 {
-	if(fName == NULL) return E_INT64_CONSTANT(-1);
+	if(fName == NULL || file_size == NULL) return E_ERROR;
 
 	const char *filename = (const char*)fName;
 
@@ -182,13 +182,15 @@ EEntry::GetSize() const
 	filename = str.String();
 
 	struct _stati64 stat;
-	if(_stati64(filename, &stat) != 0) return E_INT64_CONSTANT(-1);
-	return (eint64)stat.st_size;
+	if(_stati64(filename, &stat) != 0) return E_ERROR;
+	*file_size = (eint64)stat.st_size;
 #else
 	struct stat stat;
-	if(stat(filename, &stat) != 0) return E_INT64_CONSTANT(-1);
-	return (eint64)stat.st_size;
+	if(stat(filename, &stat) != 0) return E_ERROR;
+	*file_size = (eint64)stat.st_size;
 #endif
+
+	return E_OK;
 }
 
 
