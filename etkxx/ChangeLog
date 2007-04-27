@@ -1,2 +1,13 @@
+2007-04-28  anthonylee
+	Added EFilePanel for Storage Kit.
+	Added EEntry::IsHidden()/IsDirectory()/GetSize()/GetModifiedTime().
+	Added EDirectory::DoForEach().
+	Added EWindow::MoveToCenter().
+	Corrected scroll-action of EListView.
+	Corrected SortItems() of EStringArray/EListItem.
+	Corrected E_V_SCROLL_BAR_WIDTH/E_H_SCROLL_BAR_HEIGHT.
+	Corrected EMenuField::ResizeTo().
+	Fixed for click count of Win32 Graphics implementation.
+
 2007-04-21  anthonylee
-	* Initialized for development status at Alpha.
+	Initialized for development status at Alpha.
