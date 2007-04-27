@@ -33,36 +33,71 @@
 #include <etk/interface/Window.h>
 #include <etk/storage/Directory.h>
 
+typedef enum e_file_panel_mode {
+	E_OPEN_PANEL,
+	E_SAVE_PANEL
+} e_file_panel_mode;
+
+typedef enum e_file_panel_button {
+	E_CANCEL_BUTTON,
+	E_DEFAULT_BUTTON
+} e_file_panel_button;
+
 #ifdef __cplusplus /* Just for C++ */
+
+class EFilePanelFilter {
+public:
+	virtual bool		Filter(const EEntry *entry) = 0;
+};
+
 
 class _IMPEXP_ETK EFilePanel {
 public:
-	EFilePanel(EMessenger *target = NULL,
-		   EMessage *message = NULL,
-		   const EDirectory *directory = NULL);
+	EFilePanel(e_file_panel_mode mode = E_OPEN_PANEL,
+		   const EMessenger *target = NULL,
+		   const char *panel_directory = NULL,
+		   bool allow_multiple_selection = true,
+		   const EMessage *message = NULL,
+		   EFilePanelFilter *filter = NULL,
+		   bool modal = false,
+		   bool hide_when_done = true);
 	virtual ~EFilePanel();
 
-	void		Show();
-	void		Hide();
-	bool		IsHidden() const;
+	void			Show();
+	void			Hide();
+	bool			IsShowing() const;
 
-	EWindow		*Window() const;
-	EMessenger	*Target() const;
+	// Empty functions BEGIN --- just for derivative class
+	virtual void		WasHidden();
+	virtual void		SelectionChanged();
+	// Empty functions END
 
-	void		SetTarget(EMessenger *target);
-	void		SetMessage(EMessage *msg);
+	virtual void		SendMessage(const EMessenger *msgr, EMessage *msg);
 
-	void		GetPanelDirectory(EEntry *entry) const;
-	void		GetPanelDirectory(EPath *path) const;
-	void		GetPanelDirectory(EDirectory *directory) const;
+	EWindow			*Window() const;
+	EMessenger		*Target() const;
 
-	void		SetPanelDirectory(const EEntry *entry);
-	void		SetPanelDirectory(const EDirectory *directory);
-	void		SetPanelDirectory(const char *directory);
+	e_file_panel_mode	PanelMode() const;
 
-	void		Refresh();
-	void		Rewind();
-	e_status_t	GetNextSelected(EEntry *entry);
+	void			SetTarget(const EMessenger *target);
+	void			SetMessage(const EMessage *msg);
+
+	void			SetFilter(EFilePanelFilter *filter);
+	void			SetSaveText(const char *text);
+	void			SetButtonLabel(e_file_panel_button btn, const char *label);
+	void			SetHideWhenDone(bool state);
+
+	void			GetPanelDirectory(EEntry *entry) const;
+	void			GetPanelDirectory(EPath *path) const;
+	void			GetPanelDirectory(EDirectory *directory) const;
+
+	void			SetPanelDirectory(const EEntry *entry);
+	void			SetPanelDirectory(const EDirectory *directory);
+	void			SetPanelDirectory(const char *directory);
+
+	void			Refresh();
+	void			Rewind();
+	e_status_t		GetNextSelected(EEntry *entry);
 
 private:
 	EWindow *fWindow;

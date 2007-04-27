@@ -31,6 +31,7 @@
 #include <unistd.h>
 #else
 #include <io.h>
+#include <windows.h>
 #endif
 
 #include <sys/types.h>
@@ -141,8 +142,20 @@ EEntry::Exists() const
 bool
 EEntry::IsHidden() const
 {
-	// TODO
-	return false;
+	bool retVal = false;
+
+	EPath aPath(fName);
+	const char *leaf = aPath.Leaf();
+	if(!(leaf == NULL || *leaf != '.')) retVal = true;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+
+	if(GetFileAttributes(str.String()) & FILE_ATTRIBUTE_HIDDEN) retVal = true;
+#endif
+
+	return retVal;
 }
 
 

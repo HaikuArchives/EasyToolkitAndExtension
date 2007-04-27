@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 				   new EMessage(MSG_HELLO_WORLD),
 				   E_FOLLOW_ALL);
 
-
 	win->Lock();
 	win->AddChild(btn);
 	win->Show();

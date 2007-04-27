@@ -128,6 +128,7 @@ public:
 protected:
 	void			SetPosition(eint32 pos);
 	eint32			Position() const;
+	void			ScrollToItem(eint32 index);
 
 private:
 	EList fItems;

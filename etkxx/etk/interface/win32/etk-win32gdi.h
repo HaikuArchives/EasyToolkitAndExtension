@@ -170,6 +170,12 @@ public:
 	HWND win32NextClipboardViewer;
 	HCURSOR win32Cursor;
 
+	EMessenger win32PrevMouseMovedWin;
+	int win32PrevMouseMovedX;
+	int win32PrevMouseMovedY;
+	e_bigtime_t win32PrevMouseDownTime;
+	int win32PrevMouseDownCount;
+
 	bool win32DoQuit;
 
 	void *fRequestSem;

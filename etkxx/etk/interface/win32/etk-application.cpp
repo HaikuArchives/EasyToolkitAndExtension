@@ -397,10 +397,8 @@ extern LRESULT _etk_destroy_font_tmp_dc(EWin32GraphicsEngine *win32Engine, etk_w
 #endif
 
 #undef ETK_GDI32_REQUEST_DEBUG
+#define CLICK_TIMEOUT 200000
 
-static EMessenger prevMouseMovedWin;
-static int prevMouseMovedX;
-static int prevMouseMovedY;
 
 static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winMsg, LRESULT *retResult = NULL)
 {
@@ -1113,14 +1111,20 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 				{
 					int xPos = GET_X_LPARAM(winMsg->lParam);
 					int yPos = GET_Y_LPARAM(winMsg->lParam);
-
-					if(prevMouseMovedWin == etkWinMsgr && prevMouseMovedX == xPos && prevMouseMovedY == yPos) break;
-					prevMouseMovedWin = etkWinMsgr; prevMouseMovedX = xPos; prevMouseMovedY = yPos;
-
 					int xScreenPos = xPos;
 					int yScreenPos = yPos;
 
 					win32Engine->Lock();
+					if(win32Engine->win32PrevMouseMovedWin == etkWinMsgr &&
+					   win32Engine->win32PrevMouseMovedX == xPos &&
+					   win32Engine->win32PrevMouseMovedY == yPos)
+					{
+						win32Engine->Unlock();
+						break;
+					}
+					win32Engine->win32PrevMouseMovedWin = etkWinMsgr;
+					win32Engine->win32PrevMouseMovedX = xPos;
+					win32Engine->win32PrevMouseMovedY = yPos;
 					etk_win32_window_convert_to_screen(winMsg->hwnd, &xScreenPos, &yScreenPos);
 					win32Engine->Unlock();
 
@@ -1144,15 +1148,23 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 			case WM_MBUTTONDOWN:
 			case WM_RBUTTONDOWN:
 				{
-					if(prevMouseMovedWin == etkWinMsgr) {prevMouseMovedX = -100; prevMouseMovedY = -100;}
-
 					int xPos = GET_X_LPARAM(winMsg->lParam);
 					int yPos = GET_Y_LPARAM(winMsg->lParam);
-
 					int xScreenPos = xPos;
 					int yScreenPos = yPos;
+					eint32 clicks;
 
 					win32Engine->Lock();
+					if(win32Engine->win32PrevMouseMovedWin == etkWinMsgr)
+					{
+						win32Engine->win32PrevMouseMovedX = -1;
+						win32Engine->win32PrevMouseMovedY = -1;
+					}
+					if(currentTime - win32Engine->win32PrevMouseDownTime <= CLICK_TIMEOUT)
+						clicks = (win32Engine->win32PrevMouseDownCount += 1);
+					else
+						clicks = win32Engine->win32PrevMouseDownCount = 1;
+					win32Engine->win32PrevMouseDownTime = currentTime;
 					etk_win32_window_convert_to_screen(winMsg->hwnd, &xScreenPos, &yScreenPos);
 					win32Engine->Unlock();
 
@@ -1169,6 +1181,7 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 					message.what = E_MOUSE_DOWN;
 					message.AddInt32("button", button);
 					message.AddInt32("buttons", buttons);
+					message.AddInt32("clicks", clicks);
 					message.AddPoint("where", EPoint((float)xPos, (float)yPos));
 					message.AddPoint("screen_where", EPoint((float)xScreenPos, (float)yScreenPos));
 
@@ -1782,6 +1795,7 @@ EWin32GraphicsEngine::EWin32GraphicsEngine()
 	  win32Hinstance(NULL), win32RegisterClass(0), win32ScreenHDC(NULL),
 	  win32ThreadID(0), win32RequestWin(NULL), win32RequestAsyncWin(NULL), WM_ETK_MESSAGE(0),
 	  win32NextClipboardViewer(NULL), win32Cursor(NULL),
+	  win32PrevMouseDownTime(0), win32PrevMouseDownCount(0),
 	  win32DoQuit(false),
 	  fRequestSem(NULL), fRequestAsyncSem(NULL),
 	  fRequestThread(NULL), fRequestAsyncThread(NULL), fClipboardFilter(NULL)

@@ -393,7 +393,7 @@ EListView::Draw(ERect updateRect)
 		rect.bottom = rect.top + item->Height();
 		if(rect.top > UnitsPerPixel()) rect.OffsetBy(0, UnitsPerPixel());
 		if(rect.Intersects(updateRect) == false) continue;
-		if(rect.top > bounds.bottom) break;
+		if(rect.top >= bounds.bottom) break;
 		if(rect.Intersects(bounds) == false) continue;
 
 		PushState();
@@ -422,7 +422,26 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 	switch(bytes[0])
 	{
 		case E_ENTER:
-			if(fFirstSelected >= 0) Invoke();
+			if(fPos >= 0 && fPos >= fFirstSelected && fPos <= fLastSelected)
+			{
+				EListItem *item = (EListItem*)fItems.ItemAt(fPos);
+				if(!(item == NULL || item->fSelected == false))
+				{
+					Invoke();
+					break;
+				}
+			}
+		case E_SPACE:
+			if(fPos >= 0 && fPos < fItems.CountItems())
+			{
+				if(((EListItem*)fItems.ItemAt(fPos))->fEnabled == false) break;
+				if(((EListItem*)fItems.ItemAt(fPos))->fSelected)
+					Deselect(fPos);
+				else
+					Select(fPos, fListType != E_SINGLE_SELECTION_LIST);
+
+				Invalidate();
+			}
 			break;
 
 		case E_ESCAPE:
@@ -434,19 +453,6 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 			else if(fFirstSelected >= 0)
 			{
 				DeselectAll();
-				Invalidate();
-			}
-			break;
-
-		case E_SPACE:
-			if(fPos >= 0 && fPos < fItems.CountItems())
-			{
-				if(((EListItem*)fItems.ItemAt(fPos))->fEnabled == false) break;
-				if(((EListItem*)fItems.ItemAt(fPos))->fSelected)
-					Deselect(fPos);
-				else
-					Select(fPos, fListType != E_SINGLE_SELECTION_LIST);
-
 				Invalidate();
 			}
 			break;
@@ -1032,6 +1038,23 @@ EListView::InvalidateItem(eint32 index)
 {
 	ERect r = ItemFrame(index);
 	if(r.IsValid()) Invalidate(r, true);
+}
+
+
+void
+EListView::ScrollToItem(eint32 index)
+{
+	ERect rect = ItemFrame(index);
+	if(rect.IsValid() == false) return;
+
+	ERect vRect = VisibleBounds();
+	if(vRect.top <= rect.top && vRect.bottom >= rect.bottom) return;
+
+	EPoint pt = rect.LeftTop();
+	pt.ConstrainTo(vRect);
+
+	ScrollTo(ConvertToParent(EPoint(0, 0)).x - Frame().left,
+		 pt.y == vRect.top ? -rect.top : -(rect.bottom - vRect.Height()));
 }
 
 
