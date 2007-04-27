@@ -97,7 +97,7 @@ EListView::MakeFocus(bool focusState)
 		{
 			PushState();
 			SetHighColor(IsFocus() ? e_ui_color(E_NAVIGATION_BASE_COLOR) : ViewColor());
-			StrokeRect(Bounds());
+			StrokeRect(ConvertFromParent(Frame()));
 			PopState();
 
 			InvalidateItem(fPos);
@@ -113,7 +113,7 @@ EListView::WindowActivated(bool state)
 	if(!(IsFocus() && (Flags() & E_WILL_DRAW))) return;
 	PushState();
 	SetHighColor(state ? e_ui_color(E_NAVIGATION_BASE_COLOR) : ViewColor());
-	StrokeRect(Bounds());
+	StrokeRect(ConvertFromParent(Frame()));
 	PopState();
 }
 
@@ -296,8 +296,7 @@ EListView::IndexOf(EPoint where, bool mustVisible) const
 		boundsBottom = vRect.bottom;
 	}
 
-	ERect rect = Bounds().InsetByCopy(UnitsPerPixel(), UnitsPerPixel());
-	rect.bottom = rect.top;
+	ERect rect(UnitsPerPixel(), UnitsPerPixel(), ConvertFromParent(Frame()).right, UnitsPerPixel());
 
 	eint32 retVal = -1;
 
@@ -369,7 +368,7 @@ void
 EListView::Draw(ERect updateRect)
 {
 	if(Window() == NULL) return;
-	ERect bounds = Bounds();
+	ERect bounds = ConvertFromParent(Frame());
 	bool winActivated = Window()->IsActivate();
 
 	if(IsFocus() && winActivated)
@@ -383,8 +382,7 @@ EListView::Draw(ERect updateRect)
 	}
 
 	bounds.InsetBy(UnitsPerPixel(), UnitsPerPixel());
-	ERect rect = bounds;
-	rect.bottom = rect.top;
+	ERect rect(UnitsPerPixel(), UnitsPerPixel(), bounds.right, UnitsPerPixel());
 
 	for(eint32 i = 0; i < fItems.CountItems(); i++)
 	{
@@ -449,7 +447,7 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 				else
 					Select(fPos, fListType != E_SINGLE_SELECTION_LIST);
 
-				InvalidateItem(fPos);
+				Invalidate();
 			}
 			break;
 
@@ -577,12 +575,8 @@ EListView::MouseDown(EPoint where)
 	else
 		Select(selectIndex, fListType != E_SINGLE_SELECTION_LIST);
 
-	if(fPos != selectIndex)
-	{
-		InvalidateItem(fPos);
-		fPos = selectIndex;
-	}
-	InvalidateItem(selectIndex);
+	fPos = selectIndex;
+	Invalidate();
 }
 
 
@@ -1015,9 +1009,7 @@ EListView::ItemFrame(eint32 index) const
 		EListItem *item = (EListItem*)fItems.ItemAt(index);
 		if(item->Height() >= 0)
 		{
-			r = Bounds();
-			r.InsetBy(UnitsPerPixel(), UnitsPerPixel());
-			r.bottom = r.top;
+			r.Set(UnitsPerPixel(), UnitsPerPixel(), ConvertFromParent(Frame()).right, UnitsPerPixel());
 
 			for(eint32 i = 0; i <= index; i++)
 			{

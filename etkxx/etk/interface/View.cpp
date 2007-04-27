@@ -2456,7 +2456,7 @@ EView::Invalidate(ERect invalRect, bool redraw)
 void
 EView::Invalidate(bool redraw)
 {
-	Invalidate(Bounds(), redraw);
+	Invalidate(ConvertFromParent(Frame()), redraw);
 }
 
 
@@ -3478,7 +3478,7 @@ EView::ScrollTo(EPoint where)
 		_UpdateOriginAndVisibleRegion(true);
 
 		fScrollTimestamp = e_real_time_clock_usecs();
-		_Invalidate(Bounds(), true, fScrollTimestamp);
+		_Invalidate(ConvertFromParent(Frame()), true, fScrollTimestamp);
 
 		for(eint32 i = 0; i < fScrollBar.CountItems(); i++)
 		{
