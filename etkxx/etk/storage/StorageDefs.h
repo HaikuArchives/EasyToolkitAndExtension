@@ -68,5 +68,12 @@ enum {
 	E_SEEK_END,
 };
 
+/* node flavor */
+enum {
+	E_FILE_NODE		=	0x01,
+	E_DIRECTORY_NODE	=	0x02,
+	E_ANY_NODE		=	0xff,
+};
+
 #endif /* __ETK_STORAGE_DEFS_H__ */
 

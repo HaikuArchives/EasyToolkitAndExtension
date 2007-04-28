@@ -56,6 +56,7 @@ public:
 	EFilePanel(e_file_panel_mode mode = E_OPEN_PANEL,
 		   const EMessenger *target = NULL,
 		   const char *panel_directory = NULL,
+		   euint32 node_flavors = 0,
 		   bool allow_multiple_selection = true,
 		   const EMessage *message = NULL,
 		   EFilePanelFilter *filter = NULL,
