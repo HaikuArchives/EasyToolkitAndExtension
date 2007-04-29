@@ -1,7 +1,7 @@
-etkxx (0.1.18) unstable; urgency=low
+etkxx (0.3.1) unstable; urgency=low
   * sth...
 
- -- Anthony Lee <don.anthony.lee@gmail.com>  Sun, 26 Nov 2006 15:27:48 +0800
+ -- Anthony Lee <don.anthony.lee@gmail.com>  Sun, 29 Apr 2007 15:46:51 +0800
 
 etkxx (0.1.17) unstable; urgency=low
   * add EOutlineListView for Interface Kit

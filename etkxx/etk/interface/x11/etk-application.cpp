@@ -40,6 +40,8 @@
 #include <etk/app/Clipboard.h>
 #include <etk/interface/InterfaceDefs.h>
 
+#define CLICK_TIMEOUT 200
+
 
 static void etk_x11_clipboard_changed(const char *aStr)
 {
@@ -153,7 +155,8 @@ EXGraphicsEngine::EXGraphicsEngine()
 	: EGraphicsEngine(),
 	  xDisplay(NULL), xSupportThreads(false),
 	  xVisual(NULL), xInputMethodEventMask(0), xInputMethod(NULL), xInputContext(NULL),
-	  xDoQuit(false), xLocksCount(E_INT64_CONSTANT(0)), fX11Thread(NULL), fClipboardFilter(NULL)
+	  xDoQuit(false), xPrevMouseDownSerial(E_MAXULONG), xPrevMouseDownTime(0), xPrevMouseDownCount(0),
+	  xLocksCount(E_INT64_CONSTANT(0)), fX11Thread(NULL), fClipboardFilter(NULL)
 {
 }
 
@@ -683,12 +686,29 @@ static void etk_process_x_event(EXGraphicsEngine *x11Engine, XEvent *event)
 				else
 				{
 					eint32 buttons = button;
+					eint32 clicks = 1;
+
 					unsigned int state = event->xbutton.state;
 					if((state & Button1Mask) && button != 1) buttons += 1;
 					if((state & Button2Mask) && button != 2) buttons += 2;
 					if((state & Button3Mask) && button != 3) buttons += 3;
+
+					x11Engine->Lock();
+					if(event->xbutton.serial != x11Engine->xPrevMouseDownSerial)
+					{
+						event->xbutton.serial = x11Engine->xPrevMouseDownSerial;
+						if(x11Engine->xPrevMouseDownTime > event->xbutton.time ||
+						   event->xbutton.time - x11Engine->xPrevMouseDownTime > CLICK_TIMEOUT)
+							clicks = x11Engine->xPrevMouseDownCount = 1;
+						else
+							clicks = (x11Engine->xPrevMouseDownCount += 1);
+						x11Engine->xPrevMouseDownTime = event->xbutton.time;
+					}
+					x11Engine->Unlock();
+
 					message.AddInt32("button", button);
 					message.AddInt32("buttons", buttons);
+					message.AddInt32("clicks", clicks);
 
 					message.AddPoint("where", EPoint((float)event->xbutton.x, (float)event->xbutton.y));
 					message.AddPoint("screen_where", EPoint((float)event->xbutton.x_root, (float)event->xbutton.y_root));

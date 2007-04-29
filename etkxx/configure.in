@@ -363,6 +363,7 @@ AC_CHECK_FUNCS(strtof)
 AC_CHECK_FUNCS(strcasecmp strncasecmp strcasechr strrcasechr strstr strrstr strcasestr strrcasestr)
 AC_CHECK_FUNCS(gettimeofday sigaction mremap)
 AC_CHECK_FUNCS(on_exit atexit)
+AC_CHECK_FUNCS(stat64)
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS

@@ -129,6 +129,10 @@ public:
 	bool xDoQuit;
 	EStringArray xFontEngines;
 
+	unsigned long xPrevMouseDownSerial;
+	Time xPrevMouseDownTime;
+	eint32 xPrevMouseDownCount;
+
 private:
 	ELocker fLocker;
 	eint64 xLocksCount;

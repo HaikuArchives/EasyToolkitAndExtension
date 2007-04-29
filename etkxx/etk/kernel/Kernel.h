@@ -170,8 +170,8 @@ _IMPEXP_ETK void*	etk_open_thread(eint64 threadId);
 _IMPEXP_ETK e_status_t	etk_delete_thread(void *thread);
 
 /* etk_suspend_thread():
- * 	Be careful please...
- * 	In Posix-Thread implementation just support suspending your own thread.
+ * 	Be careful please !!!
+ * 	In POSIX-Thread implementation only supported to suspend the current thread.
  * 	It return E_OK if successed. */
 _IMPEXP_ETK e_status_t	etk_suspend_thread(void *thread);
 _IMPEXP_ETK e_status_t	etk_resume_thread(void *thread);

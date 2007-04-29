@@ -28,6 +28,8 @@
  * --------------------------------------------------------------------------*/
 
 #ifndef _WIN32
+#define __USE_LARGEFILE64
+#define __USE_FILE_OFFSET64
 #include <unistd.h>
 #else
 #include <io.h>
@@ -37,6 +39,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <etk/config.h>
 #include <etk/support/String.h>
 
 #include "Entry.h"
@@ -171,13 +174,13 @@ EEntry::IsDirectory() const
 	str.ReplaceAll("/", "\\");
 	filename = str.String();
 
-	struct _stat stat;
-	if(_stat(filename, &stat) != 0) return false;
-	return(stat.st_mode & _S_IFDIR);
+	struct _stat st;
+	if(_stat(filename, &st) != 0) return false;
+	return(st.st_mode & _S_IFDIR);
 #else
-	struct stat stat;
-	if(stat(filename, &stat) != 0) return false;
-	return S_ISDIR(stat.st_mode);
+	struct stat st;
+	if(stat(filename, &st) != 0) return false;
+	return S_ISDIR(st.st_mode);
 #endif
 }
 
@@ -197,10 +200,14 @@ EEntry::GetSize(eint64 *file_size) const
 	struct _stati64 stat;
 	if(_stati64(filename, &stat) != 0) return E_ERROR;
 	*file_size = (eint64)stat.st_size;
-#else
-	struct stat stat;
-	if(stat(filename, &stat) != 0) return E_ERROR;
+#elif defined(HAVE_STAT64)
+	struct stat64 stat;
+	if(stat64(filename, &stat) != 0) return E_ERROR;
 	*file_size = (eint64)stat.st_size;
+#else
+	struct stat st;
+	if(stat(filename, &st) != 0) return E_ERROR;
+	*file_size = (eint64)st.st_size;
 #endif
 
 	return E_OK;
@@ -223,9 +230,9 @@ EEntry::GetModifiedTime(e_bigtime_t *time) const
 	if(_stat(filename, &stat) != 0) return E_ERROR;
 	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)stat.st_mtime;
 #else
-	struct stat stat;
-	if(stat(filename, &stat) != 0) return E_ERROR;
-	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)stat.st_mtime;
+	struct stat st;
+	if(stat(filename, &st) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)st.st_mtime;
 #endif
 
 	return E_OK;

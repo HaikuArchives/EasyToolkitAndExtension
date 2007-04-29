@@ -43,7 +43,7 @@ typedef struct _threadCallback_ {
 
 typedef struct etk_beos_thread_t {
 	eint32			priority;
-	bool			running;
+	eint32			running;
 	bool			exited;
 	e_status_t		status;
 	eint64			ID;
@@ -71,7 +71,7 @@ static etk_beos_thread_t* __etk_create_thread__()
 	if(thread == NULL) return NULL;
 
 	thread->priority = -1;
-	thread->running = false;
+	thread->running = 0;
 	thread->exited = false;
 	thread->status = E_OK;
 	thread->ID = E_INT64_CONSTANT(0);
@@ -230,7 +230,7 @@ int32 etk_spawn_thread_func(void *data)
 
 		etk_lock_thread_inter(thread);
 
-		thread->running = false;
+		thread->running = 0;
 		thread->exited = true;
 		thread->callback.func = NULL;
 
@@ -259,14 +259,14 @@ int32 etk_spawn_thread_func(void *data)
 	e_thread_func threadFunc = thread->callback.func;
 	void *userData = thread->callback.user_data;
 	thread->callback.func = NULL;
-	thread->running = true;
+	thread->running = 1;
 	etk_unlock_thread_inter(thread);
 
 	e_status_t status = (threadFunc == NULL ? E_ERROR : (*threadFunc)(userData));
 
 	etk_lock_thread_inter(thread);
 
-	thread->running = false;
+	thread->running = 0;
 	thread->exited = true;
 	thread->status = status;
 
@@ -317,7 +317,7 @@ _IMPEXP_ETK void* etk_create_thread_by_current_thread(void)
 	}
 
 	thread->priority = 0;
-	thread->running = true;
+	thread->running = 1;
 	thread->exited = false;
 	thread->ID = etk_get_current_thread_id();
 	thread->existent = true;
@@ -369,7 +369,7 @@ _IMPEXP_ETK void* etk_create_thread(e_thread_func threadFunction,
 	}
 
 	thread->priority = -1;
-	thread->running = false;
+	thread->running = 0;
 	thread->exited = false;
 	thread->ID = (eint64)beThreadId;
 	thread->existent = false;
@@ -414,7 +414,7 @@ _IMPEXP_ETK e_status_t etk_delete_thread(void *data)
 		etk_lock_thread_inter(thread);
 		if(thread->ID == etk_get_current_thread_id())
 		{
-			thread->running = false;
+			thread->running = 0;
 			thread->exited = true;
 			thread->status = E_OK;
 
@@ -478,11 +478,46 @@ _IMPEXP_ETK e_status_t etk_resume_thread(void *data)
 	e_status_t retVal = E_ERROR;
 
 	etk_lock_thread_inter(thread);
-	if(thread->callback.func != NULL && thread->running == false && thread->exited == false)
+	if(((thread->callback.func != NULL && thread->running == 0) || thread->running == 2) &&
+	   thread->exited == false)
 	{
 		resume_thread((thread_id)thread->ID);
-		thread->running = true;
+		thread->running = 1;
 		retVal = E_OK;
+	}
+	etk_unlock_thread_inter(thread);
+
+	return retVal;
+}
+
+
+_IMPEXP_ETK e_status_t etk_suspend_thread(void *data)
+{
+	etk_beos_thread_private_t *priThread = (etk_beos_thread_private_t*)data;
+	etk_beos_thread_t *thread = (priThread == NULL ? NULL : priThread->thread);
+	if(thread == NULL) return E_BAD_VALUE;
+
+	e_status_t retVal = E_ERROR;
+
+	etk_lock_thread_inter(thread);
+	bool suspend_cur_thread = (thread->ID == etk_get_current_thread_id());
+	if(thread->running == 1 && thread->exited == false)
+	{
+		if(suspend_cur_thread)
+		{
+			thread->running = 2;
+			etk_unlock_thread_inter(thread);
+
+			retVal = suspend_thread((thread_id)thread->ID) != B_OK ? E_ERROR : E_OK;
+
+			etk_lock_thread_inter(thread);
+			thread->running = 1;
+		}
+		else if(suspend_thread((thread_id)thread->ID) == B_OK)
+		{
+			thread->running = 2;
+			retVal = E_OK;
+		}
 	}
 	etk_unlock_thread_inter(thread);
 
@@ -510,26 +545,36 @@ _IMPEXP_ETK euint32 etk_get_thread_run_state(void *data)
 	etk_beos_thread_t *thread = (priThread == NULL ? NULL : priThread->thread);
 	if(thread == NULL) return ETK_THREAD_INVALID;
 
-	euint32 retval = ETK_THREAD_INVALID;
+	euint32 retVal = ETK_THREAD_INVALID;
 
 	etk_lock_thread_inter(thread);
 
 	if(thread->exited)
 	{
-		if(thread->running == false)
-			retval = ETK_THREAD_EXITED;
+		if(thread->running == 0)
+			retVal = ETK_THREAD_EXITED;
 	}
-	else
+	else switch(thread->running)
 	{
-		if(thread->running)
-			retval = ETK_THREAD_RUNNING;
-		else
-			retval = ETK_THREAD_READY;
+		case 0:
+			retVal = ETK_THREAD_READY;
+			break;
+
+		case 1:
+			retVal = ETK_THREAD_RUNNING;
+			break;
+
+		case 2:
+			retVal = ETK_THREAD_SUSPENDED;
+			break;
+
+		default:
+			break;
 	}
 
 	etk_unlock_thread_inter(thread);
 
-	return retval;
+	return retVal;
 }
 
 
@@ -620,7 +665,7 @@ _IMPEXP_ETK void etk_exit_thread(e_status_t status)
 
 	etk_lock_thread_inter(thread);
 
-	thread->running = false;
+	thread->running = 0;
 	thread->exited = true;
 	thread->status = status;
 
@@ -686,7 +731,7 @@ _IMPEXP_ETK e_status_t etk_wait_for_thread_etc(void *data, e_status_t *thread_re
 		return E_WOULD_BLOCK;
 	}
 
-	if(thread->callback.func) resume_thread((thread_id)thread->ID);
+	if(thread->callback.func || thread->running == 2) resume_thread((thread_id)thread->ID);
 
 	etk_unlock_thread_inter(thread);
 
@@ -773,12 +818,5 @@ _IMPEXP_ETK eint64 etk_get_current_team_id(void)
 	thread_info threadInfo;
 	if(get_thread_info(find_thread(NULL), &threadInfo) != B_OK) return E_INT64_CONSTANT(0);
 	return (eint64)threadInfo.team;
-}
-
-
-_IMPEXP_ETK e_status_t etk_suspend_thread(void *thread)
-{
-	ETK_WARNING("[KERNEL]: %s --- No implementation.", __PRETTY_FUNCTION__);
-	return E_ERROR;
 }
 

@@ -28,13 +28,13 @@ libgraphics_linuxfb_la_LDFLAGS =		\
 			-rpath $(addonsdir)
 libgraphics_linuxfb_la_LIBADD =					\
 	$(top_builddir)/etk/libetkxx.la				\
-	$(top_builddir)/etk/interface/libetk-interface-wm.la	\
+	$(top_builddir)/etk/interface/wm/libetk-interface-wm.la	\
 	$(ETK_LIBS)						\
 	$(ETK_THREAD_LIBS)					\
 	$(ETK_GRAPHICS_LINUXFB_LIBS)
 libgraphics_linuxfb_la_DEPENDENCIES =				\
 	$(top_builddir)/etk/libetkxx.la				\
-	$(top_builddir)/etk/interface/libetk-interface-wm.la
+	$(top_builddir)/etk/interface/wm/libetk-interface-wm.la
 endif
 
 DISTCLEANFILES = Makefile.in

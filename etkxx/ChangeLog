@@ -1,3 +1,8 @@
+2007-04-30  anthonylee
+	Completed etk_suspend_thread() for BeOS/Windows/POSIX.
+	Corrected the build script to match the current version.
+	Fixed for click count of X11 Graphics implementation.
+
 2007-04-28  anthonylee
 	Added EFilePanel for Storage Kit.
 	Added EEntry::IsHidden()/IsDirectory()/GetSize()/GetModifiedTime().

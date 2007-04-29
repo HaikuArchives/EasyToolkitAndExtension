@@ -37,6 +37,8 @@
 #include <etk/support/ClassInfo.h>
 #include <etk/app/Application.h>
 
+#define CLICK_TIMEOUT 200000
+
 
 class EBePrivateWin : public BWindow
 {
@@ -56,6 +58,8 @@ public:
 
 private:
 	bool doQuit;
+	bigtime_t fPrevMouseDownTime;
+	eint32 fPrevMouseDownCount;
 };
 
 
@@ -103,7 +107,9 @@ EBePrivateWinTopView::Draw(BRect updateRect)
 
 
 EBePrivateWin::EBePrivateWin(eint32 x, eint32 y, eint32 w, eint32 h)
-	: BWindow(BRect(0, 0, 10, 10), NULL, B_TITLED_WINDOW, 0), fTopView(NULL), doQuit(false)
+	: BWindow(BRect(0, 0, 10, 10), NULL, B_TITLED_WINDOW, 0),
+	  fTopView(NULL), doQuit(false),
+	  fPrevMouseDownTime(0), fPrevMouseDownCount(0)
 {
 	fTopView = new EBePrivateWinTopView(Bounds(), NULL, B_FOLLOW_ALL, B_WILL_DRAW);
 	fTopView->SetViewColor(255, 255, 255);
@@ -460,11 +466,24 @@ EBePrivateWin::DispatchMessage(BMessage *bMsg, BHandler *handler)
 
 				BPoint where;
 				int32 buttons = 0;
-				int32 clicks = 1;
 
 				bMsg->FindPoint("where", &where);
 				if(bMsg->what != B_MOUSE_UP) bMsg->FindInt32("buttons", &buttons);
-//				if(bMsg->what == B_MOUSE_DOWN) bMsg->FindInt32("clicks", &clicks);
+
+				int32 clicks = 1;
+#if 0
+				if(bMsg->what == B_MOUSE_DOWN) bMsg->FindInt32("clicks", &clicks);
+#else
+				bigtime_t eventTime;
+				if(bMsg->FindInt64("when", &eventTime) == B_OK)
+				{
+					if(eventTime - fPrevMouseDownTime <= CLICK_TIMEOUT)
+						clicks = (fPrevMouseDownCount += 1);
+					else
+						clicks = fPrevMouseDownCount = 1;
+					fPrevMouseDownTime = eventTime;
+				}
+#endif
 
 				EMessage message;
 				if(bMsg->what == B_MOUSE_DOWN) message.what = E_MOUSE_DOWN;

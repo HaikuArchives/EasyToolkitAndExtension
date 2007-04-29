@@ -486,7 +486,8 @@ _IMPEXP_ETK e_status_t etk_resume_thread(void *data)
 	e_status_t retVal = E_ERROR;
 
 	etk_lock_thread_inter(thread);
-	if(thread->callback.func != NULL && thread->running != 1 && thread->exited == false)
+	if(((thread->callback.func != NULL && thread->running == 0) ||  thread->running == 2) &&
+	   thread->exited == false)
 	{
 		ResumeThread(thread->handle);
 		thread->running = 1;
@@ -508,14 +509,14 @@ _IMPEXP_ETK e_status_t etk_suspend_thread(void *data)
 
 	etk_lock_thread_inter(thread);
 	bool suspend_cur_thread = (thread->ID == etk_get_current_thread_id());
-	if(thread->callback.func != NULL && thread->running == 1 && thread->exited == false)
+	if(thread->running == 1 && thread->exited == false)
 	{
 		if(suspend_cur_thread)
 		{
 			thread->running = 2;
 			etk_unlock_thread_inter(thread);
 
-			retVal = (SuspendThread(thread->handle) == (DWORD)-1 ? E_ERROR : E_OK);
+			retVal = SuspendThread(thread->handle) == (DWORD)-1 ? E_ERROR : E_OK;
 
 			etk_lock_thread_inter(thread);
 			thread->running = 1;
@@ -571,8 +572,11 @@ _IMPEXP_ETK euint32 etk_get_thread_run_state(void *data)
 			retVal = ETK_THREAD_RUNNING;
 			break;
 
-		default:
+		case 2:
 			retVal = ETK_THREAD_SUSPENDED;
+			break;
+
+		default:
 			break;
 	}
 
@@ -740,7 +744,7 @@ _IMPEXP_ETK e_status_t etk_wait_for_thread_etc(void *data, e_status_t *thread_re
 		return E_WOULD_BLOCK;
 	}
 
-	if(thread->callback.func) ResumeThread(thread->handle);
+	if(thread->callback.func || thread->running == 2) ResumeThread(thread->handle);
 
 	HANDLE handles[2] = {NULL, NULL};
 	handles[0] = thread->cond;
