@@ -471,17 +471,20 @@ EBePrivateWin::DispatchMessage(BMessage *bMsg, BHandler *handler)
 				if(bMsg->what != B_MOUSE_UP) bMsg->FindInt32("buttons", &buttons);
 
 				int32 clicks = 1;
-#if 0
-				if(bMsg->what == B_MOUSE_DOWN) bMsg->FindInt32("clicks", &clicks);
-#else
-				bigtime_t eventTime;
-				if(bMsg->FindInt64("when", &eventTime) == B_OK)
+				if(bMsg->what == B_MOUSE_DOWN)
 				{
-					if(eventTime - fPrevMouseDownTime <= CLICK_TIMEOUT)
-						clicks = (fPrevMouseDownCount += 1);
-					else
-						clicks = fPrevMouseDownCount = 1;
-					fPrevMouseDownTime = eventTime;
+#if 0
+					bMsg->FindInt32("clicks", &clicks);
+#else
+					bigtime_t eventTime;
+					if(bMsg->FindInt64("when", &eventTime) == B_OK)
+					{
+						if(eventTime - fPrevMouseDownTime <= CLICK_TIMEOUT)
+							clicks = (fPrevMouseDownCount += 1);
+						else
+							clicks = fPrevMouseDownCount = 1;
+						fPrevMouseDownTime = eventTime;
+					}
 				}
 #endif
 
