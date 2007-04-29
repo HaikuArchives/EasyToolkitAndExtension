@@ -485,8 +485,8 @@ EBePrivateWin::DispatchMessage(BMessage *bMsg, BHandler *handler)
 							clicks = fPrevMouseDownCount = 1;
 						fPrevMouseDownTime = eventTime;
 					}
-				}
 #endif
+				}
 
 				EMessage message;
 				if(bMsg->what == B_MOUSE_DOWN) message.what = E_MOUSE_DOWN;
