@@ -29,6 +29,7 @@
 
 #include <time.h>
 
+#include <etk/kernel/Kernel.h>
 #include <etk/support/Autolock.h>
 #include <etk/support/ClassInfo.h>
 #include <etk/app/Application.h>
@@ -79,6 +80,7 @@
 #define TEXT_ALL_VOLUMES	"All volumes"
 #define TEXT_NO_NAME		"No name"
 #define TEXT_OTHER_DIRECTORYIES	"Other directories"
+#define TEXT_BYTES		"bytes"
 
 #define TEXT_NOTICE_EMPTY	"[Empty]"
 #define TEXT_NOTICE_VOLUME	"[Volume]"
@@ -229,6 +231,7 @@ public:
 	void			RefreshDirMenu();
 
 private:
+	friend class EFilePanel;
 	friend class EFilePanelListView;
 
 	EFilePanel *fPanel;
@@ -570,10 +573,10 @@ static void column_size_drawing_callback(EView *owner, ERect rect, EFilePanelLis
 	if(!rect.IsValid() || item->IsVolume() || item->IsDirectory()) return;
 
 	EString str;
-	if(item->Size() >= 0x40000000) str << ((float)item->Size() / (float)0x40000000) << "G";
-	else if(item->Size() >= 0x100000) str << ((float)item->Size() / (float)0x100000) << "M";
-	else if(item->Size() >= 0x400) str << ((float)item->Size() / (float)0x400) << "K";
-	else str << item->Size() << " bytes";
+	if(item->Size() >= 0x40000000) str.AppendFormat("%.2gG", (float)item->Size() / (float)0x40000000);
+	else if(item->Size() >= 0x100000) str.AppendFormat("%.2gM", (float)item->Size() / (float)0x100000);
+	else if(item->Size() >= 0x400) str.AppendFormat("%.2gK", (float)item->Size() / (float)0x400);
+	else str.AppendFormat("%I64i %s", item->Size(), TEXT_BYTES);
 
 	EFont font;
 	e_font_height fontHeight;
@@ -1081,6 +1084,8 @@ EFilePanelWindow::EFilePanelWindow(EFilePanel *panel,
 
 	e_find_directory(E_USER_DIRECTORY, &fPath);
 	AddCommonFilter(new EMessageFilter(E_KEY_DOWN, filter_key_down_hook));
+
+	Run();
 }
 
 
@@ -1158,7 +1163,7 @@ EFilePanelWindow::MessageReceived(EMessage *msg)
 					fPath.SetTo(item->Path());
 					Refresh();
 				}
-				else
+				else if(listView->ListType() == E_SINGLE_SELECTION_LIST)
 				{
 					PostMessage(MSG_PANEL_DONE);
 				}
@@ -1554,6 +1559,13 @@ EFilePanel::Target() const
 }
 
 
+EFilePanelFilter*
+EFilePanel::Filter() const
+{
+	return ((EFilePanelWindow*)fWindow)->fFilter;
+}
+
+
 e_file_panel_mode
 EFilePanel::PanelMode() const
 {
@@ -1622,19 +1634,34 @@ EFilePanel::SetHideWhenDone(bool state)
 }
 
 
+bool
+EFilePanel::HidesWhenDone() const
+{
+	return ((EFilePanelWindow*)fWindow)->fHidesWhenDone;
+}
+
+
 void
 EFilePanel::GetPanelDirectory(EEntry *entry) const
 {
 	if(entry == NULL) return;
 
-	EMessenger msgr(fWindow, fWindow);
-	EMessage msg(MSG_PANEL_GET_DIR);
-	const char *path = NULL;
+	if(fWindow->Thread() != etk_get_current_thread_id())
+	{
+		EMessenger msgr(fWindow, fWindow);
+		EMessage msg(MSG_PANEL_GET_DIR);
+		const char *path = NULL;
 
-	entry->Unset();
-	if(msgr.SendMessage(&msg, &msg) != E_OK) return;
-	if(msg.FindString("PanelDirectory", &path) == false) return;
-	entry->SetTo(path);
+		entry->Unset();
+		if(msgr.SendMessage(&msg, &msg) != E_OK) return;
+		if(msg.FindString("PanelDirectory", &path) == false) return;
+		entry->SetTo(path);
+	}
+	else
+	{
+		entry->Unset();
+		entry->SetTo(((EFilePanelWindow*)fWindow)->fPath.Path());
+	}
 }
 
 

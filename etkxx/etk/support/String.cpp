@@ -2701,7 +2701,11 @@ eint32 e_printf_double(EString &str, double value, int precision_width, eint32 *
 	}
 
 	eint32 exp = -1;
+#if 0
 	if(exponent != NULL) // 'g' or 'G' or 'e' or 'E' style
+#else
+	if(!g_style && exponent != NULL) // 'e' or 'E' style
+#endif
 	{
 		exp = digits - 1;
 		if(exp >= precision_width)
@@ -2818,7 +2822,11 @@ eint32 e_printf_double(EString &str, long double value, int precision_width, ein
 	}
 
 	eint32 exp = -1;
+#if 0
 	if(exponent != NULL) // 'g' or 'G' or 'e' or 'E' style
+#else
+	if(!g_style && exponent != NULL) // 'e' or 'E' style
+#endif
 	{
 		exp = digits - 1;
 		if(exp >= precision_width)

@@ -77,6 +77,7 @@ public:
 
 	EWindow			*Window() const;
 	EMessenger		*Target() const;
+	EFilePanelFilter	*Filter() const;
 
 	e_file_panel_mode	PanelMode() const;
 
@@ -86,7 +87,9 @@ public:
 	void			SetFilter(EFilePanelFilter *filter);
 	void			SetSaveText(const char *text);
 	void			SetButtonLabel(e_file_panel_button btn, const char *label);
+
 	void			SetHideWhenDone(bool state);
+	bool			HidesWhenDone() const;
 
 	void			GetPanelDirectory(EEntry *entry) const;
 	void			GetPanelDirectory(EPath *path) const;
