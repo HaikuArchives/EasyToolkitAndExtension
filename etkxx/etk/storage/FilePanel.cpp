@@ -81,6 +81,7 @@
 #define TEXT_NO_NAME		"No name"
 #define TEXT_OTHER_DIRECTORYIES	"Other directories"
 #define TEXT_BYTES		"bytes"
+#define TEXT_HOME		"Home"
 
 #define TEXT_NOTICE_EMPTY	"[Empty]"
 #define TEXT_NOTICE_VOLUME	"[Volume]"
@@ -1394,18 +1395,16 @@ EFilePanelWindow::RefreshDirMenu()
 	{
 		EVolumeRoster volRoster;
 		EVolume vol;
+		EPath aPath;
 
 		while(volRoster.GetNextVolume(&vol) == E_NO_ERROR)
 		{
 			EDirectory volRootDir;
 			EEntry aEntry;
-			EPath aPath;
 
 			vol.GetRootDirectory(&volRootDir);
 			volRootDir.GetEntry(&aEntry);
-			aEntry.GetPath(&aPath);
-
-			if(aPath.Path() == NULL) continue;
+			if(aEntry.GetPath(&aPath) != E_OK || aPath.Path() == NULL) continue;
 
 			msg = new EMessage(MSG_PANEL_SET_DIR);
 			msg->AddString("PanelDirectory", aPath.Path());
@@ -1421,6 +1420,18 @@ EFilePanelWindow::RefreshDirMenu()
 		}
 
 		if(fDirMenu->CountItems() > 0) fDirMenu->AddItem(new EMenuSeparatorItem(), 0);
+
+		if(e_find_directory(E_USER_DIRECTORY, &aPath) == E_OK)
+		{
+			msg = new EMessage(MSG_PANEL_SET_DIR);
+			msg->AddString("PanelDirectory", aPath.Path());
+
+			menuItem = new EMenuItem(TEXT_HOME, msg);
+			menuItem->SetTarget(this);
+			fDirMenu->AddItem(menuItem, 0);
+
+			fDirMenu->AddItem(new EMenuSeparatorItem(), 0);
+		}
 	}
 	else
 	{

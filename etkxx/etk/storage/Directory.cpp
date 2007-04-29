@@ -287,8 +287,7 @@ EDirectory::GetNextEntry(EEntry *entry, bool traverse)
 		}
 
 		const char *filename = ((etk_win32_dir_t*)fDir)->findData.cFileName;
-		if(strlen(filename) == 1 && filename[0] == '.') continue;
-		if(strlen(filename) == 2 && strcmp(filename, "..") == 0) continue;
+		if(filename[0] == '.' && (filename[1] == 0 || (filename[1] == '.' && filename[2] == 0))) continue;
 
 		EPath aPath(fName, filename, true);
 		if(aPath.Path() == NULL) break;
