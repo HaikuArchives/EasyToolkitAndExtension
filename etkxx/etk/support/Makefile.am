@@ -25,7 +25,9 @@ libetk_support_la_SOURCES =	\
 		Locker.h		\
 		Autolock.h		\
 		Archivable.cpp		\
-		Archivable.h
+		Archivable.h		\
+		ByteOrder.c		\
+		ByteOrder.h
 
 etk_supportincludedir=$(includedir)/etkxx/etk/support
 etk_supportinclude_HEADERS =	\
@@ -38,7 +40,8 @@ etk_supportinclude_HEADERS =	\
 		SimpleLocker.h	\
 		Locker.h	\
 		Autolock.h	\
-		Archivable.h
+		Archivable.h	\
+		ByteOrder.h
 
 DISTCLEANFILES =	\
 	Makefile.in

@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,20 +22,25 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: SupportKit.h
- * 
+ *
+ * File: ByteOrder.h
+ *
  * --------------------------------------------------------------------------*/
 
+#ifndef __ETK_BYTE_ORDER_H__
+#define __ETK_BYTE_ORDER_H__
+
+#include <etk/ETKBuild.h>
 #include <etk/support/SupportDefs.h>
-#include <etk/support/ByteOrder.h>
-#include <etk/support/ClassInfo.h>
-#include <etk/support/Errors.h>
-#include <etk/support/Archivable.h>
-#include <etk/support/Autolock.h>
-#include <etk/support/SimpleLocker.h>
-#include <etk/support/Locker.h>
-#include <etk/support/String.h>
-#include <etk/support/List.h>
-#include <etk/support/StringArray.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif /* __ETK_BYTE_ORDER_H__ */
 
