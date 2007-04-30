@@ -162,6 +162,9 @@
 				<File
 					RelativePath="..\..\..\etk\support\StringArray.cpp">
 				</File>
+				<File
+					RelativePath="..\..\..\etk\support\ByteOrder.c">
+				</File>
 			</Filter>
 			<Filter
 				Name="kernel"
@@ -507,6 +510,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\SupportDefs.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\support\ByteOrder.h">
 				</File>
 			</Filter>
 			<Filter

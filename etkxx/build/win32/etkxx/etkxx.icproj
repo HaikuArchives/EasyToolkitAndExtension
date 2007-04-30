@@ -150,6 +150,8 @@
 		<File 
 			RelativePath="..\..\..\etk\support\StringArray.cpp"/>
 		<File 
+			RelativePath="..\..\..\etk\support\ByteOrder.c"/>
+		<File 
 			RelativePath="..\..\..\etk\kernel\Debug.cpp"/>
 		<File 
 			RelativePath="..\..\..\etk\kernel\win32\etk-area.cpp"/>
@@ -353,6 +355,8 @@
 			RelativePath="..\..\..\etk\support\StringArray.h"/>
 		<File 
 			RelativePath="..\..\..\etk\support\SupportDefs.h"/>
+		<File 
+			RelativePath="..\..\..\etk\support\ByteOrder.h"/>
 		<File 
 			RelativePath="..\..\..\etk\kernel\Debug.h"/>
 		<File 

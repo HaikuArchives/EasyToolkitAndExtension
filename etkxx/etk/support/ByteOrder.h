@@ -37,6 +37,66 @@
 extern "C" {
 #endif
 
+typedef enum e_swap_action {
+	E_SWAP_HOST_TO_LENDIAN,
+	E_SWAP_HOST_TO_BENDIAN,
+	E_SWAP_LENDIAN_TO_HOST,
+	E_SWAP_BENDIAN_TO_HOST,
+	E_SWAP_ALWAYS
+} e_swap_action;
+
+_IMPEXP_ETK e_status_t			e_swap_data(e_type_code type, void *data, size_t len, e_swap_action action);
+_IMPEXP_ETK bool			e_is_type_swapped(e_type_code type);
+
+#define E_SWAP_INT16(v)			((((v) & 0xff) << 8) | (((v) >> 8) & 0xff))
+#define E_SWAP_INT32(v)			((E_SWAP_INT16((v) & 0xffff) << 16) | E_SWAP_INT16(((v) >> 16) & 0xffff))
+#define E_SWAP_INT64(v)			((E_SWAP_INT32((v) & 0xffffffff) << 32) | E_SWAP_INT32(((v) >> 32) & 0xffffffff))
+
+
+#ifdef ETK_LITTLE_ENDIAN
+
+#define E_HOST_IS_LENDIAN		1
+#define E_HOST_IS_BENDIAN		0
+
+#define E_HOST_TO_LENDIAN_INT16(v)	(eint16)(v)
+#define E_HOST_TO_LENDIAN_INT32(v)	(eint32)(v)
+#define E_HOST_TO_LENDIAN_INT64(v)	(eint64)(v)
+
+#define E_HOST_TO_BENDIAN_INT16(v)	E_SWAP_INT16(v)
+#define E_HOST_TO_BENDIAN_INT32(v)	E_SWAP_INT32(v)
+#define E_HOST_TO_BENDIAN_INT64(v)	E_SWAP_INT64(v)
+
+#define E_LENDIAN_TO_HOST_INT16(v)	(eint16)(v)
+#define E_LENDIAN_TO_HOST_INT32(v)	(eint32)(v)
+#define E_LENDIAN_TO_HOST_INT64(v)	(eint64)(v)
+
+#define E_BENDIAN_TO_HOST_INT16(v)	E_SWAP_INT16(v)
+#define E_BENDIAN_TO_HOST_INT32(v)	E_SWAP_INT32(v)
+#define E_BENDIAN_TO_HOST_INT64(v)	E_SWAP_INT64(v)
+
+#else
+
+#define E_HOST_IS_LENDIAN		0
+#define E_HOST_IS_BENDIAN		1
+
+#define E_HOST_TO_LENDIAN_INT16(v)	E_SWAP_INT16(v)
+#define E_HOST_TO_LENDIAN_INT32(v)	E_SWAP_INT32(v)
+#define E_HOST_TO_LENDIAN_INT64(v)	E_SWAP_INT64(v)
+
+#define E_HOST_TO_BENDIAN_INT16(v)	(eint16)(v)
+#define E_HOST_TO_BENDIAN_INT32(v)	(eint32)(v)
+#define E_HOST_TO_BENDIAN_INT64(v)	(eint64)(v)
+
+#define E_LENDIAN_TO_HOST_INT16(v)	E_SWAP_INT16(v)
+#define E_LENDIAN_TO_HOST_INT32(v)	E_SWAP_INT32(v)
+#define E_LENDIAN_TO_HOST_INT64(v)	E_SWAP_INT64(v)
+
+#define E_BENDIAN_TO_HOST_INT16(v)	(eint16)(v)
+#define E_BENDIAN_TO_HOST_INT32(v)	(eint32)(v)
+#define E_BENDIAN_TO_HOST_INT64(v)	(eint64)(v)
+
+#endif /* ETK_LITTLE_ENDIAN */
+
 
 #ifdef __cplusplus
 } // extern "C"
