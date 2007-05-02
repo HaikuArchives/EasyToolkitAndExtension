@@ -39,7 +39,8 @@ public:
 	static void	Enable(bool state);
 	static bool	IsEnabled();
 
-	static void	Print(const char *format, ...);
+	static void	Debug(const char *format, ...);
+	static void	Print(const char *string);
 	static void	Dump(const char *data, size_t len, const char *title);
 };
 

@@ -37,7 +37,7 @@
 			<Tool 
 				Name="LinkerTool"
 				DelayImpLib=""
-				AdditionalDependencies="imm32.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib"
 				OutputFile="$(OutDir)/libetkxx.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -103,7 +103,7 @@
 			<Tool 
 				Name="LinkerTool"
 				DelayImpLib=""
-				AdditionalDependencies="imm32.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib"
 				OutputFile="$(OutDir)/libetkxx.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""

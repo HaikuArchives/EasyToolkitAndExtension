@@ -1,5 +1,5 @@
 2007-05-02  anthonylee
-	Added ENetDebug for Net Kit.
+	Added ENetDebug/ENetBuffer for Net Kit.
 	Added ByteOrder.h for Support Kit.
 
 2007-04-30  anthonylee

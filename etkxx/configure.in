@@ -639,6 +639,64 @@ if test "x$etk_system_libs" != x ; then
 fi
 AC_MSG_RESULT(done)
 
+# Test program for socket
+m4_define([etk_net_test],[
+#include <sys/types.h>
+#include <sys/socket.h> 
+int main()
+{
+	socket(AF_INET, SOCK_DGRAM, 0);
+	exit(0);
+}])
+
+
+case $etk_native_os_extra in
+	mingw)
+		etk_net_libs="-lws2_32"
+	;;
+	*)
+		etk_net_libs=none
+	;;
+esac
+if test "$etk_net_libs" = none; then
+	etk_save_CFLAGS="$CFLAGS"
+	etk_save_LIBS="$LIBS"
+        for net_lib in none net socket; do
+		if test x"$net_lib" = xnone; then
+			add_net_lib=""
+			IN=""
+		else
+			add_net_lib="-l$net_lib"
+			IN=" in -l$net_lib"
+		fi
+
+		CFLAGS="$etk_save_CFLAGS"
+		LIBS="$etk_save_LIBS $add_net_lib"
+
+		AC_MSG_CHECKING(for socket$IN)
+		AC_TRY_RUN(etk_net_test(0),
+			   etk_result=yes,
+			   etk_result=no,
+			   [AC_LINK_IFELSE(etk_net_test(0),
+					   etk_result=yes,
+					   etk_result=no)])
+		AC_MSG_RESULT($etk_result)
+
+		if test "$etk_result" = "yes" ; then
+			if test x"$net_lib" != xnone; then
+				etk_net_libs="$add_net_lib"
+			fi
+			break
+		fi
+	done
+	CFLAGS="$etk_save_CFLAGS"
+	LIBS="$etk_save_LIBS"
+fi
+if test "$etk_net_libs" != "none" ; then
+	ETK_EXTRA_LIBS="$ETK_EXTRA_LIBS $etk_net_libs"
+fi
+
+
 ETK_EXTRA_CFLAGS="$ETK_EXTRA_CFLAGS $want_etkxx_cflags $etk_system_cflags $etk_extra_cflags"
 ETK_EXTRA_LIBS="$ETK_EXTRA_LIBS $want_etkxx_libs $etk_system_libs $etk_extra_libs"
 
@@ -1202,16 +1260,14 @@ if test "x$have_threads" = xposix; then
 			IN=" in -l$sem_lib"
 		fi
 
-		defattr=0
-
 		CFLAGS="$etk_save_CFLAGS $ETK_THREAD_CFLAGS"
-		LIBS="$etk_save_LIBS $ETK_THREAD_LIBS $ETK_THREAD_LIBS_FOR_THREAD"
+		LIBS="$etk_save_LIBS $ETK_THREAD_LIBS $ETK_THREAD_LIBS_FOR_THREAD $add_sem_lib"
 
 		AC_MSG_CHECKING(for sem_timedwait$IN)
-		AC_TRY_RUN(etk_semaphore_test($defattr),
+		AC_TRY_RUN(etk_semaphore_test(0),
 			   etk_result=yes,
 			   etk_result=no,
-			   [AC_LINK_IFELSE(etk_semaphore_test($defattr),
+			   [AC_LINK_IFELSE(etk_semaphore_test(0),
 					   etk_result=yes,
 					   etk_result=no)])
 		AC_MSG_RESULT($etk_result)

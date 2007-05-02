@@ -56,7 +56,7 @@ ENetDebug::IsEnabled()
 
 
 void
-ENetDebug::Print(const char *format, ...)
+ENetDebug::Debug(const char *format, ...)
 {
 	if(!format) return;
 
@@ -75,6 +75,18 @@ ENetDebug::Print(const char *format, ...)
 
 	fputs(buffer, stderr);
 	free(buffer);
+}
+
+
+void
+ENetDebug::Print(const char *string)
+{
+	if(string == NULL || *string == 0) return;
+
+	EAutolock <ESimpleLocker> autolock(_e_net_locker);
+	if(!autolock.IsLocked() || !_e_net_enabled) return;
+
+	fputs(string, stderr);
 }
 
 
