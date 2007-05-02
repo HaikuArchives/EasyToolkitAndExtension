@@ -104,7 +104,7 @@ ENetDebug::Dump(const char *data, size_t len, const char *title)
 	{
 		for(int i = 0; i < 16 && len > 0; i++, len--, data++)
 		{
-			fprintf(stderr, "%x", *data);
+			fprintf(stderr, "%02x", *data);
 			if(!(i == 15 || len == 1)) fputc(' ', stderr);
 		}
 		fputs("\n", stderr);
