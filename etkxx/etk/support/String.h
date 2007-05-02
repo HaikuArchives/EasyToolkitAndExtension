@@ -268,6 +268,8 @@ public:
 	// if IsNumber() is "true", it convert the string to double then return "true", else do nothing and return "false"
 	bool		GetDecimal(float *value) const;
 	bool		GetDecimal(double *value) const;
+	bool		GetInteger(eint8 *value) const;
+	bool		GetInteger(euint8 *value) const;
 	bool		GetInteger(eint16 *value) const;
 	bool		GetInteger(euint16 *value) const;
 	bool		GetInteger(eint32 *value) const;

@@ -2314,6 +2314,30 @@ EString::GetDecimal(long double *value) const
 
 
 bool
+EString::GetInteger(eint8 *value) const
+{
+	if(!value || !IsNumber()) return false;
+
+	*value = (eint8)strtol(String(), NULL, 10);
+
+	return true;
+}
+
+
+bool
+EString::GetInteger(euint8 *value) const
+{
+	if(!value || !IsNumber()) return false;
+
+	if(e_get_hex(*this, value)) return true;
+
+	*value = (euint8)strtoul(String(), NULL, 10);
+
+	return true;
+}
+
+
+bool
 EString::GetInteger(eint16 *value) const
 {
 	if(!value || !IsNumber()) return false;

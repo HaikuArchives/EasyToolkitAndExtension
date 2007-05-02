@@ -1,3 +1,7 @@
+2007-05-02  anthonylee
+	Added ENetDebug for Net Kit.
+	Added ByteOrder.h for Support Kit.
+
 2007-04-30  anthonylee
 	Completed etk_suspend_thread() for BeOS/Windows/POSIX.
 	Corrected the build script to match the current version.

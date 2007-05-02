@@ -27,5 +27,77 @@
  *
  * --------------------------------------------------------------------------*/
 
+#include <stdarg.h>
+#include <stdio.h>
+
+#include <etk/support/Autolock.h>
+#include <etk/support/SimpleLocker.h>
+#include <etk/support/String.h>
+
 #include "NetDebug.h"
+
+static ESimpleLocker _e_net_locker(true);
+static bool _e_net_enabled = false;
+
+
+void
+ENetDebug::Enable(bool state)
+{
+	EAutolock <ESimpleLocker> autolock(_e_net_locker);
+	if(autolock.IsLocked()) _e_net_enabled = state;
+}
+
+
+bool
+ENetDebug::IsEnabled()
+{
+	return _e_net_enabled;
+}
+
+
+void
+ENetDebug::Print(const char *format, ...)
+{
+	if(!format) return;
+
+	EAutolock <ESimpleLocker> autolock(_e_net_locker);
+	if(!autolock.IsLocked() || !_e_net_enabled) return;
+
+	va_list args;
+
+	char *buffer = NULL;
+
+	va_start(args, format);
+	buffer = e_strdup_vprintf(format, args);
+	va_end(args);
+
+	if(buffer == NULL) return;
+
+	fputs(buffer, stderr);
+	free(buffer);
+}
+
+
+void
+ENetDebug::Dump(const char *data, size_t len, const char *title)
+{
+	if(!data || len == 0) return;
+
+	EAutolock <ESimpleLocker> autolock(_e_net_locker);
+	if(!autolock.IsLocked() || !_e_net_enabled) return;
+
+	fprintf(stderr, "[NET]: -------- %s(START) --------\n", title ? title : "No title");
+
+	while(len > 0)
+	{
+		for(int i = 0; i < 16 && len > 0; i++, len--, data++)
+		{
+			fprintf(stderr, "%x", *data);
+			if(!(i == 15 || len == 1)) fputc(' ', stderr);
+		}
+		fputs("\n", stderr);
+	}
+
+	fprintf(stderr, "[NET]: --------- %s(END) ---------\n", title ? title : "No title");
+}
 

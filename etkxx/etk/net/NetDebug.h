@@ -34,6 +34,14 @@
 
 #ifdef __cplusplus /* Just for C++ */
 
+class _IMPEXP_ETK ENetDebug {
+public:
+	static void	Enable(bool state);
+	static bool	IsEnabled();
+
+	static void	Print(const char *format, ...);
+	static void	Dump(const char *data, size_t len, const char *title);
+};
 
 #endif /* __cplusplus */
 
