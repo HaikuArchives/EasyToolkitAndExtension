@@ -30,10 +30,71 @@
 #ifndef __ETK_NET_ENDPOINT_H__
 #define __ETK_NET_ENDPOINT_H__
 
-#include <etk/support/SupportDefs.h>
+#include <etk/net/NetAddress.h>
+#include <etk/net/NetBuffer.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
+class _IMPEXP_ETK ENetEndpoint : public EArchivable {
+public:
+	ENetEndpoint(int proto = SOCK_STREAM);
+	ENetEndpoint(const ENetEndpoint &from);
+	virtual ~ENetEndpoint();
+
+	// Archiving
+	ENetEndpoint(EMessage *from);
+	static EArchivable *Instantiate(EMessage *from);
+	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
+
+	e_status_t		InitCheck() const;
+
+	ENetEndpoint		&operator=(const ENetEndpoint &endpoint);
+
+	e_status_t		SetProtocol(int proto);
+
+	int			SetOption(eint32 option, eint32 level, const void *data, size_t data_len);
+	int			SetNonBlocking(bool state = true);
+	int			SetReuseAddr(bool state = true);
+
+	const ENetAddress	&LocalAddr() const;
+	const ENetAddress	&RemoteAddr() const;
+
+	int			Socket() const;
+
+	virtual void		Close();
+
+	virtual e_status_t	Bind(const ENetAddress &addr);
+	virtual e_status_t	Bind(euint16 port = 0);
+
+	virtual e_status_t	Connect(const ENetAddress &addr);
+	virtual e_status_t	Connect(const char *addr, euint16 port);
+
+	virtual e_status_t	Listen(int backlog = 5);
+	virtual ENetEndpoint	*Accept(eint32 timeout_msec = -1);
+
+	int			Error() const;
+	const char		*ErrorStr() const;
+
+	virtual eint32		Send(const void *buf, size_t len, int flags = 0);
+	virtual eint32		Send(const ENetBuffer &buf, int flags = 0);
+	virtual eint32		SendTo(const void *buf, size_t len, const ENetAddress &to, int flags = 0);
+	virtual eint32		SendTo(const ENetBuffer &buf, const ENetAddress &to, int flags = 0);
+
+	void			SetTimeout(e_bigtime_t timeout);
+	virtual eint32		Receive(void *buf, size_t len, int flags = 0);
+	virtual eint32		Receive(ENetBuffer &buf, size_t len, int flags = 0);
+	virtual eint32		ReceiveFrom(void *buf, size_t len, const ENetAddress &from, int flags = 0);
+	virtual eint32		ReceiveFrom(ENetBuffer &buf, size_t len, const ENetAddress &from, int flags = 0);
+
+	virtual bool		IsDataPending(e_bigtime_t timeout = 0);
+
+private:
+	int fSocket;
+	e_bigtime_t fTimeout;
+
+	ENetAddress fLocalAddr;
+	ENetAddress fRemoteAddr;
+};
 
 #endif /* __cplusplus */
 

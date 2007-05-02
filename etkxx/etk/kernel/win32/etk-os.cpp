@@ -93,6 +93,9 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 		/* The DLL is being mapped into process's address space */
 		/* Do any required initialization on a per application basis, return FALSE if failed */
 		{
+			WSADATA wsaData;
+			WSAStartup(0x202, &wsaData);
+
 #if 0
 			etk_system_boot_time();
 			signal_int_old_func = signal(SIGINT, etk_signal_func);
@@ -114,6 +117,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 			signal(SIGINT, signal_int_old_func);
 			signal(SIGTERM, signal_term_old_func);
 #endif
+			WSACleanup();
 			break;
 		}
 

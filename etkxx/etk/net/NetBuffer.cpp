@@ -153,7 +153,7 @@ ENetBuffer::AppendInt16(eint16 value)
 e_status_t
 ENetBuffer::AppendUint16(euint16 value)
 {
-	eint16 v = E_HOST_TO_BENDIAN_INT16(*((eint16*)&value));
+	eint16 v = E_HOST_TO_BENDIAN_INT16(value);
 	return AppendData(&v, 2);
 }
 
@@ -169,7 +169,7 @@ ENetBuffer::AppendInt32(eint32 value)
 e_status_t
 ENetBuffer::AppendUint32(euint32 value)
 {
-	eint32 v = E_HOST_TO_BENDIAN_INT32(*((eint32*)&value));
+	eint32 v = E_HOST_TO_BENDIAN_INT32(value);
 	return AppendData(&v, 4);
 }
 
@@ -185,7 +185,7 @@ ENetBuffer::AppendInt64(eint64 value)
 e_status_t
 ENetBuffer::AppendUint64(euint64 value)
 {
-	eint64 v = E_HOST_TO_BENDIAN_INT64(*((eint64*)&value));
+	eint64 v = E_HOST_TO_BENDIAN_INT64(value);
 	return AppendData(&v, 8);
 }
 
@@ -307,12 +307,9 @@ ENetBuffer::RemoveInt16(eint16 &value)
 e_status_t
 ENetBuffer::RemoveUint16(euint16 &value)
 {
-	eint16 v;
+	if(RemoveData(&value, 2) != E_OK) return E_ERROR;
 
-	if(RemoveData(&v, 2) != E_OK) return E_ERROR;
-
-	v = E_BENDIAN_TO_HOST_INT16(v);
-	value = *((euint16*)&v);
+	value = E_BENDIAN_TO_HOST_INT16(value);
 	return E_OK;
 }
 
@@ -330,12 +327,9 @@ ENetBuffer::RemoveInt32(eint32 &value)
 e_status_t
 ENetBuffer::RemoveUint32(euint32 &value)
 {
-	eint32 v;
+	if(RemoveData(&value, 4) != E_OK) return E_ERROR;
 
-	if(RemoveData(&v, 4) != E_OK) return E_ERROR;
-
-	v = E_BENDIAN_TO_HOST_INT32(v);
-	value = *((euint32*)&v);
+	value = E_BENDIAN_TO_HOST_INT32(value);
 	return E_OK;
 }
 
@@ -353,12 +347,9 @@ ENetBuffer::RemoveInt64(eint64 &value)
 e_status_t
 ENetBuffer::RemoveUint64(euint64 &value)
 {
-	eint64 v;
+	if(RemoveData(&value, 8) != E_OK) return E_ERROR;
 
-	if(RemoveData(&v, 8) != E_OK) return E_ERROR;
-
-	v = E_BENDIAN_TO_HOST_INT64(v);
-	value = *((euint64*)&v);
+	value = E_BENDIAN_TO_HOST_INT64(value);
 	return E_OK;
 }
 
@@ -407,7 +398,8 @@ ENetBuffer::RemoveMessage(EMessage &msg)
 #endif
 	if(msgSize == 0 || (size_t)msgSize > fPos - 8) return E_ERROR;
 
-	if(msg.Unflatten((const char*)(fData + fPos - (size_t)msgSize - 8), msgSize) == false) return E_ERROR;
+	if(msg.Unflatten((const char*)(fData + fPos - (size_t)msgSize - 8),
+			 (size_t)msgSize) == false) return E_ERROR;
 
 	fPos -= (size_t)msgSize + 8;
 	return E_OK;
