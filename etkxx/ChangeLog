@@ -1,3 +1,6 @@
+2007-05-04  anthonylee
+	Added ENetAddress/ENetEndpoint for Net Kit.
+
 2007-05-02  anthonylee
 	Added ENetDebug/ENetBuffer for Net Kit.
 	Added ByteOrder.h for Support Kit.

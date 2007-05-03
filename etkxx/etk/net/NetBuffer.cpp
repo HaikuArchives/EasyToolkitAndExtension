@@ -93,9 +93,6 @@ ENetBuffer&
 ENetBuffer::operator=(const ENetBuffer &buf)
 {
 	if(fData) free(fData);
-	fData = NULL;
-	fSize = 0;
-	fPos = 0;
 
 	if(!(buf.InitCheck() != E_OK ||
 	     (fData = (unsigned char*)malloc(buf.fSize)) == NULL))

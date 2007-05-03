@@ -27,36 +27,63 @@
  *
  * --------------------------------------------------------------------------*/
 
+// WARNING: MT-SAFE uncompleted yet !!!
+
 #include <errno.h>
 #include <string.h>
 
+#include <sys/time.h>
+#include <sys/types.h>
+#include <signal.h>
+
 #ifndef _WIN32
 #	include <netdb.h>
-#	include <netinet/in.h>
+#	include <unistd.h>
+#	include <fcntl.h>
 
 #	ifdef __BEOS__
-#		include <BeBuild.h>
-#	endif
-
-#	if !(defined(__BEOS__) && B_BEOS_VERSION < 0x0510)
+#		include <sys/socket.h>
+#		ifdef BONE_VERSION
+#			include <arpa/inet.h>
+#		endif
+#		define socklen_t int
+#	else
 #		include <arpa/inet.h>
 #	endif
 #else
 #	include <winsock2.h>
+#	define socklen_t int
+#	define EWOULDBLOCK WSAEWOULDBLOCK
+#	define ECONNABORTED WSAECONNABORTED
+#	undef EINTR
+#	define EINTR WSAEINTR
 #endif
 
 #include "NetEndpoint.h"
 
 
+#ifdef SIGPIPE
+_LOCAL class ENetEndpointSignalIgnore {
+public:
+	ENetEndpointSignalIgnore()
+	{
+		ETK_DEBUG("[NET]: Ignore SIGPIPE.");
+		signal(SIGPIPE, SIG_IGN);
+	}
+};
+static ENetEndpointSignalIgnore _ignore;
+#endif
+
+
 ENetEndpoint::ENetEndpoint(int proto)
-	: EArchivable(), fSocket(-1), fTimeout(0)
+	: EArchivable(), fProtocol(proto), fBind(false), fNonBlocking(false), fTimeout(0)
 {
-	// TODO
+	fSocket = socket(AF_INET, fProtocol, 0);
 }
 
 
 ENetEndpoint::ENetEndpoint(const ENetEndpoint &from)
-	: EArchivable(), fSocket(-1), fTimeout(0)
+	: EArchivable(), fSocket(-1), fBind(false), fNonBlocking(false)
 {
 	ENetEndpoint::operator=(from);
 }
@@ -64,12 +91,12 @@ ENetEndpoint::ENetEndpoint(const ENetEndpoint &from)
 
 ENetEndpoint::~ENetEndpoint()
 {
-	ENetEndpoint::Close();
+	_Close();
 }
 
 
 ENetEndpoint::ENetEndpoint(EMessage *from)
-	: EArchivable(from), fSocket(-1), fTimeout(0)
+	: EArchivable(from), fSocket(-1), fBind(false), fNonBlocking(false)
 {
 	// TODO
 }
@@ -108,7 +135,15 @@ ENetEndpoint::InitCheck() const
 ENetEndpoint&
 ENetEndpoint::operator=(const ENetEndpoint &endpoint)
 {
-	// TODO
+	ENetEndpoint::Close();
+
+	if(endpoint.fSocket != -1)
+	{
+		if(endpoint.fBind) ENetEndpoint::Bind(endpoint.fLocalAddr);
+		ENetEndpoint::Connect(endpoint.fRemoteAddr);
+		if(endpoint.fNonBlocking) SetNonBlocking(true);
+	}
+
 	return *this;
 }
 
@@ -116,32 +151,96 @@ ENetEndpoint::operator=(const ENetEndpoint &endpoint)
 e_status_t
 ENetEndpoint::SetProtocol(int proto)
 {
-	// TODO
-	return E_ERROR;
+	if(fProtocol != proto)
+	{
+		int s = socket(AF_INET, proto, 0);
+		if(s == -1) return E_ERROR;
+
+		_Close();
+
+		fSocket = s;
+		fProtocol = proto;
+	}
+
+	return E_OK;
 }
 
 
 int
-ENetEndpoint::SetOption(eint32 option, eint32 level, const void *data, size_t data_len)
+ENetEndpoint::SetSocketOption(eint32 level, eint32 option, const void *data, size_t data_len)
 {
-	// TODO
-	return -1;
+	if(fSocket == -1) return -1;
+
+	int retVal = setsockopt(fSocket, level, option, (const char*)data, data_len) < 0 ? -1 : 0;
+
+#if (defined(__BEOS__) && !defined(BONE_VERSION))
+	if(retVal == 0 && option == SO_NONBLOCK)
+	{
+		fNonBlocking = false;
+		for(const euint8 *tmp = (const euint8*)data; data_len > 0; data_len--, tmp--)
+		{
+			if(*tmp != 0)
+			{
+				fNonBlocking = true;
+				break;
+			}
+		}
+	}
+#endif
+
+	return retVal;
+}
+
+
+int
+ENetEndpoint::GetSocketOption(eint32 level, eint32 option, void *data, size_t *data_len) const
+{
+	if(fSocket == -1) return -1;
+
+#if (defined(__BEOS__) && !defined(BONE_VERSION))
+	if(level != SOL_SOCKET || option != SO_NONBLOCK ||
+	   data == NULL || data_len == NULL || *data_len == 0) return -1;
+	bzero(data, *data_len);
+	if(fNonBlocking) *((euint8*)data) = 1;
+	return 0;
+#else
+	socklen_t len = (data_len ? (socklen_t)*data_len : 0);
+	if(getsockopt(fSocket, level, option, (char*)data, &len) < 0) return -1;
+	if(data_len) *data_len = (size_t)len;
+	return 0;
+#endif
 }
 
 
 int
 ENetEndpoint::SetNonBlocking(bool state)
 {
-	// TODO
-	return -1;
+	if(fSocket == -1) return -1;
+
+	if(fNonBlocking == state) return 0;
+
+#ifdef __BEOS__
+	return SetSocketOption(SOL_SOCKET, SO_NONBLOCK, &state, sizeof(state));
+#elif defined(_WIN32)
+	u_long value = (u_long)state;
+	if(ioctlsocket(fSocket, FIONBIO, &value) != 0) return -1;
+	fNonBlocking = state;
+	return 0;
+#else
+	int flags = fcntl(fSocket, F_GETFL, 0);
+	if(state) flags |= O_NONBLOCK;
+	else flags &= ~O_NONBLOCK;
+	if(fcntl(fSocket, F_SETFL, flags) == -1) return -1;
+	fNonBlocking = state;
+	return 0;
+#endif
 }
 
 
-int
-ENetEndpoint::SetReuseAddr(bool state)
+bool
+ENetEndpoint::IsNonBlocking() const
 {
-	// TODO
-	return -1;
+	return fNonBlocking;
 }
 
 
@@ -159,113 +258,213 @@ ENetEndpoint::RemoteAddr() const
 }
 
 
-int
-ENetEndpoint::Socket() const
+void
+ENetEndpoint::_Close()
 {
-	return fSocket;
+	if(fSocket != -1)
+	{
+#if defined(_WIN32) || (defined(__BEOS__) && !defined(BONE_VERSION))
+		closesocket(fSocket);
+#else
+		close(fSocket);
+#endif
+		fSocket = -1;
+	}
+
+	fLocalAddr = ENetAddress();
+	fRemoteAddr = ENetAddress();
+
+	fBind = false;
+	fNonBlocking = false;
 }
 
 
 void
 ENetEndpoint::Close()
 {
-	// TODO
-	if(fSocket != -1)
-	{
-		close(fSocket);
-	}
+	_Close();
+	fSocket = socket(AF_INET, fProtocol, 0);
 }
 
 
 e_status_t
 ENetEndpoint::Bind(const ENetAddress &addr)
 {
-	// TODO
-	return E_ERROR;
+	if(fSocket == -1) return E_ERROR;
+
+	struct sockaddr_in sa;
+	if(addr.GetAddr(sa) != E_OK) return E_ERROR;
+
+	if(bind(fSocket, (struct sockaddr*)&sa, sizeof(sa)) != 0)
+	{
+		ETK_DEBUG("[NET]: %s --- bind() failed (errno:%d).", __PRETTY_FUNCTION__, errno);
+		return E_ERROR;
+	}
+
+	socklen_t len = sizeof(sa);
+	getsockname(fSocket, (struct sockaddr*)&sa, &len);
+	fLocalAddr.SetTo(sa);
+	fBind = true;
+
+	return E_OK;
 }
 
 
 e_status_t
 ENetEndpoint::Bind(euint16 port)
 {
-	// TODO
-	return E_ERROR;
+	ENetAddress addr(INADDR_LOOPBACK, port);
+	return Bind(addr);
 }
 
 
 e_status_t
 ENetEndpoint::Connect(const ENetAddress &addr)
 {
-	// TODO
-	return E_ERROR;
+	if(fSocket == -1) return E_ERROR;
+
+	struct sockaddr_in sa;
+	socklen_t len;
+
+	if(addr.GetAddr(sa) != E_OK) return E_ERROR;
+
+	if(connect(fSocket, (struct sockaddr*)&sa, sizeof(sa)) != 0)
+	{
+		ETK_DEBUG("[NET]: %s --- connect() failed (errno:%d).", __PRETTY_FUNCTION__, errno);
+		return E_ERROR;
+	}
+
+	if(fBind == false)
+	{
+		len = sizeof(sa);
+		if(getsockname(fSocket, (struct sockaddr*)&sa, &len) == 0) fLocalAddr.SetTo(sa);
+	}
+
+	len = sizeof(sa);
+	if(getpeername(fSocket, (struct sockaddr*)&sa, &len) == 0) fRemoteAddr.SetTo(sa);
+
+	return E_OK;
 }
 
 
 e_status_t
-ENetEndpoint::Connect(const char *addr, euint16 port)
+ENetEndpoint::Connect(const char *address, euint16 port)
 {
-	// TODO
-	return E_ERROR;
+	ENetAddress addr(address, port);
+	return ENetEndpoint::Connect(addr);
 }
 
 
 e_status_t
 ENetEndpoint::Listen(int backlog)
 {
-	// TODO
-	return E_ERROR;
+	if(fSocket == -1) return E_ERROR;
+	return(listen(fSocket, backlog) == 0 ? E_OK : E_ERROR);
 }
 
 
 ENetEndpoint*
 ENetEndpoint::Accept(eint32 timeout_msec)
 {
-	// TODO
-	return NULL;
+	if(fSocket == -1) return NULL;
+
+	struct sockaddr_in sa;
+	socklen_t len = sizeof(sa);
+	int s = -1;
+
+	if(timeout_msec < 0)
+	{
+		s = accept(fSocket, (struct sockaddr*)&sa, &len);
+	}
+	else
+	{
+		bool saveState = fNonBlocking;
+		e_bigtime_t saveTime = e_real_time_clock_usecs();
+		SetNonBlocking(true);
+		do
+		{
+			if((s = accept(fSocket, (struct sockaddr*)&sa, &len)) != -1) break;
+
+			int err = Error();
+			if(!(err == EWOULDBLOCK ||
+			     err == ECONNABORTED ||
+			     err == EINTR)) break;
+			if(timeout_msec > 0) e_snooze(1000);
+		} while(e_real_time_clock_usecs() - saveTime <= timeout_msec * E_INT64_CONSTANT(1000));
+		SetNonBlocking(saveState);
+	}
+
+	if(s == -1) return NULL;
+
+	ENetEndpoint *endpoint = new ENetEndpoint(fProtocol);
+	endpoint->_Close();
+	endpoint->fSocket = s;
+	endpoint->fLocalAddr = fLocalAddr;
+	endpoint->fRemoteAddr.SetTo(sa);
+
+	return endpoint;
 }
 
 
 int
 ENetEndpoint::Error() const
 {
+#ifdef _WIN32
+	return WSAGetLastError();
+#else
 	return errno;
+#endif
 }
 
 
 const char*
 ENetEndpoint::ErrorStr() const
 {
-	return strerror(errno);
+	return strerror(Error());
 }
 
 
 eint32
 ENetEndpoint::Send(const void *buf, size_t len, int flags)
 {
-	// TODO
-	return -1;
+	if(fSocket == -1 || fLocalAddr.InitCheck() != E_OK) return -1;
+
+	if(fProtocol == SOCK_DGRAM)
+	{
+		struct sockaddr_in sa;
+		if(fRemoteAddr.GetAddr(sa) != E_OK) return -1;
+		return sendto(fSocket, (const char*)buf, len, flags, (struct sockaddr*)&sa, sizeof(sa));
+	}
+	else
+	{
+		return send(fSocket, (const char*)buf, len, flags);
+	}
 }
 
 
 eint32
 ENetEndpoint::Send(const ENetBuffer &buf, int flags)
 {
-	return Send(buf.Data(), buf.Size(), flags);
+	return ENetEndpoint::Send(buf.Data(), buf.Size(), flags);
 }
 
 
 eint32
 ENetEndpoint::SendTo(const void *buf, size_t len, const ENetAddress &to, int flags)
 {
-	// TODO
-	return -1;
+	if(fSocket == -1 || fLocalAddr.InitCheck() != E_OK) return -1;
+	if(fProtocol != SOCK_DGRAM) return -1;
+
+	struct sockaddr_in sa;
+	if(fRemoteAddr.GetAddr(sa) != E_OK) return -1;
+	return sendto(fSocket, (const char*)buf, len, flags, (struct sockaddr*)&sa, sizeof(sa));
 }
 
 
 eint32
 ENetEndpoint::SendTo(const ENetBuffer &buf, const ENetAddress &to, int flags)
 {
-	return SendTo(buf.Data(), buf.Size(), to, flags);
+	return ENetEndpoint::SendTo(buf.Data(), buf.Size(), to, flags);
 }
 
 
@@ -274,16 +473,15 @@ ENetEndpoint::SetTimeout(e_bigtime_t timeout)
 {
 	if(timeout < 0) timeout = 0;
 	fTimeout = timeout;
-
-	// TODO
 }
 
 
 eint32
 ENetEndpoint::Receive(void *buf, size_t len, int flags)
 {
-	// TODO
-	return -1;
+	if(fSocket == -1 || fLocalAddr.InitCheck() != E_OK) return -1;
+	if(!ENetEndpoint::IsDataPending(fTimeout)) return -1;
+	return recv(fSocket, (char*)buf, len, flags);
 }
 
 
@@ -293,7 +491,7 @@ ENetEndpoint::Receive(ENetBuffer &buf, size_t len, int flags)
 	void *data = (len != 0 ? malloc(len) : NULL);
 	if(data == NULL) return -1;
 
-	eint32 bytes = Receive(data, len, flags);
+	eint32 bytes = ENetEndpoint::Receive(data, len, flags);
 	if(bytes < 0)
 	{
 		free(data);
@@ -311,8 +509,16 @@ ENetEndpoint::Receive(ENetBuffer &buf, size_t len, int flags)
 eint32
 ENetEndpoint::ReceiveFrom(void *buf, size_t len, const ENetAddress &from, int flags)
 {
-	// TODO
-	return -1;
+	if(fSocket == -1 || fLocalAddr.InitCheck() != E_OK) return -1;
+	if(fProtocol != SOCK_DGRAM) return -1;
+
+	struct sockaddr_in sa;
+	if(from.GetAddr(sa) != E_OK) return -1;
+
+	if(!ENetEndpoint::IsDataPending(fTimeout)) return -1;
+
+	socklen_t _len = sizeof(sa);
+	return recvfrom(fSocket, (char*)buf, len, flags, (struct sockaddr*)&sa, &_len);
 }
 
 
@@ -322,7 +528,7 @@ ENetEndpoint::ReceiveFrom(ENetBuffer &buf, size_t len, const ENetAddress &from, 
 	void *data = (len != 0 ? malloc(len) : NULL);
 	if(data == NULL) return -1;
 
-	eint32 bytes = ReceiveFrom(data, len, from, flags);
+	eint32 bytes = ENetEndpoint::ReceiveFrom(data, len, from, flags);
 	if(bytes < 0)
 	{
 		free(data);
@@ -338,9 +544,19 @@ ENetEndpoint::ReceiveFrom(ENetBuffer &buf, size_t len, const ENetAddress &from, 
 
 
 bool
-ENetEndpoint::IsDataPending(e_bigtime_t timeout)
+ENetEndpoint::IsDataPending(e_bigtime_t _timeout)
 {
-	// TODO
-	return false;
+	if(fSocket == -1) return false;
+
+	struct timeval timeout;
+	timeout.tv_sec = _timeout / E_INT64_CONSTANT(1000000);
+	timeout.tv_usec = _timeout % E_INT64_CONSTANT(1000000);
+
+	fd_set rset;
+	FD_ZERO(&rset);
+	FD_SET(fSocket, &rset);
+
+	int status = select(fSocket + 1, &rset, NULL, NULL, &timeout);
+	return(status > 0 && FD_ISSET(fSocket, &rset));
 }
 

@@ -52,14 +52,16 @@ public:
 
 	e_status_t		SetProtocol(int proto);
 
-	int			SetOption(eint32 option, eint32 level, const void *data, size_t data_len);
+	int			SetSocketOption(eint32 level, eint32 option, const void *data, size_t data_len);
+	int			GetSocketOption(eint32 level, eint32 option, void *data, size_t *data_len) const;
+
 	int			SetNonBlocking(bool state = true);
+	bool			IsNonBlocking() const;
+
 	int			SetReuseAddr(bool state = true);
 
 	const ENetAddress	&LocalAddr() const;
 	const ENetAddress	&RemoteAddr() const;
-
-	int			Socket() const;
 
 	virtual void		Close();
 
@@ -67,7 +69,7 @@ public:
 	virtual e_status_t	Bind(euint16 port = 0);
 
 	virtual e_status_t	Connect(const ENetAddress &addr);
-	virtual e_status_t	Connect(const char *addr, euint16 port);
+	virtual e_status_t	Connect(const char *address, euint16 port);
 
 	virtual e_status_t	Listen(int backlog = 5);
 	virtual ENetEndpoint	*Accept(eint32 timeout_msec = -1);
@@ -90,11 +92,24 @@ public:
 
 private:
 	int fSocket;
+	int fProtocol;
+	bool fBind;
+	bool fNonBlocking;
 	e_bigtime_t fTimeout;
 
 	ENetAddress fLocalAddr;
 	ENetAddress fRemoteAddr;
+	void _Close();
 };
+
+
+inline int
+ENetEndpoint::SetReuseAddr(bool state)
+{
+	int opt = (int)state;
+	return SetSocketOption(SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+}
+
 
 #endif /* __cplusplus */
 

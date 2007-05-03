@@ -33,6 +33,7 @@
 #ifndef _WIN32
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #else
 #include <winsock2.h>
 #endif
@@ -66,9 +67,9 @@ public:
 	e_status_t	SetTo(const struct in_addr addr, euint16 port = 0);
 	e_status_t	SetTo(euint32 addr = INADDR_ANY, euint16 port = 0);
 
-	e_status_t	GetAddr(char *hostname, size_t hostname_len, euint16 *port = NULL);
-	e_status_t	GetAddr(struct sockaddr_in &sa);
-	e_status_t	GetAddr(struct in_addr &addr, euint16 *port = NULL);
+	e_status_t	GetAddr(char *hostname, size_t hostname_len, euint16 *port = NULL) const;
+	e_status_t	GetAddr(struct sockaddr_in &sa) const;
+	e_status_t	GetAddr(struct in_addr &addr, euint16 *port = NULL) const;
 
 private:
 	struct sockaddr_in fAddr;

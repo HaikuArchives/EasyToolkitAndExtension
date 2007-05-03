@@ -23,7 +23,8 @@ noinst_PROGRAMS =			\
 	button-test			\
 	scroll-test			\
 	xml-parser-test			\
-	file-test
+	file-test			\
+	net-test
 
 area_test_SOURCES = area-test.c
 locker_test_SOURCES = locker-test.c
@@ -45,6 +46,7 @@ button_test_SOURCES = button-test.cpp
 scroll_test_SOURCES = scroll-test.cpp
 xml_parser_test_SOURCES = xml-parser-test.cpp
 file_test_SOURCES = file-test.cpp
+net_test_SOURCES = net-test.cpp
 
 DISTCLEANFILES = Makefile.in
 

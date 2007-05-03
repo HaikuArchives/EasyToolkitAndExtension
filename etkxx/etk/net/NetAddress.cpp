@@ -32,15 +32,18 @@
 #	include <netinet/in.h>
 
 #	ifdef __BEOS__
-#		include <BeBuild.h>
-#	endif
-
-#	if !(defined(__BEOS__) && B_BEOS_VERSION < 0x0510)
+#		include <sys/socket.h>
+#		ifdef BONE_VERSION
+#			include <arpa/inet.h>
+#		endif
+#	else
 #		include <arpa/inet.h>
 #	endif
 #else
 #	include <winsock2.h>
 #endif
+
+#include <etk/support/ByteOrder.h>
 
 #include "NetAddress.h"
 
@@ -140,7 +143,7 @@ ENetAddress&
 ENetAddress::operator=(const ENetAddress &addr)
 {
 	fStatus = addr.fStatus;
-	memcpy(&fAddr, &addr.fAddr, sizeof(struct sockaddr_in));
+	fAddr = addr.fAddr;
 	return *this;
 }
 
@@ -158,7 +161,7 @@ ENetAddress::SetTo(const char *hostname, euint16 port)
 	switch(ent->h_addrtype)
 	{
 		case AF_INET:
-			fAddr.sin_addr.s_addr = inet_addr(ent->h_addr);
+			fAddr.sin_addr.s_addr = *((euint32*)ent->h_addr);
 			fAddr.sin_family = AF_INET;
 			fAddr.sin_port = htons(port);
 			retVal = fStatus = E_OK;
@@ -194,7 +197,7 @@ ENetAddress::SetTo(const struct sockaddr_in &sa)
 		return E_ERROR;
 	}
 
-	memcpy(&fAddr, &sa, sizeof(struct sockaddr_in));
+	fAddr = sa;
 	return(fStatus = E_OK);
 }
 
@@ -204,7 +207,7 @@ ENetAddress::SetTo(const struct in_addr addr, euint16 port)
 {
 	fAddr.sin_family = AF_INET;
 	fAddr.sin_port = htons(port);
-	memcpy(&fAddr.sin_addr, &addr, sizeof(struct in_addr));
+	fAddr.sin_addr = addr;
 	return(fStatus = E_OK);
 }
 
@@ -214,13 +217,13 @@ ENetAddress::SetTo(euint32 addr, euint16 port)
 {
 	fAddr.sin_family = AF_INET;
 	fAddr.sin_port = htons(port);
-	fAddr.sin_addr.s_addr = addr;
+	fAddr.sin_addr.s_addr = htonl(addr);
 	return(fStatus = E_OK);
 }
 
 
 e_status_t
-ENetAddress::GetAddr(char *hostname, size_t hostname_len, euint16 *port)
+ENetAddress::GetAddr(char *hostname, size_t hostname_len, euint16 *port) const
 {
 	if(fStatus != E_OK) return E_ERROR;
 	if(!(hostname == NULL || hostname_len == 0))
@@ -242,19 +245,19 @@ ENetAddress::GetAddr(char *hostname, size_t hostname_len, euint16 *port)
 
 
 e_status_t
-ENetAddress::GetAddr(struct sockaddr_in &sa)
+ENetAddress::GetAddr(struct sockaddr_in &sa) const
 {
 	if(fStatus != E_OK) return E_ERROR;
-	memcpy(&sa, &fAddr, sizeof(struct sockaddr_in));
+	sa = fAddr;
 	return E_OK;
 }
 
 
 e_status_t
-ENetAddress::GetAddr(struct in_addr &addr, euint16 *port)
+ENetAddress::GetAddr(struct in_addr &addr, euint16 *port) const
 {
 	if(fStatus != E_OK) return E_ERROR;
-	memcpy(&addr, &fAddr.sin_addr, sizeof(struct in_addr));
+	addr = fAddr.sin_addr;
 	if(port) *port = ntohs(fAddr.sin_port);
 	return E_OK;
 }
