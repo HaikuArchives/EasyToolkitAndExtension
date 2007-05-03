@@ -27,6 +27,8 @@
  *
  * --------------------------------------------------------------------------*/
 
+#include <etk/config.h>
+
 #include "ByteOrder.h"
 
 
@@ -53,10 +55,12 @@ _IMPEXP_ETK e_status_t e_swap_data(e_type_code type, void *_data, size_t len, e_
 
 	switch(type)
 	{
+		case E_BOOL_TYPE:
 		case E_INT8_TYPE:
 		case E_UINT8_TYPE:
 		case E_CHAR_TYPE:
 		case E_STRING_TYPE:
+		case E_MIME_TYPE:
 			retVal = E_OK;
 			break;
 
@@ -86,6 +90,26 @@ _IMPEXP_ETK e_status_t e_swap_data(e_type_code type, void *_data, size_t len, e_
 			{
 				euint64 *data = (euint64*)_data;
 				for(len = len / 8; len > 0; len--, data++) *data = E_SWAP_INT64(*data);
+				retVal = E_OK;
+			}
+			break;
+
+		case E_FLOAT_TYPE:
+		case E_RECT_TYPE:
+		case E_POINT_TYPE:
+			if(len % 4 == 0)
+			{
+				float *data = (float*)_data;
+				for(len = len / 4; len > 0; len--, data++) *data = E_SWAP_FLOAT(*data);
+				retVal = E_OK;
+			}
+			break;
+
+		case E_DOUBLE_TYPE:
+			if(len % 8 == 0)
+			{
+				double *data = (double*)_data;
+				for(len = len / 8; len > 0; len--, data++) *data = E_SWAP_DOUBLE(*data);
 				retVal = E_OK;
 			}
 			break;
@@ -130,5 +154,33 @@ _IMPEXP_ETK bool e_is_type_swapped(e_type_code type)
 		default:
 			return false;
 	}
+}
+
+
+_IMPEXP_ETK float e_swap_float(float value)
+{
+#if SIZEOF_FLOAT == 4
+	eint32 v;
+	memcpy(&v, &value, 4);
+	v = E_SWAP_INT32(v);
+	memcpy(&value, &v, 4);
+	return value;
+#else
+	#error "Unknown"
+#endif
+}
+
+
+_IMPEXP_ETK double e_swap_double(double value)
+{
+#if SIZEOF_DOUBLE == 8
+	eint64 v;
+	memcpy(&v, &value, 8);
+	v = E_SWAP_INT64(v);
+	memcpy(&value, &v, 8);
+	return value;
+#else
+	#error "Unknown"
+#endif
 }
 

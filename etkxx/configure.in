@@ -446,6 +446,8 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(__int64)
 AC_CHECK_SIZEOF(long long)
+AC_CHECK_SIZEOF(float)
+AC_CHECK_SIZEOF(double)
 
 # usually, it's impossible
 if test x$ac_cv_sizeof_char != x1 ; then
