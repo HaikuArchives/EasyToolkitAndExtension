@@ -173,7 +173,7 @@ ENetEndpoint::SetSocketOption(eint32 level, eint32 option, const void *data, siz
 
 	int retVal = setsockopt(fSocket, level, option, (const char*)data, data_len) < 0 ? -1 : 0;
 
-#if (defined(__BEOS__) && !defined(BONE_VERSION))
+#ifdef __BEOS__
 	if(retVal == 0 && option == SO_NONBLOCK)
 	{
 		fNonBlocking = false;
