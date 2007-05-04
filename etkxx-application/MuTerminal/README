@@ -3,7 +3,7 @@ MuTerminal with ETK++
 Version:   0.0.1
 Status:    UNCOMPLETED YET !!!
 
-Purpose: Running on other systems more than BeOS
+Purpose:   Running on other systems more than BeOS
 
 
 - Required:
@@ -22,6 +22,6 @@ Purpose: Running on other systems more than BeOS
 - ChangeLog
 
 2007-05-05 anthonylee
-	First unstable version.
-	Crash at once on Windows because of something uncompleted yet.
+	Can run on Linux.
+	Crash on Windows once it runs.
 
