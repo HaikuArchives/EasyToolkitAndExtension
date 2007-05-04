@@ -1,0 +1,27 @@
+MuTerminal with ETK++
+---------------------
+Version:   0.0.1
+Status:    UNCOMPLETED YET !!!
+
+Purpose: Running on other systems more than BeOS
+
+
+- Required:
+	ETK++ >= 0.3.1
+
+- How to apply the patch
+
+	$ wget http://ms1.me.nctu.edu.tw/~yfchen/MuTerm-2.4.zip
+	$ unzip MuTerm-2.4.zip
+	$ cd ./MuTerm
+	$ patch -p1 < ../MuTerminal-2.4-with-etkxx.patch
+	$ cd src
+	$ make -f Makefile_with_etkxx
+
+
+- ChangeLog
+
+2007-05-05 anthonylee
+	First unstable version.
+	Crash at once on Windows because of something uncompleted yet.
+
