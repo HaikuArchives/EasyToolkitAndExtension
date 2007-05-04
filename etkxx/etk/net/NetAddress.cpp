@@ -159,7 +159,6 @@ ENetAddress::SetTo(const char *hostname, euint16 port)
 
 #ifndef HAVE_GETHOSTBYNAME_R
 	ent = gethostbyname(hostname);
-	if(ent == NULL) return E_ERROR;
 #else
 
 #ifdef ETK_OS_SOLARIS
