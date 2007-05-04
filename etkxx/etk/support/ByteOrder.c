@@ -94,6 +94,7 @@ _IMPEXP_ETK e_status_t e_swap_data(e_type_code type, void *_data, size_t len, e_
 			}
 			break;
 
+#if SIZEOF_FLOAT == 4
 		case E_FLOAT_TYPE:
 		case E_RECT_TYPE:
 		case E_POINT_TYPE:
@@ -104,7 +105,9 @@ _IMPEXP_ETK e_status_t e_swap_data(e_type_code type, void *_data, size_t len, e_
 				retVal = E_OK;
 			}
 			break;
+#endif
 
+#if SIZEOF_DOUBLE == 8
 		case E_DOUBLE_TYPE:
 			if(len % 8 == 0)
 			{
@@ -113,6 +116,7 @@ _IMPEXP_ETK e_status_t e_swap_data(e_type_code type, void *_data, size_t len, e_
 				retVal = E_OK;
 			}
 			break;
+#endif
 
 		default:
 			/* TODO: other types */

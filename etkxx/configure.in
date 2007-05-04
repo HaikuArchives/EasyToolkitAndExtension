@@ -364,6 +364,8 @@ AC_CHECK_FUNCS(strcasecmp strncasecmp strcasechr strrcasechr strstr strrstr strc
 AC_CHECK_FUNCS(gettimeofday sigaction mremap)
 AC_CHECK_FUNCS(on_exit atexit)
 AC_CHECK_FUNCS(stat64)
+AC_CHECK_FUNCS(localtime_r)
+AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r getservbyname_r)
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS

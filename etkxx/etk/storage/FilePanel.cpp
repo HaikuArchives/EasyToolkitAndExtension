@@ -29,6 +29,7 @@
 
 #include <time.h>
 
+#include <etk/config.h>
 #include <etk/kernel/Kernel.h>
 #include <etk/support/Autolock.h>
 #include <etk/support/ClassInfo.h>
@@ -622,7 +623,14 @@ static void column_modified_drawing_callback(EView *owner, ERect rect, EFilePane
 	if(!rect.IsValid() || item->IsVolume()) return;
 
 	time_t timer = (time_t)(item->ModifiedTime() / E_INT64_CONSTANT(1000000));
-	struct tm *tmTime = localtime(&timer);
+	struct tm *tmTime = NULL;
+
+#ifndef HAVE_LOCALTIME_R
+	tmTime = localtime(&timer);
+#else
+	struct tm _tmTime;
+	tmTime = localtime_r(&timer, &_tmTime);
+#endif
 
 	if(tmTime == NULL) return;
 

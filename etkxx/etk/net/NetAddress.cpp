@@ -43,6 +43,8 @@
 #	include <winsock2.h>
 #endif
 
+#include <etk/config.h>
+#include <etk/ETKBuild.h>
 #include <etk/support/ByteOrder.h>
 
 #include "NetAddress.h"
@@ -153,7 +155,29 @@ ENetAddress::SetTo(const char *hostname, euint16 port)
 {
 	if(hostname == NULL) return E_ERROR;
 
-	struct hostent *ent = gethostbyname(hostname);
+	struct hostent *ent = NULL;
+
+#ifndef HAVE_GETHOSTBYNAME_R
+	ent = gethostbyname(hostname);
+	if(ent == NULL) return E_ERROR;
+#else
+
+#ifdef ETK_OS_SOLARIS
+	struct hostent _ent;
+	char buf[8192];
+	int err;
+	ent = gethostbyname_r(hostname, &_ent, buf, sizeof(buf), &err);
+#elif defined(ETK_OS_LINUX)
+	struct hostent _ent;
+	char buf[8192];
+	int err;
+	gethostbyname_r(hostname, &_ent, buf, sizeof(buf), &ent, &err);
+#else
+	#error "FIXME: gethostbyname_r"
+#endif
+
+#endif
+
 	if(ent == NULL) return E_ERROR;
 
 	e_status_t retVal = E_ERROR;
@@ -181,7 +205,26 @@ ENetAddress::SetTo(const char *hostname, const char *protocol, const char *servi
 {
 	if(hostname == NULL) return E_ERROR;
 
-	struct servent *ent = getservbyname(service, protocol);
+	struct servent *ent = NULL;
+
+#ifndef HAVE_GETSERVBYNAME_R
+	ent = getservbyname(service, protocol);
+#else
+
+#ifdef ETK_OS_SOLARIS
+	struct servent _ent;
+	char buf[8192];
+	ent = getservbyname_r(service, protocol, &_ent, buf, sizeof(buf));
+#elif defined(ETK_OS_LINUX)
+	struct servent _ent;
+	char buf[8192];
+	getservbyname_r(service, protocol, &_ent, buf, sizeof(buf), &ent);
+#else
+	#error "FIXME: getservbyname_r"
+#endif
+
+#endif
+
 	if(ent == NULL) return E_ERROR;
 
 	return SetTo(hostname, ntohs(ent->s_port));
@@ -228,7 +271,30 @@ ENetAddress::GetAddr(char *hostname, size_t hostname_len, euint16 *port) const
 	if(fStatus != E_OK) return E_ERROR;
 	if(!(hostname == NULL || hostname_len == 0))
 	{
-		struct hostent *ent = gethostbyaddr((const char*)&fAddr.sin_addr, sizeof(struct in_addr), AF_INET);
+		struct hostent *ent = NULL;
+
+#ifndef HAVE_GETHOSTBYADDR_R
+		ent = gethostbyaddr((const char*)&fAddr.sin_addr, sizeof(struct in_addr), AF_INET);
+#else
+
+#ifdef ETK_OS_SOLARIS
+		struct hostent _ent;
+		char buf[8192];
+		int err;
+		ent = gethostbyaddr_r((const char*)&fAddr.sin_addr, sizeof(struct in_addr), AF_INET,
+				      &_ent, buf, sizeof(buf), &err);
+#elif defined(ETK_OS_LINUX)
+		struct hostent _ent;
+		char buf[8192];
+		int err;
+		gethostbyaddr_r((const char*)&fAddr.sin_addr, sizeof(struct in_addr), AF_INET,
+				&_ent, buf, sizeof(buf), &ent, &err);
+#else
+		#error "FIXME: gethostbyaddr_r"
+#endif
+
+#endif
+
 		if(ent == NULL) return E_ERROR;
 
 		if(hostname_len > 1)
