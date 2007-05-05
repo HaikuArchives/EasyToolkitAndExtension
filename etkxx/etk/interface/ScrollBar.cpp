@@ -221,7 +221,7 @@ EScrollBar::SetTarget(EView *target)
 
 	if(target != NULL)
 	{
-		if(target->Ancestor() != Ancestor())
+		if(!(target->Ancestor() == Ancestor() || (target->Window() == Window() && Window() != NULL)))
 		{
 			ETK_WARNING("[INTERFACE]: %s --- target hasn't same ancestor as this.", __PRETTY_FUNCTION__);
 			return E_BAD_VALUE;
