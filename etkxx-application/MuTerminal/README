@@ -8,6 +8,7 @@ Purpose:   Running on other systems more than BeOS
 
 - Required:
 	ETK++ >= 0.3.1
+	libiconv
 
 - How to apply the patch
 

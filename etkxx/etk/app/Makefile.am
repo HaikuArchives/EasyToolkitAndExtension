@@ -13,7 +13,6 @@ libetk_app_la_SOURCES =			\
 		AppDefs.h		\
 		Message.cpp		\
 		Message.h		\
-		_Message.h		\
 		MessageQueue.cpp	\
 		MessageQueue.h		\
 		Handler.cpp		\
@@ -39,7 +38,6 @@ etk_appincludedir = $(includedir)/etkxx/etk/app
 etk_appinclude_HEADERS =		\
 		AppDefs.h	\
 		Message.h	\
-		_Message.h	\
 		MessageQueue.h	\
 		Handler.h	\
 		Looper.h	\

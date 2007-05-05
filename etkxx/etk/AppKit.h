@@ -29,7 +29,6 @@
 
 #include <etk/app/AppDefs.h>
 #include <etk/app/Message.h>
-#include <etk/app/_Message.h>
 #include <etk/app/MessageQueue.h>
 #include <etk/app/Handler.h>
 #include <etk/app/Looper.h>

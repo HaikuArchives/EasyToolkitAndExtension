@@ -58,8 +58,8 @@ enum {
 	E_NOT_ALLOWED,
 
 	E_ERROR = -1,
-	E_OK = 0,
-	E_NO_ERROR = 0
+	E_OK = 1,
+	E_NO_ERROR = 1
 };
 
 /* Kernel Kit Errors */

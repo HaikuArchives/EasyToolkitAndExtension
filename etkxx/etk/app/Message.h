@@ -224,6 +224,14 @@ public:
 				  EHandler *replyHandler = NULL,
 				  e_bigtime_t sendTimeout = E_INFINITE_TIMEOUT) const;
 
+	/* GetInfo()/__FindData(): likes BMessage */
+	e_status_t	GetInfo(e_type_code type, eint32 index,
+				char **nameFound, e_type_code *typeFound, eint32 *countFound = NULL) const;
+	e_status_t	__FindData(const char *name, e_type_code type, eint32 index,
+				   const void **data, ssize_t *numBytes) const;
+	e_status_t	__FindData(const char *name, e_type_code type,
+				   const void **data, ssize_t *numBytes) const;
+
 private:
 	friend class ELooper;
 	friend class EMessenger;
@@ -262,8 +270,69 @@ private:
 	bool fIsReply;
 };
 
+
+inline e_status_t
+EMessage::GetInfo(e_type_code type, eint32 index,
+		  char **nameFound, e_type_code *typeFound, eint32 *countFound) const
+{
+	if(index < 0) return E_BAD_INDEX;
+	eint32 aIndex = index;
+
+	for(eint32 i = 0; i < CountNames(E_ANY_TYPE, true); i++)
+	{
+		eint32 typesCount = CountTypesByName(i);
+		for(eint32 k = 0; k < typesCount; k++)
+		{
+			e_type_code aType;
+			eint32 count = CountItems(i, k, &aType);
+			if(!(type == E_ANY_TYPE || aType == type) || (aIndex--) > 0) continue;
+			if(nameFound) *nameFound = (char*)NameAt(i);
+			if(typeFound) *typeFound = aType;
+			if(countFound) *countFound = count;
+			return E_OK;
+		}
+	}
+
+	return(aIndex == index ? E_BAD_TYPE : E_BAD_INDEX);
+}
+
+
+inline e_status_t
+EMessage::__FindData(const char *name, e_type_code type, eint32 index,
+		     const void **data, ssize_t *numBytes) const
+{
+	if(index < 0) return E_BAD_INDEX;
+
+	eint32 nameIndex = FindName(name);
+	if(nameIndex < 0) return E_NAME_NOT_FOUND;
+
+	eint32 typesCount = CountTypesByName(nameIndex);
+	eint32 aIndex = index;
+
+	for(eint32 k = 0; k < typesCount; k++)
+	{
+		e_type_code aType;
+		eint32 count = CountItems(nameIndex, k, &aType);
+		if(!(type == E_ANY_TYPE || aType == type)) continue;
+
+		if(aIndex < count)
+			return(FindData(nameIndex, k, aIndex, data, numBytes) ? E_OK : E_ERROR);
+
+		aIndex -= count;
+	}
+
+	return(aIndex == index ? E_BAD_TYPE : E_BAD_INDEX);
+}
+
+
+inline e_status_t
+EMessage::__FindData(const char *name, e_type_code type,
+		   const void **data, ssize_t *numBytes) const
+{
+	return __FindData(name, type, 0, data, numBytes);
+}
+
 #endif /* __cplusplus */
 
 #endif /* __ETK_MESSAGE_H__ */
-
 
