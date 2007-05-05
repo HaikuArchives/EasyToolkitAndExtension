@@ -1,6 +1,6 @@
 diff -Nur MuTerm/src/AboutDlg.cpp MuTerm working/src/AboutDlg.cpp
---- MuTerm/src/AboutDlg.cpp	2001-07-01 12:28:10.000000000 +0800
-+++ MuTerm working/src/AboutDlg.cpp	2007-05-05 00:53:39.000000000 +0800
+--- MuTerm/src/AboutDlg.cpp	Sun Jul  1 12:28:10 2001
++++ MuTerm working/src/AboutDlg.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,10 @@
   AboutDlg.cpp,v Implementation for MuTerminal About Dialog.
  
@@ -79,8 +79,8 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm working/src/AboutDlg.cpp
 +#endif
  }
 diff -Nur MuTerm/src/AboutDlg.h MuTerm working/src/AboutDlg.h
---- MuTerm/src/AboutDlg.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/AboutDlg.h	2007-05-04 18:39:57.000000000 +0800
+--- MuTerm/src/AboutDlg.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/AboutDlg.h	Sat May  5 16:00:24 2007
 @@ -18,8 +18,12 @@
  #ifndef ABOUTDLG_H_INCLUDED
  #define ABOUTDLG_H_INCLUDED
@@ -95,8 +95,8 @@ diff -Nur MuTerm/src/AboutDlg.h MuTerm working/src/AboutDlg.h
  const ulong MSG_ABOUT_CLOSED = 'msac';
  
 diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm working/src/AppearPrefView.cpp
---- MuTerm/src/AppearPrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/AppearPrefView.cpp	2007-05-05 01:02:22.000000000 +0800
+--- MuTerm/src/AppearPrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/AppearPrefView.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,7 @@
  
  ***************************************************************************/
@@ -116,8 +116,8 @@ diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm working/src/AppearPrefView.cpp
  #include <stdlib.h>
  
 diff -Nur MuTerm/src/CodeConv.cpp MuTerm working/src/CodeConv.cpp
---- MuTerm/src/CodeConv.cpp	2001-06-08 21:22:49.000000000 +0800
-+++ MuTerm working/src/CodeConv.cpp	2007-05-05 02:56:54.000000000 +0800
+--- MuTerm/src/CodeConv.cpp	Fri Jun  8 21:22:49 2001
++++ MuTerm working/src/CodeConv.cpp	Sat May  5 16:04:18 2007
 @@ -32,14 +32,20 @@
  ************************************************************************/
  
@@ -140,18 +140,21 @@ diff -Nur MuTerm/src/CodeConv.cpp MuTerm working/src/CodeConv.cpp
  
  extern char utf8_width_table[]; // define UTF8WidthTbl.c
  extern int gNowCoding;	        // defined TermParse.cpp
-@@ -119,7 +125,7 @@
+@@ -119,7 +125,11 @@
  
    for(;;)
    {
--	  res=iconv(cdfromutf8,(const char**)&inptr,&inleftsize,&outptr,&outleftsize);
++#ifndef ETK_OS_LINUX
+ 	  res=iconv(cdfromutf8,(const char**)&inptr,&inleftsize,&outptr,&outleftsize);
++#else
 +	  res=iconv(cdfromutf8,(char**)&inptr,&inleftsize,&outptr,&outleftsize);
++#endif
  	  if( res == (size_t)(-1) )
  	  {
  	     if (errno == EILSEQ)  //char not defined in code table, or wrong table
 diff -Nur MuTerm/src/CodeConv.h MuTerm working/src/CodeConv.h
---- MuTerm/src/CodeConv.h	2001-06-08 21:18:47.000000000 +0800
-+++ MuTerm working/src/CodeConv.h	2007-05-04 18:38:06.000000000 +0800
+--- MuTerm/src/CodeConv.h	Fri Jun  8 21:18:47 2001
++++ MuTerm working/src/CodeConv.h	Sat May  5 16:00:24 2007
 @@ -19,9 +19,19 @@
  #ifndef CODECONV_H
  #define CODECONV_H
@@ -173,8 +176,8 @@ diff -Nur MuTerm/src/CodeConv.h MuTerm working/src/CodeConv.h
  #define BEGINS_CHAR(byte) ((byte & 0xc0) >= 0x80)
  
 diff -Nur MuTerm/src/CurPos.h MuTerm working/src/CurPos.h
---- MuTerm/src/CurPos.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/CurPos.h	2007-05-04 23:18:02.000000000 +0800
+--- MuTerm/src/CurPos.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/CurPos.h	Sat May  5 16:00:24 2007
 @@ -19,7 +19,11 @@
  #ifndef	CURPOS_H_INCLUDED
  #define	CURPOS_H_INCLUDED
@@ -187,215 +190,9 @@ diff -Nur MuTerm/src/CurPos.h MuTerm working/src/CurPos.h
  
  class CurPos
  {
-diff -Nur MuTerm/src/etkxx-impl.h MuTerm working/src/etkxx-impl.h
---- MuTerm/src/etkxx-impl.h	1970-01-01 08:00:00.000000000 +0800
-+++ MuTerm working/src/etkxx-impl.h	2007-05-05 03:21:20.000000000 +0800
-@@ -0,0 +1,202 @@
-+#ifndef __ETKXX_IMPL_H__
-+#define __ETKXX_IMPL_H__
-+
-+#ifdef _WIN32
-+#include <windows.h>
-+#endif
-+
-+#include <etkxx.h>
-+
-+#define int8			eint8
-+#define int16			eint16
-+#define int32			eint32
-+#define int64			eint64
-+#define uint8			euint8
-+#define uint16			euint16
-+#define uint32			euint32
-+#define uint64			euint64
-+
-+#define uchar			unsigned char
-+#define uint			unsigned int
-+#define ulong			unsigned long
-+
-+#define team_id			eint64
-+#define status_t		e_status_t
-+#define bigtime_t		e_bigtime_t
-+#define type_code		e_type_code
-+
-+#define thread_id		void*
-+#define sem_id			void*
-+#define sem_info		etk_sem_info
-+
-+#define B_OK			E_OK
-+#define B_NO_ERROR		E_OK
-+#define B_ERROR			E_ERROR
-+
-+#define B_MIME_TYPE		E_MIME_TYPE
-+#define B_STRING_TYPE		E_STRING_TYPE
-+
-+// kernel kit
-+#define real_time_clock()	e_real_time_clock()
-+#define beep()			(void)0
-+#define snooze(usec)		e_snooze(usec)
-+#define spawn_thread(a,b,c,d)	etk_create_thread(a,c,d,NULL)
-+#define resume_thread(arg)	etk_resume_thread(arg)
-+#define exit_thread(s)		etk_exit_thread(s)
-+
-+#define create_sem(a,b)		etk_create_sem(a,NULL)
-+#define delete_sem(sem)		etk_delete_sem(sem)
-+#define acquire_sem(sem)	etk_acquire_sem(sem)
-+#define acquire_sem_etc(a,b,c,d)	etk_acquire_sem_etc(a,b,c,d)
-+#define release_sem(sem)	etk_release_sem(sem)
-+#define release_sem_etc(a,b,c)	etk_release_sem_etc(a,b,c)
-+#define get_sem_info(a,b)	etk_get_sem_info(a,b)
-+
-+#define B_DISPLAY_PRIORITY	E_DISPLAY_PRIORITY
-+#define B_NORMAL_PRIORITY	E_NORMAL_PRIORITY
-+#define B_BAD_THREAD_ID		NULL
-+#define B_TIMEOUT		E_TIMEOUT
-+#define B_TIMED_OUT		E_TIMED_OUT
-+
-+#ifdef __cplusplus
-+
-+// support kit
-+#define BString			EString
-+#define BList			EList
-+
-+// storage kit
-+#define B_READ_ONLY		E_READ_ONLY
-+#define B_WRITE_ONLY		E_WRITE_ONLY
-+#define B_CREATE_FILE		E_CREATE_FILE
-+#define B_ERASE_FILE		E_ERASE_FILE
-+
-+#define B_PATH_NAME_LENGTH	E_MAXPATH
-+#define BEntry			EEntry
-+#define BPath			EPath
-+#define BFile			EFile
-+#define BDirectory		EDirectory
-+
-+#define BFilePanel		EFilePanel
-+#define B_SAVE_PANEL		E_SAVE_PANEL
-+
-+// app kit
-+#define B_FIELD_NAME_LENGTH	1024
-+#define B_QUIT_REQUESTED	E_QUIT_REQUESTED
-+#define B_REPLY			E_REPLY
-+#define be_app			etk_app
-+#define be_clipboard		(&etk_clipboard)
-+
-+#define BMessage		EMessage
-+#define BMessageRunner		EMessageRunner
-+#define BMessenger		EMessenger
-+#define BHandler		EHandler
-+#define BLooper			ELooper
-+#define BApplication		EApplication
-+#define BInvoker		EInvoker
-+#define BClipboard		EClipboard
-+
-+#define BCursor			ECursor
-+#define B_HAND_CURSOR		E_CURSOR_HAND
-+#define B_I_BEAM_CURSOR		E_CURSOR_I_BEAM
-+
-+
-+// interface kit
-+#define rgb_color		e_rgb_color
-+#define ui_color(w)		e_ui_color(w)
-+#define B_PANEL_BACKGROUND_COLOR	E_PANEL_BACKGROUND_COLOR
-+
-+#define B_VERTICAL		E_VERTICAL
-+#define B_COPY			'COPY'
-+#define B_PASTE			'PSTE'
-+#define B_SELECT_ALL		'SALL'
-+#define B_ABOUT_REQUESTED	E_ABOUT_REQUESTED
-+#define B_SAVE_REQUESTED	'SAVE'
-+
-+#define BPoint			EPoint
-+#define BRect			ERect
-+
-+#define BWindow			EWindow
-+#define B_TITLED_WINDOW_LOOK	E_TITLED_WINDOW_LOOK
-+#define B_NORMAL_WINDOW_FEEL	E_NORMAL_WINDOW_FEEL
-+#define B_FLOATING_APP_WINDOW_FEEL	E_FLOATING_APP_WINDOW_FEEL
-+#define B_DOCUMENT_WINDOW	E_DOCUMENT_WINDOW
-+#define B_NOT_ZOOMABLE		E_NOT_ZOOMABLE
-+#define B_NOT_RESIZABLE		E_NOT_RESIZABLE
-+#define B_CURRENT_WORKSPACE	E_CURRENT_WORKSPACE
-+#define IsActive		IsActivate
-+
-+#define BView			EView
-+#define B_FOLLOW_NONE		E_FOLLOW_NONE
-+#define B_FOLLOW_ALL_SIDES	E_FOLLOW_ALL
-+#define B_WILL_DRAW		E_WILL_DRAW
-+#define B_FRAME_EVENTS		E_FRAME_EVENTS
-+#define B_PULSE_NEEDED		E_PULSE_NEEDED
-+#define B_OP_OVER		E_OP_OVER
-+#define B_OP_COPY		E_OP_COPY
-+#define B_OP_MIN		E_OP_MIN
-+#define B_EXITED_VIEW		E_EXITED_VIEW
-+#define B_ENTERED_VIEW		E_ENTERED_VIEW
-+
-+#define B_COMMAND_KEY		E_COMMAND_KEY
-+#define B_OPTION_KEY		E_OPTION_KEY
-+#define B_RETURN		E_RETURN
-+#define B_LEFT_ARROW		E_LEFT_ARROW
-+#define B_RIGHT_ARROW		E_RIGHT_ARROW
-+#define B_UP_ARROW		E_UP_ARROW
-+#define B_SHIFT_KEY		E_SHIFT_KEY
-+#define B_DOWN_ARROW		E_DOWN_ARROW
-+#define B_ESCAPE		E_ESCAPE
-+#define B_INSERT		E_INSERT
-+#define B_HOME			E_HOME
-+#define B_PAGE_DOWN		E_PAGE_DOWN
-+#define B_PAGE_UP		E_PAGE_UP
-+#define B_FUNCTION_KEY		E_FUNCTION_KEY
-+#define B_END			E_END
-+#define B_CONTROL_KEY		E_CONTROL_KEY
-+#define B_PRIMARY_MOUSE_BUTTON	E_PRIMARY_MOUSE_BUTTON
-+#define B_SECONDARY_MOUSE_BUTTON	E_SECONDARY_MOUSE_BUTTON
-+#define B_TERTIARY_MOUSE_BUTTON	E_TERTIARY_MOUSE_BUTTON
-+
-+#define BMenu			EMenu
-+#define BMenuBar		EMenuBar
-+#define BMenuItem		EMenuItem
-+#define BPopUpMenu		EPopUpMenu
-+
-+#define BFont			EFont
-+#define B_FIXED_SPACING		0
-+#define font_height		e_font_height
-+#define font_family		e_font_family
-+#define count_font_families()	etk_count_font_families()
-+
-+#define BTextView		ETextView
-+#define BBitmap			EBitmap
-+
-+#define BScrollBar		EScrollBar
-+#define B_V_SCROLL_BAR_WIDTH	E_V_SCROLL_BAR_WIDTH
-+#define B_H_SCROLL_BAR_HEIGHT	E_H_SCROLL_BAR_HEIGHT
-+
-+#define BTextControl		ETextControl
-+#define BColorControl		EColorControl
-+#define BBox			EBox
-+#define BButton			EButton
-+#define BTabView		ETabView
-+#define BRadioButton		ERadioButton
-+#define BCheckBox		ECheckBox
-+#define BMenuField		EMenuField
-+#define BStringView		EStringView
-+
-+#define BAlert			EAlert
-+#define B_WIDTH_FROM_LABEL	E_WIDTH_FROM_LABEL
-+#define B_INFO_ALERT		E_INFO_ALERT
-+#define B_WARNING_ALERT		E_WARNING_ALERT
-+#define B_WIDTH_AS_USUAL	E_WIDTH_AS_USUAL
-+#define B_WIDTH_FROM_WIDEST	E_WIDTH_FROM_LABEL
-+
-+enum color_control_layout {
-+	B_CELLS_32x8 = 0,
-+};
-+
-+#endif
-+
-+#endif /* __ETKXX_IMPL_H__ */
-+
 diff -Nur MuTerm/src/LangPrefView.cpp MuTerm working/src/LangPrefView.cpp
---- MuTerm/src/LangPrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/LangPrefView.cpp	2007-05-05 01:10:56.000000000 +0800
+--- MuTerm/src/LangPrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/LangPrefView.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,9 @@
  
  ***************************************************************************/
@@ -436,8 +233,8 @@ diff -Nur MuTerm/src/LangPrefView.cpp MuTerm working/src/LangPrefView.cpp
      if(!strcmp(buf, gTermPref->getString(PREF_GUI_LANGUAGE))){
        item->SetMarked(true);
 diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
---- MuTerm/src/Makefile_with_etkxx	1970-01-01 08:00:00.000000000 +0800
-+++ MuTerm working/src/Makefile_with_etkxx	2007-05-05 02:58:21.000000000 +0800
+--- MuTerm/src/Makefile_with_etkxx	Thu Jan  1 08:00:00 1970
++++ MuTerm working/src/Makefile_with_etkxx	Sat May  5 16:00:24 2007
 @@ -0,0 +1,84 @@
 +DEBUG_OPTIONS = -g -Wall
 +OPTIMIZE = -O3
@@ -524,8 +321,8 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
 +	$(CXX) $(CXXFLAGS) -c $< -o $@
 +
 diff -Nur MuTerm/src/MenuUtil.cpp MuTerm working/src/MenuUtil.cpp
---- MuTerm/src/MenuUtil.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/MenuUtil.cpp	2007-05-05 01:30:56.000000000 +0800
+--- MuTerm/src/MenuUtil.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/MenuUtil.cpp	Sat May  5 16:00:24 2007
 @@ -16,12 +16,17 @@
  
  ***************************************************************************/
@@ -564,8 +361,8 @@ diff -Nur MuTerm/src/MenuUtil.cpp MuTerm working/src/MenuUtil.cpp
        if(!strcmp(defaultFontName, family)){
          (menu->ItemAt(i))->SetMarked(true);
 diff -Nur MuTerm/src/MenuUtil.h MuTerm working/src/MenuUtil.h
---- MuTerm/src/MenuUtil.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/MenuUtil.h	2007-05-04 23:31:33.000000000 +0800
+--- MuTerm/src/MenuUtil.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/MenuUtil.h	Sat May  5 16:00:24 2007
 @@ -19,7 +19,11 @@
  #ifndef MENUUTIL_H_INCLUDED
  #define MENUUTIL_H_INCLUDED
@@ -579,8 +376,8 @@ diff -Nur MuTerm/src/MenuUtil.h MuTerm working/src/MenuUtil.h
  #ifdef __cplusplus
  extern "C" {
 diff -Nur MuTerm/src/MousePrefView.cpp MuTerm working/src/MousePrefView.cpp
---- MuTerm/src/MousePrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/MousePrefView.cpp	2007-05-05 01:05:19.000000000 +0800
+--- MuTerm/src/MousePrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/MousePrefView.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,10 @@
  
  ***************************************************************************/
@@ -605,8 +402,8 @@ diff -Nur MuTerm/src/MousePrefView.cpp MuTerm working/src/MousePrefView.cpp
  #include "MousePrefView.h"
  #include "PrefHandler.h"
 diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
---- MuTerm/src/PrefDlg.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefDlg.cpp	2007-05-05 01:44:08.000000000 +0800
+--- MuTerm/src/PrefDlg.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefDlg.cpp	Sat May  5 16:00:24 2007
 @@ -15,6 +15,8 @@
   PrefDlg.cpp,v: Implementation for MuTerminal Preference Dialog.
  
@@ -723,8 +520,8 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
 +#endif
  }
 diff -Nur MuTerm/src/PrefDlg.h MuTerm working/src/PrefDlg.h
---- MuTerm/src/PrefDlg.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefDlg.h	2007-05-04 23:24:56.000000000 +0800
+--- MuTerm/src/PrefDlg.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefDlg.h	Sat May  5 16:00:24 2007
 @@ -18,7 +18,12 @@
  #ifndef PREFDLG_H_INCLUDED
  #define PREFDLG_H_INCLUDED
@@ -739,8 +536,8 @@ diff -Nur MuTerm/src/PrefDlg.h MuTerm working/src/PrefDlg.h
  
  // local message, so these are in .cpp files....
 diff -Nur MuTerm/src/PrefHandler.cpp MuTerm working/src/PrefHandler.cpp
---- MuTerm/src/PrefHandler.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefHandler.cpp	2007-05-05 01:24:02.000000000 +0800
+--- MuTerm/src/PrefHandler.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefHandler.cpp	Sat May  5 16:00:24 2007
 @@ -20,11 +20,15 @@
  #include <stdlib.h>
  #include <string.h>
@@ -900,8 +697,8 @@ diff -Nur MuTerm/src/PrefHandler.cpp MuTerm working/src/PrefHandler.cpp
  /////////////////////////////////////////////////////////////////////////////
  //
 diff -Nur MuTerm/src/PrefHandler.h MuTerm working/src/PrefHandler.h
---- MuTerm/src/PrefHandler.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefHandler.h	2007-05-04 18:36:34.000000000 +0800
+--- MuTerm/src/PrefHandler.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefHandler.h	Sat May  5 16:00:24 2007
 @@ -18,10 +18,14 @@
  #ifndef PREFHANDLER_H_INCLUDED
  #define PREFHANDLER_H_INCLUDED
@@ -918,8 +715,8 @@ diff -Nur MuTerm/src/PrefHandler.h MuTerm working/src/PrefHandler.h
  struct prefDefaults
  {
 diff -Nur MuTerm/src/PrefView.cpp MuTerm working/src/PrefView.cpp
---- MuTerm/src/PrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefView.cpp	2007-05-05 01:01:02.000000000 +0800
+--- MuTerm/src/PrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefView.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,7 @@
  
  ***************************************************************************/
@@ -966,8 +763,8 @@ diff -Nur MuTerm/src/PrefView.cpp MuTerm working/src/PrefView.cpp
    return col;
  }
 diff -Nur MuTerm/src/PrefView.h MuTerm working/src/PrefView.h
---- MuTerm/src/PrefView.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefView.h	2007-05-04 23:25:28.000000000 +0800
+--- MuTerm/src/PrefView.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefView.h	Sat May  5 16:00:24 2007
 @@ -18,9 +18,14 @@
  
  #ifndef PREFVIEW_H_INCLUDED
@@ -984,8 +781,8 @@ diff -Nur MuTerm/src/PrefView.h MuTerm working/src/PrefView.h
  // Interface Element's Coordinate System to BRect.
  #define IERECT(X,Y,W,H)  BRect((X),(Y),(X+W-1),(Y+H-1))
 diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm working/src/ShellPrefView.cpp
---- MuTerm/src/ShellPrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/ShellPrefView.cpp	2007-05-05 01:06:01.000000000 +0800
+--- MuTerm/src/ShellPrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/ShellPrefView.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,9 @@
  
  ***************************************************************************/
@@ -1008,96 +805,36 @@ diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm working/src/ShellPrefView.cpp
  
  #include "ShellPrefView.h"
  #include "PrefHandler.h"
-diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
---- MuTerm/src/spawn.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/spawn.cpp	2007-05-05 03:21:46.000000000 +0800
-@@ -26,11 +26,18 @@
- #include <stdio.h>
- #include <signal.h>
- #include <errno.h>
-+#ifndef __BEOS__
-+#include <sys/ioctl.h>
-+#endif
-+#ifndef _WIN32
- #include <termios.h>
-+#endif
- #include <fcntl.h>
- #include <sys/stat.h>
- #include <time.h>
+diff -Nur MuTerm/src/TTextControl.cpp MuTerm working/src/TTextControl.cpp
+--- MuTerm/src/TTextControl.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TTextControl.cpp	Sat May  5 16:00:24 2007
+@@ -16,7 +16,6 @@
+ 
+ ***************************************************************************/
+ 
+-#include <TextControl.h>
+ #include "TTextControl.h"
+ 
+ /************************************************************************
+diff -Nur MuTerm/src/TTextControl.h MuTerm working/src/TTextControl.h
+--- MuTerm/src/TTextControl.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TTextControl.h	Sat May  5 16:00:24 2007
+@@ -18,7 +18,12 @@
+ 
+ #ifndef TTEXTCTL_H_INCLUDED
+ #define TTEXTCTL_H_INCLUDED
++
 +#ifndef USE_ETKXX
- #include <kernel/OS.h>
-+#endif
- 
- #include "TermConst.h"
- #include "spawn.h"
-@@ -81,6 +88,7 @@
-  */
- 
- 
-+#ifndef _WIN32
- /*
-  *  spawn_shell(): spawn child process, create pty master/slave device and
-  *  execute SHELL program.
-@@ -118,7 +126,12 @@
-   pid_t pgrp;
-   
-   int master, slave;
-+#ifdef __BEOS__
-   struct termio tio;
+ #include <TextControl.h>
 +#else
-+  struct termios tio;
-+# define VSWTCH VSWTC
-+#endif
-   struct winsize ws;
-   
-   handshake_t handshake;
-@@ -470,4 +483,12 @@
-   
-   return (done > 0) ? master : -1;
- }
-+#else
-+int
-+spawn_shell (int row, int col, const char *command, const char *coding)
-+{
-+  // TODO
-+  return -1;
-+}
++#include "etkxx-impl.h"
 +#endif
  
-diff -Nur MuTerm/src/spawn.h MuTerm working/src/spawn.h
---- MuTerm/src/spawn.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/spawn.h	2007-05-05 03:19:18.000000000 +0800
-@@ -23,15 +23,23 @@
-  * allow for mobility of the pty master/slave directories
-  */
- 
-+#ifdef __BEOS__
- #define	PTYDEV		"/dev/pt/%c%c"
- #define TTYDEV		"/dev/tt/%c%c"
- 
-+#define TTYFORMAT	"/dev/tt/%d"
-+#define PTYFORMAT	"/dev/pt/%d"
-+#else
-+#define	PTYDEV		"/dev/pty%c%c"
-+#define TTYDEV		"/dev/tty%c%c"
-+
-+#define TTYFORMAT	"/dev/tty%d"
-+#define PTYFORMAT	"/dev/pty%d"
-+#endif
-+
- #define PTYCHAR1	"pqrs"
- #define	PTYCHAR2	"0123456789abcdef"
- 
--#define TTYFORMAT "/dev/tt/%d"
--#define PTYFORMAT "/dev/pt/%d"
--
- #define MAXPTTYS 16 * 4
- 
- #ifndef CEOF
-Binary files MuTerm/src/.spawn.h.swp and MuTerm working/src/.spawn.h.swp differ
+ class TTextControl : public BTextControl
+ {
 diff -Nur MuTerm/src/TermApp.cpp MuTerm working/src/TermApp.cpp
---- MuTerm/src/TermApp.cpp	2001-07-01 12:27:21.000000000 +0800
-+++ MuTerm working/src/TermApp.cpp	2007-05-04 20:28:21.000000000 +0800
+--- MuTerm/src/TermApp.cpp	Sun Jul  1 12:27:21 2001
++++ MuTerm working/src/TermApp.cpp	Sat May  5 16:00:24 2007
 @@ -24,19 +24,37 @@
  char *muterm_ver = "2.4";
  char *last_update = "2001/7/1";
@@ -1290,8 +1027,8 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm working/src/TermApp.cpp
  
  ////////////////////////////////////////////////////////////////////////////
 diff -Nur MuTerm/src/TermApp.h MuTerm working/src/TermApp.h
---- MuTerm/src/TermApp.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermApp.h	2007-05-04 18:27:29.000000000 +0800
+--- MuTerm/src/TermApp.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermApp.h	Sat May  5 16:00:24 2007
 @@ -19,8 +19,12 @@
  #ifndef TERMAPP_H
  #define TERMAPP_H
@@ -1306,8 +1043,8 @@ diff -Nur MuTerm/src/TermApp.h MuTerm working/src/TermApp.h
  extern int pfd;
  extern char *ptyname;
 diff -Nur MuTerm/src/TermBaseView.h MuTerm working/src/TermBaseView.h
---- MuTerm/src/TermBaseView.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermBaseView.h	2007-05-04 23:23:58.000000000 +0800
+--- MuTerm/src/TermBaseView.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermBaseView.h	Sat May  5 16:00:24 2007
 @@ -18,7 +18,12 @@
  
  #ifndef TERMBASEVIEW_H_INCLUDED
@@ -1322,8 +1059,8 @@ diff -Nur MuTerm/src/TermBaseView.h MuTerm working/src/TermBaseView.h
  class TermView;
  
 diff -Nur MuTerm/src/TermBuffer.cpp MuTerm working/src/TermBuffer.cpp
---- MuTerm/src/TermBuffer.cpp	2001-06-28 14:50:39.000000000 +0800
-+++ MuTerm working/src/TermBuffer.cpp	2007-05-05 00:35:26.000000000 +0800
+--- MuTerm/src/TermBuffer.cpp	Thu Jun 28 14:50:39 2001
++++ MuTerm working/src/TermBuffer.cpp	Sat May  5 16:00:24 2007
 @@ -81,13 +81,19 @@
  
  ************************************************************************/
@@ -1346,8 +1083,8 @@ diff -Nur MuTerm/src/TermBuffer.cpp MuTerm working/src/TermBuffer.cpp
  #include "TermBuffer.h"
  #include "TermConst.h"
 diff -Nur MuTerm/src/TermBuffer.h MuTerm working/src/TermBuffer.h
---- MuTerm/src/TermBuffer.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermBuffer.h	2007-05-04 23:23:24.000000000 +0800
+--- MuTerm/src/TermBuffer.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermBuffer.h	Sat May  5 16:00:24 2007
 @@ -18,7 +18,12 @@
  #ifndef TERMBUFFER_H_INCLUDED
  #define TERMBUFFER_H_INCLUDED
@@ -1362,8 +1099,8 @@ diff -Nur MuTerm/src/TermBuffer.h MuTerm working/src/TermBuffer.h
  #include "CurPos.h"
  
 diff -Nur MuTerm/src/TermConst.h MuTerm working/src/TermConst.h
---- MuTerm/src/TermConst.h	2001-06-28 14:43:48.000000000 +0800
-+++ MuTerm working/src/TermConst.h	2007-05-04 18:35:44.000000000 +0800
+--- MuTerm/src/TermConst.h	Thu Jun 28 14:43:48 2001
++++ MuTerm working/src/TermConst.h	Sat May  5 16:00:24 2007
 @@ -24,6 +24,10 @@
  #define MALLOC_DEBUG
  #endif
@@ -1376,8 +1113,8 @@ diff -Nur MuTerm/src/TermConst.h MuTerm working/src/TermConst.h
  // Application signature (Must same in Muterminal.rsrc)//
  ////////////////////////////////////////////////////////////////////////////
 diff -Nur MuTerm/src/TermIM.cpp MuTerm working/src/TermIM.cpp
---- MuTerm/src/TermIM.cpp	2001-06-08 21:32:57.000000000 +0800
-+++ MuTerm working/src/TermIM.cpp	2007-05-05 00:32:55.000000000 +0800
+--- MuTerm/src/TermIM.cpp	Fri Jun  8 21:32:57 2001
++++ MuTerm working/src/TermIM.cpp	Sat May  5 16:00:24 2007
 @@ -17,18 +17,29 @@
  
  ***************************************************************************/
@@ -1520,8 +1257,8 @@ diff -Nur MuTerm/src/TermIM.cpp MuTerm working/src/TermIM.cpp
 +#endif
  }
 diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
---- MuTerm/src/TermParse.cpp	2001-06-28 14:47:13.000000000 +0800
-+++ MuTerm working/src/TermParse.cpp	2007-05-05 03:29:59.000000000 +0800
+--- MuTerm/src/TermParse.cpp	Thu Jun 28 14:47:13 2001
++++ MuTerm working/src/TermParse.cpp	Sat May  5 16:05:05 2007
 @@ -25,10 +25,14 @@
  #include <signal.h>
  #include <unistd.h>
@@ -1633,16 +1370,19 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    delete_sem (fReaderSem);
    delete_sem (fReaderLocker);
  
-@@ -691,7 +731,7 @@
+@@ -691,7 +731,11 @@
          size_t res;      //status report of iconv
          for(;;)
          {
--           res=iconv(cd2utf8,(const char**)&inptr,&inleftsize,&outptr,&outleftsize);
++#ifndef ETK_OS_LINUX
+            res=iconv(cd2utf8,(const char**)&inptr,&inleftsize,&outptr,&outleftsize);
++#else
 +           res=iconv(cd2utf8,(char**)&inptr,&inleftsize,&outptr,&outleftsize);
++#endif
             if( res == (size_t)(-1) )
             {
                if (errno == EILSEQ)  //char not defined in code table, or wrong table
-@@ -720,7 +760,11 @@
+@@ -720,7 +764,11 @@
          viewObj->PutChar(dstbuf, attr, width);
       }
    }
@@ -1655,8 +1395,8 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    return B_OK;
  }
 diff -Nur MuTerm/src/TermParse.h MuTerm working/src/TermParse.h
---- MuTerm/src/TermParse.h	2001-06-08 19:54:00.000000000 +0800
-+++ MuTerm working/src/TermParse.h	2007-05-04 23:15:06.000000000 +0800
+--- MuTerm/src/TermParse.h	Fri Jun  8 19:54:00 2001
++++ MuTerm working/src/TermParse.h	Sat May  5 16:00:24 2007
 @@ -19,8 +19,13 @@
  #ifndef TERMPARSE_H
  #define TERMPARSE_H
@@ -1672,8 +1412,8 @@ diff -Nur MuTerm/src/TermParse.h MuTerm working/src/TermParse.h
  
  class TermView;
 diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
---- MuTerm/src/TermView.cpp	2001-07-01 15:37:51.000000000 +0800
-+++ MuTerm working/src/TermView.cpp	2007-05-05 03:25:43.000000000 +0800
+--- MuTerm/src/TermView.cpp	Sun Jul  1 15:37:51 2001
++++ MuTerm working/src/TermView.cpp	Sat May  5 16:02:41 2007
 @@ -17,6 +17,7 @@
  
  ***************************************************************************/
@@ -1690,7 +1430,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
 +#include "etkxx-impl.h"
 +#endif
 +
-+#ifndef __BEOS__
++#if !(defined(__BEOS__) || defined(_WIN32))
 +#include <sys/ioctl.h>
 +#endif
  
@@ -1967,10 +1707,9 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
        break;
    
      case 2:
-Binary files MuTerm/src/.TermView.cpp.swp and MuTerm working/src/.TermView.cpp.swp differ
 diff -Nur MuTerm/src/TermView.h MuTerm working/src/TermView.h
---- MuTerm/src/TermView.h	2001-05-21 23:21:34.000000000 +0800
-+++ MuTerm working/src/TermView.h	2007-05-05 01:45:31.000000000 +0800
+--- MuTerm/src/TermView.h	Mon May 21 23:21:34 2001
++++ MuTerm working/src/TermView.h	Sat May  5 16:00:24 2007
 @@ -19,9 +19,14 @@
  #ifndef TERMVIEW_H
  #define TERMVIEW_H
@@ -2018,8 +1757,8 @@ diff -Nur MuTerm/src/TermView.h MuTerm working/src/TermView.h
    //
    // Flags.
 diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
---- MuTerm/src/TermWindow.cpp	2001-06-07 20:29:35.000000000 +0800
-+++ MuTerm working/src/TermWindow.cpp	2007-05-05 03:10:11.000000000 +0800
+--- MuTerm/src/TermWindow.cpp	Thu Jun  7 20:29:35 2001
++++ MuTerm working/src/TermWindow.cpp	Sat May  5 16:00:24 2007
 @@ -16,6 +16,7 @@
  
  *****************************************************************************/
@@ -2198,8 +1937,8 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
  
    if((! fPrintSettings) && (DoPageSetup() != B_NO_ERROR)) {
 diff -Nur MuTerm/src/TermWindow.h MuTerm working/src/TermWindow.h
---- MuTerm/src/TermWindow.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermWindow.h	2007-05-04 23:49:35.000000000 +0800
+--- MuTerm/src/TermWindow.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermWindow.h	Sat May  5 16:00:24 2007
 @@ -20,8 +20,12 @@
  #ifndef TERMWIN_H
  #define TERMWIN_H
@@ -2236,30 +1975,294 @@ diff -Nur MuTerm/src/TermWindow.h MuTerm working/src/TermWindow.h
    void		doShowHelp (uint32 command);
    // Printing
    status_t	DoPageSetup (void);
-diff -Nur MuTerm/src/TTextControl.cpp MuTerm working/src/TTextControl.cpp
---- MuTerm/src/TTextControl.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TTextControl.cpp	2007-05-05 01:01:38.000000000 +0800
-@@ -16,7 +16,6 @@
- 
- ***************************************************************************/
- 
--#include <TextControl.h>
- #include "TTextControl.h"
- 
- /************************************************************************
-diff -Nur MuTerm/src/TTextControl.h MuTerm working/src/TTextControl.h
---- MuTerm/src/TTextControl.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TTextControl.h	2007-05-05 00:59:26.000000000 +0800
-@@ -18,7 +18,12 @@
- 
- #ifndef TTEXTCTL_H_INCLUDED
- #define TTEXTCTL_H_INCLUDED
+diff -Nur MuTerm/src/etkxx-impl.h MuTerm working/src/etkxx-impl.h
+--- MuTerm/src/etkxx-impl.h	Thu Jan  1 08:00:00 1970
++++ MuTerm working/src/etkxx-impl.h	Sat May  5 16:00:24 2007
+@@ -0,0 +1,202 @@
++#ifndef __ETKXX_IMPL_H__
++#define __ETKXX_IMPL_H__
 +
++#ifdef _WIN32
++#include <windows.h>
++#endif
++
++#include <etkxx.h>
++
++#define int8			eint8
++#define int16			eint16
++#define int32			eint32
++#define int64			eint64
++#define uint8			euint8
++#define uint16			euint16
++#define uint32			euint32
++#define uint64			euint64
++
++#define uchar			unsigned char
++#define uint			unsigned int
++#define ulong			unsigned long
++
++#define team_id			eint64
++#define status_t		e_status_t
++#define bigtime_t		e_bigtime_t
++#define type_code		e_type_code
++
++#define thread_id		void*
++#define sem_id			void*
++#define sem_info		etk_sem_info
++
++#define B_OK			E_OK
++#define B_NO_ERROR		E_OK
++#define B_ERROR			E_ERROR
++
++#define B_MIME_TYPE		E_MIME_TYPE
++#define B_STRING_TYPE		E_STRING_TYPE
++
++// kernel kit
++#define real_time_clock()	e_real_time_clock()
++#define beep()			(void)0
++#define snooze(usec)		e_snooze(usec)
++#define spawn_thread(a,b,c,d)	etk_create_thread(a,c,d,NULL)
++#define resume_thread(arg)	etk_resume_thread(arg)
++#define exit_thread(s)		etk_exit_thread(s)
++
++#define create_sem(a,b)		etk_create_sem(a,NULL)
++#define delete_sem(sem)		etk_delete_sem(sem)
++#define acquire_sem(sem)	etk_acquire_sem(sem)
++#define acquire_sem_etc(a,b,c,d)	etk_acquire_sem_etc(a,b,c,d)
++#define release_sem(sem)	etk_release_sem(sem)
++#define release_sem_etc(a,b,c)	etk_release_sem_etc(a,b,c)
++#define get_sem_info(a,b)	etk_get_sem_info(a,b)
++
++#define B_DISPLAY_PRIORITY	E_DISPLAY_PRIORITY
++#define B_NORMAL_PRIORITY	E_NORMAL_PRIORITY
++#define B_BAD_THREAD_ID		NULL
++#define B_TIMEOUT		E_TIMEOUT
++#define B_TIMED_OUT		E_TIMED_OUT
++
++#ifdef __cplusplus
++
++// support kit
++#define BString			EString
++#define BList			EList
++
++// storage kit
++#define B_READ_ONLY		E_READ_ONLY
++#define B_WRITE_ONLY		E_WRITE_ONLY
++#define B_CREATE_FILE		E_CREATE_FILE
++#define B_ERASE_FILE		E_ERASE_FILE
++
++#define B_PATH_NAME_LENGTH	E_MAXPATH
++#define BEntry			EEntry
++#define BPath			EPath
++#define BFile			EFile
++#define BDirectory		EDirectory
++
++#define BFilePanel		EFilePanel
++#define B_SAVE_PANEL		E_SAVE_PANEL
++
++// app kit
++#define B_FIELD_NAME_LENGTH	1024
++#define B_QUIT_REQUESTED	E_QUIT_REQUESTED
++#define B_REPLY			E_REPLY
++#define be_app			etk_app
++#define be_clipboard		(&etk_clipboard)
++
++#define BMessage		EMessage
++#define BMessageRunner		EMessageRunner
++#define BMessenger		EMessenger
++#define BHandler		EHandler
++#define BLooper			ELooper
++#define BApplication		EApplication
++#define BInvoker		EInvoker
++#define BClipboard		EClipboard
++
++#define BCursor			ECursor
++#define B_HAND_CURSOR		E_CURSOR_HAND
++#define B_I_BEAM_CURSOR		E_CURSOR_I_BEAM
++
++
++// interface kit
++#define rgb_color		e_rgb_color
++#define ui_color(w)		e_ui_color(w)
++#define B_PANEL_BACKGROUND_COLOR	E_PANEL_BACKGROUND_COLOR
++
++#define B_VERTICAL		E_VERTICAL
++#define B_COPY			'COPY'
++#define B_PASTE			'PSTE'
++#define B_SELECT_ALL		'SALL'
++#define B_ABOUT_REQUESTED	E_ABOUT_REQUESTED
++#define B_SAVE_REQUESTED	'SAVE'
++
++#define BPoint			EPoint
++#define BRect			ERect
++
++#define BWindow			EWindow
++#define B_TITLED_WINDOW_LOOK	E_TITLED_WINDOW_LOOK
++#define B_NORMAL_WINDOW_FEEL	E_NORMAL_WINDOW_FEEL
++#define B_FLOATING_APP_WINDOW_FEEL	E_FLOATING_APP_WINDOW_FEEL
++#define B_DOCUMENT_WINDOW	E_DOCUMENT_WINDOW
++#define B_NOT_ZOOMABLE		E_NOT_ZOOMABLE
++#define B_NOT_RESIZABLE		E_NOT_RESIZABLE
++#define B_CURRENT_WORKSPACE	E_CURRENT_WORKSPACE
++#define IsActive		IsActivate
++
++#define BView			EView
++#define B_FOLLOW_NONE		E_FOLLOW_NONE
++#define B_FOLLOW_ALL_SIDES	E_FOLLOW_ALL
++#define B_WILL_DRAW		E_WILL_DRAW
++#define B_FRAME_EVENTS		E_FRAME_EVENTS
++#define B_PULSE_NEEDED		E_PULSE_NEEDED
++#define B_OP_OVER		E_OP_OVER
++#define B_OP_COPY		E_OP_COPY
++#define B_OP_MIN		E_OP_MIN
++#define B_EXITED_VIEW		E_EXITED_VIEW
++#define B_ENTERED_VIEW		E_ENTERED_VIEW
++
++#define B_COMMAND_KEY		E_COMMAND_KEY
++#define B_OPTION_KEY		E_OPTION_KEY
++#define B_RETURN		E_RETURN
++#define B_LEFT_ARROW		E_LEFT_ARROW
++#define B_RIGHT_ARROW		E_RIGHT_ARROW
++#define B_UP_ARROW		E_UP_ARROW
++#define B_SHIFT_KEY		E_SHIFT_KEY
++#define B_DOWN_ARROW		E_DOWN_ARROW
++#define B_ESCAPE		E_ESCAPE
++#define B_INSERT		E_INSERT
++#define B_HOME			E_HOME
++#define B_PAGE_DOWN		E_PAGE_DOWN
++#define B_PAGE_UP		E_PAGE_UP
++#define B_FUNCTION_KEY		E_FUNCTION_KEY
++#define B_END			E_END
++#define B_CONTROL_KEY		E_CONTROL_KEY
++#define B_PRIMARY_MOUSE_BUTTON	E_PRIMARY_MOUSE_BUTTON
++#define B_SECONDARY_MOUSE_BUTTON	E_SECONDARY_MOUSE_BUTTON
++#define B_TERTIARY_MOUSE_BUTTON	E_TERTIARY_MOUSE_BUTTON
++
++#define BMenu			EMenu
++#define BMenuBar		EMenuBar
++#define BMenuItem		EMenuItem
++#define BPopUpMenu		EPopUpMenu
++
++#define BFont			EFont
++#define B_FIXED_SPACING		0
++#define font_height		e_font_height
++#define font_family		e_font_family
++#define count_font_families()	etk_count_font_families()
++
++#define BTextView		ETextView
++#define BBitmap			EBitmap
++
++#define BScrollBar		EScrollBar
++#define B_V_SCROLL_BAR_WIDTH	E_V_SCROLL_BAR_WIDTH
++#define B_H_SCROLL_BAR_HEIGHT	E_H_SCROLL_BAR_HEIGHT
++
++#define BTextControl		ETextControl
++#define BColorControl		EColorControl
++#define BBox			EBox
++#define BButton			EButton
++#define BTabView		ETabView
++#define BRadioButton		ERadioButton
++#define BCheckBox		ECheckBox
++#define BMenuField		EMenuField
++#define BStringView		EStringView
++
++#define BAlert			EAlert
++#define B_WIDTH_FROM_LABEL	E_WIDTH_FROM_LABEL
++#define B_INFO_ALERT		E_INFO_ALERT
++#define B_WARNING_ALERT		E_WARNING_ALERT
++#define B_WIDTH_AS_USUAL	E_WIDTH_AS_USUAL
++#define B_WIDTH_FROM_WIDEST	E_WIDTH_FROM_LABEL
++
++enum color_control_layout {
++	B_CELLS_32x8 = 0,
++};
++
++#endif
++
++#endif /* __ETKXX_IMPL_H__ */
++
+diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
+--- MuTerm/src/spawn.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/spawn.cpp	Sat May  5 16:01:59 2007
+@@ -26,11 +26,18 @@
+ #include <stdio.h>
+ #include <signal.h>
+ #include <errno.h>
++#if !(defined(__BEOS__) || defined(_WIN32))
++#include <sys/ioctl.h>
++#endif
++#ifndef _WIN32
+ #include <termios.h>
++#endif
+ #include <fcntl.h>
+ #include <sys/stat.h>
+ #include <time.h>
 +#ifndef USE_ETKXX
- #include <TextControl.h>
-+#else
-+#include "etkxx-impl.h"
+ #include <kernel/OS.h>
 +#endif
  
- class TTextControl : public BTextControl
- {
+ #include "TermConst.h"
+ #include "spawn.h"
+@@ -81,6 +88,7 @@
+  */
+ 
+ 
++#ifndef _WIN32
+ /*
+  *  spawn_shell(): spawn child process, create pty master/slave device and
+  *  execute SHELL program.
+@@ -118,7 +126,12 @@
+   pid_t pgrp;
+   
+   int master, slave;
++#ifdef __BEOS__
+   struct termio tio;
++#else
++  struct termios tio;
++# define VSWTCH VSWTC
++#endif
+   struct winsize ws;
+   
+   handshake_t handshake;
+@@ -470,4 +483,12 @@
+   
+   return (done > 0) ? master : -1;
+ }
++#else
++int
++spawn_shell (int row, int col, const char *command, const char *coding)
++{
++  // TODO
++  return -1;
++}
++#endif
+ 
+diff -Nur MuTerm/src/spawn.h MuTerm working/src/spawn.h
+--- MuTerm/src/spawn.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/spawn.h	Sat May  5 16:00:24 2007
+@@ -23,14 +23,22 @@
+  * allow for mobility of the pty master/slave directories
+  */
+ 
++#ifdef __BEOS__
+ #define	PTYDEV		"/dev/pt/%c%c"
+ #define TTYDEV		"/dev/tt/%c%c"
+ 
++#define TTYFORMAT	"/dev/tt/%d"
++#define PTYFORMAT	"/dev/pt/%d"
++#else
++#define	PTYDEV		"/dev/pty%c%c"
++#define TTYDEV		"/dev/tty%c%c"
++
++#define TTYFORMAT	"/dev/tty%d"
++#define PTYFORMAT	"/dev/pty%d"
++#endif
++
+ #define PTYCHAR1	"pqrs"
+ #define	PTYCHAR2	"0123456789abcdef"
+-
+-#define TTYFORMAT "/dev/tt/%d"
+-#define PTYFORMAT "/dev/pt/%d"
+ 
+ #define MAXPTTYS 16 * 4
+ 
