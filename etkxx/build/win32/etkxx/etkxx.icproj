@@ -444,8 +444,6 @@
 		<File 
 			RelativePath="..\..\..\etk\app\Message.h"/>
 		<File 
-			RelativePath="..\..\..\etk\app\_Message.h"/>
-		<File 
 			RelativePath="..\..\..\etk\app\MessageQueue.h"/>
 		<File 
 			RelativePath="..\..\..\etk\app\MessageRunner.h"/>
