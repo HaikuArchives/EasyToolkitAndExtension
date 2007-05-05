@@ -11,7 +11,6 @@
 // functions: different with BeAPI
 #define BView_ScrollTo(x, y)		ScrollTo(-(x), -(y))
 #define BView_ScrollBy(dh, dv)		ScrollBy(-(dh), -(dv))
-#define BView_ScrollTo(pt)		ScrollTo(E_ORIGIN - (pt))
 
 #endif /* __cplusplus */
 
@@ -19,7 +18,6 @@
 #define B_PRIMARY_MOUSE_BUTTON		E_PRIMARY_MOUSE_BUTTON
 #define B_SECONDARY_MOUSE_BUTTON	E_SECONDARY_MOUSE_BUTTON
 #define B_TERTIARY_MOUSE_BUTTON		E_TERTIARY_MOUSE_BUTTON
-
 
 #define B_ENTERED_VIEW			E_ENTERED_VIEW
 #define B_INSIDE_VIEW			E_INSIDE_VIEW
