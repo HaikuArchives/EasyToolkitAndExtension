@@ -132,6 +132,7 @@ public:
 
 	ERect		Bounds() const;
 	ERect		Frame() const;
+	EPoint		LeftTop() const;
 
 	bool		IsVisible() const;
 	ERect		VisibleBounds() const;

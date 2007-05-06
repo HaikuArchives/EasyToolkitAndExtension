@@ -206,7 +206,7 @@ ERect EButton::ContentFrame() const
 ERect
 EButton::ContentFrame() const
 {
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 
 	e_theme_engine *theme = etk_get_current_theme_engine();
 	if(!(theme == NULL || theme->get_button_border_margins == NULL))
@@ -230,13 +230,14 @@ EButton::Draw(ERect updateRect)
 	if(theme == NULL) return;
 
 	bool fPushed = (IsEnabled() ? Value() == E_CONTROL_ON : false);
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 
 	PushState();
 
 	ConstrainClippingRegion(updateRect);
 
 	if(theme->draw_button_border != NULL)
-		theme->draw_button_border(theme, this, Bounds(), fPushed, fInsided, fFocusFlash);
+		theme->draw_button_border(theme, this, rect, fPushed, fInsided, fFocusFlash);
 
 	if(IsFocusChanging())
 	{
@@ -245,7 +246,7 @@ EButton::Draw(ERect updateRect)
 	}
 
 	if(theme->clear_button_content != NULL)
-		theme->clear_button_content(theme, this, Bounds(), fPushed, fInsided, fFocusFlash);
+		theme->clear_button_content(theme, this, rect, fPushed, fInsided, fFocusFlash);
 
 	ERect contentFrame = ContentFrame();
 	ConstrainClippingRegion(contentFrame);
@@ -288,7 +289,8 @@ EButton::DrawContent()
 	if(Label() == NULL) return;
 	e_theme_engine *theme = etk_get_current_theme_engine();
 	if(theme == NULL || theme->draw_button_label == NULL) return;
-	theme->draw_button_label(theme, this, Bounds(), Label(), (IsEnabled() ? Value() == E_CONTROL_ON : false), fInsided, 0);
+	theme->draw_button_label(theme, this, Frame().OffsetToSelf(E_ORIGIN), Label(),
+				 (IsEnabled() ? Value() == E_CONTROL_ON : false), fInsided, 0);
 }
 
 
@@ -524,18 +526,20 @@ EButton::Pulse()
 	Window()->DisableUpdates();
 
 	bool fPushed = (IsEnabled() ? Value() == E_CONTROL_ON : false);
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
+
 	fFocusFlash++;
 
 	PushState();
 
-	ConstrainClippingRegion(Bounds());
+	ConstrainClippingRegion(rect);
 
 	if(theme->draw_button_border != NULL && (shouldFlash & E_THEME_FOCUS_FLASH_BORDER))
-		theme->draw_button_border(theme, this, Bounds(), fPushed, fInsided, fFocusFlash);
+		theme->draw_button_border(theme, this, rect, fPushed, fInsided, fFocusFlash);
 
 	if(theme->clear_button_content != NULL && (shouldFlash & E_THEME_FOCUS_FLASH_CONTENT))
 	{
-		theme->clear_button_content(theme, this, Bounds(), fPushed, fInsided, fFocusFlash);
+		theme->clear_button_content(theme, this, rect, fPushed, fInsided, fFocusFlash);
 
 		ERect contentFrame = ContentFrame();
 		ConstrainClippingRegion(contentFrame);

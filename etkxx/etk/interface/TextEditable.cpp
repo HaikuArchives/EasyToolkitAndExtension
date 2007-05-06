@@ -407,7 +407,7 @@ ETextEditable::Draw(ERect updateRect)
 {
 	if(!IsVisible()) return;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;
@@ -511,7 +511,7 @@ ETextEditable::DrawSelectedBackground(ERect updateRect)
 	if(fCount <= 0 || !IsEnabled()) return;
 	if(fSelectStart < 0 || fSelectEnd < 0 || fSelectEnd < fSelectStart || fSelectEnd >= fCount || fCharWidths == NULL) return;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;
@@ -567,7 +567,7 @@ ETextEditable::DrawCursor()
 	if(Window() == NULL || Window()->IsActivate() == false) return;
 	if(!(IsFocus() || IsFocusChanging())) return;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;
@@ -617,7 +617,7 @@ ETextEditable::DrawCursor()
 void
 ETextEditable::MouseDown(EPoint where)
 {
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;
@@ -695,7 +695,7 @@ ETextEditable::MouseUp(EPoint where)
 {
 	fSelectTracking = -1;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;
@@ -708,7 +708,7 @@ ETextEditable::MouseUp(EPoint where)
 void
 ETextEditable::MouseMoved(EPoint where, euint32 code, const EMessage *a_message)
 {
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;
@@ -1188,7 +1188,7 @@ ETextEditable::GetCharLocation(eint32 pos, float *x, float *y, EFont *tFont)
 {
 	if(!x) return false;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
 	rect.right -= fMargins.right;

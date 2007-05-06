@@ -752,11 +752,11 @@ ETextView::ScrollToOffset(eint32 offset, bool utf8)
 
 	ERect validRect = ConvertFromParent(scrollView->TargetFrame());
 
-	if(Bounds().Contains(rect) == false || validRect.Contains(rect)) return;
+	if(Frame().OffsetToSelf(E_ORIGIN).Contains(rect) == false || validRect.Contains(rect)) return;
 
 	EPoint aPt = rect.LeftTop();
 	aPt.ConstrainTo(validRect);
-	pt = aPt - rect.LeftTop();
+	pt = rect.LeftTop() - aPt;
 	ScrollBy(pt.x, pt.y);
 
 	validRect = ConvertFromParent(scrollView->TargetFrame());
@@ -764,7 +764,7 @@ ETextView::ScrollToOffset(eint32 offset, bool utf8)
 	if(validRect.Contains(aPt) == false)
 	{
 		aPt.ConstrainTo(validRect);
-		pt = aPt - rect.RightBottom();
+		pt = rect.RightBottom() - aPt;
 		ScrollBy(pt.x, pt.y);
 	}
 }
@@ -1680,8 +1680,8 @@ ETextView::GetPreferredSize(float *width, float *height)
 void
 ETextView::SetTextRect(ERect textRect)
 {
-	ERect rect = Bounds();
-	if(!textRect.IsValid()) textRect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
+	if(!textRect.IsValid()) textRect = Frame().OffsetToSelf(E_ORIGIN);
 
 	fMargins.left = textRect.left;
 	fMargins.top = textRect.top;
@@ -1695,7 +1695,7 @@ ETextView::SetTextRect(ERect textRect)
 ERect
 ETextView::TextRect() const
 {
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 
 	rect.left += fMargins.left;
 	rect.top += fMargins.top;
@@ -2377,12 +2377,13 @@ ETextView::KeyDown(const char *bytes, eint32 numBytes)
 					if(bytes[0] == E_PAGE_UP)
 					{
 						if(validRect.top <= 0) break;
-						yOffset = min_c(validRect.top, validRect.Height());
+						yOffset = -min_c(validRect.top, validRect.Height());
 					}
 					else
 					{
-						if(validRect.bottom >= Bounds().bottom) break;
-						yOffset = -(min_c(Bounds().bottom - validRect.bottom, validRect.Height()));
+						ERect bounds = Frame().OffsetToSelf(E_ORIGIN);
+						if(validRect.bottom >= bounds.bottom) break;
+						yOffset = min_c(bounds.bottom - validRect.bottom, validRect.Height());
 					}
 					if(yOffset == 0) break;
 

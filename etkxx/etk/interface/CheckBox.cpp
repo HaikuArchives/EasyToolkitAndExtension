@@ -100,7 +100,7 @@ ECheckBox::Draw(ERect updateRect)
 	font.GetHeight(&fontHeight);
 	float sHeight = fontHeight.ascent + fontHeight.descent;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.InsetBy(5, (rect.Height() - sHeight) / 2);
 	if(rect.IsValid() == false) return;
 
@@ -176,7 +176,7 @@ ECheckBox::MouseDown(EPoint where)
 	GetFontHeight(&fontHeight);
 	float sHeight = fontHeight.ascent + fontHeight.descent;
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.InsetBy(5, (rect.Height() - sHeight) / 2);
 	if(rect.IsValid() == false) return;
 	rect.right = rect.left + rect.Height();

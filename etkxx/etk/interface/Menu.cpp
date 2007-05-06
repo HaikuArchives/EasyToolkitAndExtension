@@ -1247,7 +1247,7 @@ EMenu::Draw(ERect updateRect)
 {
 	if(!IsVisible()) return;
 
-	ERect bounds = Bounds();
+	ERect bounds = Frame().OffsetToSelf(E_ORIGIN);
 	bounds.left += fMargins.left;
 	bounds.top += fMargins.top;
 	bounds.right -= fMargins.right;

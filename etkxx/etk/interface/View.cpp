@@ -689,7 +689,14 @@ EView::Ancestor() const
 ERect
 EView::Bounds() const
 {
-	return fFrame.OffsetToCopy(0, 0);
+	return ConvertFromParent(fFrame);
+}
+
+
+EPoint
+EView::LeftTop() const
+{
+	return Bounds().LeftTop();
 }
 
 
@@ -1277,7 +1284,7 @@ EView::_SetFrame(ERect newFrame, bool parent_changed)
 		for(eint32 i = 0; (view = (EView*)fViewsList.ItemAt(i)) != NULL; i++)
 		{
 			euint32 vMode = view->ResizingMode();
-			ERect vFrame = view->Frame();
+			ERect vFrame = view->fFrame;
 
 			if(vMode == E_FOLLOW_NONE || vMode == (E_FOLLOW_LEFT | E_FOLLOW_TOP))
 			{
@@ -2456,7 +2463,7 @@ EView::Invalidate(ERect invalRect, bool redraw)
 void
 EView::Invalidate(bool redraw)
 {
-	Invalidate(ConvertFromParent(Frame()), redraw);
+	Invalidate(Bounds(), redraw);
 }
 
 
@@ -3146,6 +3153,8 @@ EView::GetPreferredSize(float *width, float *height)
 	float w = 0, h = 0;
 	EView *child;
 
+	ERect rect = fFrame.OffsetToCopy(E_ORIGIN);
+
 	for(eint32 i = 0; (child = ChildAt(i)) != NULL; i++)
 	{
 		float cW = 0, cH = 0;
@@ -3154,11 +3163,11 @@ EView::GetPreferredSize(float *width, float *height)
 		if(child->IsHidden()) continue;
 		child->GetPreferredSize(&cW, &cH);
 
-		if((cMode & E_FOLLOW_LEFT) || cMode == E_FOLLOW_NONE) cW += child->Frame().left;
-		if(cMode & E_FOLLOW_RIGHT) cW += Bounds().right - child->Frame().right;
+		if((cMode & E_FOLLOW_LEFT) || cMode == E_FOLLOW_NONE) cW += child->fFrame.left;
+		if(cMode & E_FOLLOW_RIGHT) cW += rect.right - child->fFrame.right;
 
-		if((cMode & E_FOLLOW_TOP) || cMode == E_FOLLOW_NONE) cH += child->Frame().top;
-		if(cMode & E_FOLLOW_BOTTOM) cH += Bounds().bottom - child->Frame().bottom;
+		if((cMode & E_FOLLOW_TOP) || cMode == E_FOLLOW_NONE) cH += child->fFrame.top;
+		if(cMode & E_FOLLOW_BOTTOM) cH += rect.bottom - child->fFrame.bottom;
 
 		w = max_c(w, cW);
 		h = max_c(h, cH);
@@ -3457,7 +3466,7 @@ EView::IsEnabled() const
 void
 EView::ScrollBy(float dh, float dv)
 {
-	ScrollTo(fLocalOrigin + EPoint(dh, dv));
+	ScrollTo(EPoint(dh, dv) - fLocalOrigin);
 }
 
 
@@ -3471,6 +3480,8 @@ EView::ScrollTo(float x, float y)
 void
 EView::ScrollTo(EPoint where)
 {
+	where = E_ORIGIN - where;
+
 	if(fLocalOrigin != where)
 	{
 		fLocalOrigin = where;
@@ -3478,7 +3489,7 @@ EView::ScrollTo(EPoint where)
 		_UpdateOriginAndVisibleRegion(true);
 
 		fScrollTimestamp = e_real_time_clock_usecs();
-		_Invalidate(ConvertFromParent(Frame()), true, fScrollTimestamp);
+		_Invalidate(Bounds(), true, fScrollTimestamp);
 
 		for(eint32 i = 0; i < fScrollBar.CountItems(); i++)
 		{

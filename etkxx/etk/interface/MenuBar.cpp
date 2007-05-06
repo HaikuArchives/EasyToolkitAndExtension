@@ -272,7 +272,7 @@ EMenuBar::Draw(ERect updateRect)
 	{
 		case E_BORDER_FRAME:
 			{
-				ERect rect = Bounds();
+				ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 
 				PushState();
 				SetHighColor(shadowColor);

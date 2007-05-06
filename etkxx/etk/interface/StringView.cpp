@@ -169,15 +169,17 @@ EStringView::Draw(ERect updateRect)
 			  (float)(fTextArray->CountItems()) * sHeight;
 	float lineHeight = sHeight + (float)ceil((double)(sHeight * ETK_STRING_VIEW_LINE_SPACING));
 
+	ERect bounds = Frame().OffsetToSelf(E_ORIGIN);
+
 	float yStart = 0;
 	switch(fVerticalAlignment)
 	{
 		case E_ALIGN_BOTTOM:
-			yStart = Bounds().bottom - allHeight;
+			yStart = bounds.bottom - allHeight;
 			break;
 
 		case E_ALIGN_MIDDLE:
-			yStart = Bounds().Center().y - allHeight / 2.f;
+			yStart = bounds.Center().y - allHeight / 2.f;
 			break;
 
 		default:
@@ -200,11 +202,11 @@ EStringView::Draw(ERect updateRect)
 			switch(fAlignment)
 			{
 				case E_ALIGN_RIGHT:
-					xStart = Bounds().right - strWidth;
+					xStart = bounds.right - strWidth;
 					break;
 
 				case E_ALIGN_CENTER:
-					xStart = Bounds().Center().x - strWidth / 2.f;
+					xStart = bounds.Center().x - strWidth / 2.f;
 					break;
 
 				default:

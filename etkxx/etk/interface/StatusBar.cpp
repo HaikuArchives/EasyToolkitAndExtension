@@ -267,7 +267,7 @@ EStatusBar::Draw(ERect updateRect)
 
 	EPoint penLocation;
 
-	MovePenTo(Bounds().LeftTop());
+	MovePenTo(E_ORIGIN);
 	MovePenBy(0, fontHeight.ascent + 1);
 
 	if(fLabel != NULL)
@@ -304,7 +304,7 @@ EStatusBar::Draw(ERect updateRect)
 		}
 	}
 
-	MovePenTo(Bounds().RightTop());
+	MovePenTo(Frame().Width(), 0);
 	MovePenBy(0, fontHeight.ascent + 1);
 
 	if(fTrailingLabel != NULL)
@@ -344,7 +344,7 @@ EStatusBar::Draw(ERect updateRect)
 		}
 	}
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	if(fLabel != NULL || fTrailingLabel != NULL || fText != NULL || fTrailingText != NULL) rect.top += sHeight + 5;
 	if(rect.IsValid() == false) return;
 

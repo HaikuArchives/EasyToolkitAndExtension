@@ -36,7 +36,7 @@ EScrollView::TargetValidFrame(bool ignore_scrollbar) const
 
 	if(fTarget == NULL) return ERect();
 
-	ERect r = Bounds();
+	ERect r = Frame().OffsetToSelf(E_ORIGIN);
 
 	if(!ignore_scrollbar)
 	{
@@ -243,18 +243,20 @@ EScrollView::FrameResized(float new_width, float new_height)
 {
 	if(fTarget == NULL) return;
 
+	ERect targetFrame = fTarget->Frame();
+
 	if(fHSB != NULL)
 	{
-		if(!fAlwaysShowHorizontal && TargetValidFrame(true).Width() >= fTarget->Bounds().Width()) fHSB->Hide();
+		if(!fAlwaysShowHorizontal && TargetValidFrame(true).Width() >= targetFrame.Width()) fHSB->Hide();
 		else fHSB->Show();
-		fHSB->SetRange(0, max_c(fTarget->Bounds().Width() - TargetValidFrame(false).Width(), 0.f));
+		fHSB->SetRange(0, max_c(targetFrame.Width() - TargetValidFrame(false).Width(), 0.f));
 	}
 
 	if(fVSB != NULL)
 	{
-		if(!fAlwaysShowVertical && TargetValidFrame(true).Height() >= fTarget->Bounds().Height()) fVSB->Hide();
+		if(!fAlwaysShowVertical && TargetValidFrame(true).Height() >= targetFrame.Height()) fVSB->Hide();
 		else fVSB->Show();
-		fVSB->SetRange(0, max_c(fTarget->Bounds().Height() - TargetValidFrame(false).Height(), 0.f));
+		fVSB->SetRange(0, max_c(targetFrame.Height() - TargetValidFrame(false).Height(), 0.f));
 	}
 
 	bool hsbHidden = (fHSB == NULL ? true : fHSB->IsHidden());
@@ -264,14 +266,14 @@ EScrollView::FrameResized(float new_width, float new_height)
 	{
 		if(vsbHidden && fHSB != NULL)
 		{
-			ERect hR = Bounds();
+			ERect hR = Frame().OffsetToSelf(E_ORIGIN);
 			hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
 			fHSB->ResizeTo(hR.Width(), hR.Height());
 			fHSB->MoveTo(hR.LeftTop());
 		}
 		else if(hsbHidden && fVSB != NULL)
 		{
-			ERect vR = Bounds();
+			ERect vR = Frame().OffsetToSelf(E_ORIGIN);
 			vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
 			fVSB->ResizeTo(vR.Width(), vR.Height());
 			fVSB->MoveTo(vR.LeftTop());
@@ -279,8 +281,8 @@ EScrollView::FrameResized(float new_width, float new_height)
 	}
 	else
 	{
-		ERect hR = Bounds();
-		ERect vR = Bounds();
+		ERect hR = Frame().OffsetToSelf(E_ORIGIN);
+		ERect vR = Frame().OffsetToSelf(E_ORIGIN);
 		hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
 		hR.right -= E_V_SCROLL_BAR_WIDTH;
 		vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
@@ -349,7 +351,7 @@ ERect
 EScrollView::TargetFrame() const
 {
 	ERect r = TargetValidFrame(false);
-	if(fTarget) r &= fTarget->ConvertToParent(fTarget->Bounds());
+	if(fTarget) r &= fTarget->ConvertToParent(fTarget->Frame().OffsetToSelf(E_ORIGIN));
 	return r;
 }
 

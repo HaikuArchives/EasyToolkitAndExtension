@@ -105,9 +105,9 @@ EScrollBar::_SetValue(float value, bool response)
 		if(fTarget != NULL && response)
 		{
 			if(fOrientation == E_HORIZONTAL)
-				fTarget->ScrollTo(-fValue, fTarget->fLocalOrigin.y);
+				fTarget->ScrollTo(fValue, -(fTarget->fLocalOrigin.y));
 			else
-				fTarget->ScrollTo(fTarget->fLocalOrigin.x, -fValue);
+				fTarget->ScrollTo(-(fTarget->fLocalOrigin.x), fValue);
 		}
 
 		Invalidate();
@@ -177,9 +177,9 @@ EScrollBar::SetRange(float min, float max)
 			fValue = (fValue < fRangeMin ? fRangeMin : fRangeMax);
 
 			if(fOrientation == E_HORIZONTAL)
-				fTarget->ScrollTo(-fValue, fTarget->fLocalOrigin.y);
+				fTarget->ScrollTo(fValue, -(fTarget->fLocalOrigin.y));
 			else
-				fTarget->ScrollTo(fTarget->fLocalOrigin.x, -fValue);
+				fTarget->ScrollTo(-(fTarget->fLocalOrigin.x), fValue);
 		}
 
 		Invalidate();
@@ -235,9 +235,9 @@ EScrollBar::SetTarget(EView *target)
 	if(fTarget != NULL)
 	{
 		if(fOrientation == E_HORIZONTAL)
-			fTarget->ScrollTo(-fValue, fTarget->fLocalOrigin.y);
+			fTarget->ScrollTo(fValue, -(fTarget->fLocalOrigin.y));
 		else
-			fTarget->ScrollTo(fTarget->fLocalOrigin.x, -fValue);
+			fTarget->ScrollTo(-(fTarget->fLocalOrigin.x), fValue);
 	}
 
 	return E_OK;
@@ -268,7 +268,7 @@ EScrollBar::Draw(ERect updateRect)
 
 	PushState();
 	ConstrainClippingRegion(updateRect);
-	theme->draw_scrollbar(theme, this, Bounds(),
+	theme->draw_scrollbar(theme, this, Frame().OffsetToSelf(E_ORIGIN),
 			      fOrientation, fRangeMin, fRangeMax, fValue,
 			      (fTracking && fTrackingState > 0) ? fTrackingRegion.Contains(fMousePosition) : false,
 			      fMousePosition);
@@ -296,7 +296,8 @@ EScrollBar::MouseDown(EPoint where)
 	e_theme_engine *theme = etk_get_current_theme_engine();
 	if(theme == NULL || theme->get_scrollbar_respondent_region == NULL) return;
 	ERegion dragTo, smallUp, smallDown, largeUp, largeDown;
-	theme->get_scrollbar_respondent_region(theme, this, Bounds(), fOrientation, fRangeMin, fRangeMax, fValue, NULL,
+	theme->get_scrollbar_respondent_region(theme, this, Frame().OffsetToSelf(E_ORIGIN),
+					       fOrientation, fRangeMin, fRangeMax, fValue, NULL,
 					       &dragTo, &smallUp, &smallDown, &largeUp, &largeDown);
 	if(smallUp.Contains(where)) {fTrackingState = 1; fTrackingRegion = smallUp;}
 	else if(smallDown.Contains(where)) {fTrackingState = 2; fTrackingRegion = smallDown;}
@@ -359,7 +360,7 @@ EScrollBar::MouseMoved(EPoint where, euint32 code, const EMessage *a_message)
 			if(theme == NULL || theme->get_scrollbar_respondent_region == NULL) break;
 
 			float ratio = 0;
-			theme->get_scrollbar_respondent_region(theme, this, Bounds(),
+			theme->get_scrollbar_respondent_region(theme, this, Frame().OffsetToSelf(E_ORIGIN),
 							       fOrientation, fRangeMin, fRangeMax, fValue, &ratio,
 							       NULL, NULL, NULL, NULL, NULL);
 			if(ratio <= 0) break;
@@ -369,7 +370,7 @@ EScrollBar::MouseMoved(EPoint where, euint32 code, const EMessage *a_message)
 			else
 				SetValue(fValue + (where.y - fMousePosition.y) / ratio);
 
-			theme->get_scrollbar_respondent_region(theme, this, Bounds(),
+			theme->get_scrollbar_respondent_region(theme, this, Frame().OffsetToSelf(E_ORIGIN),
 							       fOrientation, fRangeMin, fRangeMax, fValue, NULL,
 							       &fTrackingRegion, NULL, NULL, NULL, NULL);
 

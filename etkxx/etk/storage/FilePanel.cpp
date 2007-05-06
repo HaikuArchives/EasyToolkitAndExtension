@@ -833,8 +833,8 @@ EFilePanelView::FrameResized(float new_width, float new_height)
 	fHSB->SetRange(0, max_c(w - new_width, 0));
 	fHSB->SetEnabled(new_width < w);
 
-	fVSB->SetRange(0, max_c(rect.Height() - fListView->Bounds().Height(), 0));
-	fVSB->SetEnabled(fListView->Bounds().Height() < rect.Height());
+	fVSB->SetRange(0, max_c(rect.Height() - fListView->Frame().Height(), 0));
+	fVSB->SetEnabled(fListView->Frame().Height() < rect.Height());
 }
 
 
@@ -879,18 +879,19 @@ EFilePanelTitleView::Draw(ERect updateRect)
 	SetDrawingMode(E_OP_COPY);
 	SetPenSize(0);
 
+	ERect bounds = Frame().OffsetToSelf(E_ORIGIN);
 	SetHighColor(ViewColor());
-	FillRect(Bounds());
+	FillRect(bounds);
 
-	ERect rect = Bounds();
+	ERect rect = bounds;
 	rect.right = rect.left;
 	for(eint32 i = 0; i <= parent->CountColumns(); i++)
 	{
 		if(i == parent->CountColumns())
 		{
-			if(rect.right >= Bounds().right) break;
+			if(rect.right >= bounds.right) break;
 			rect.left = rect.right + (i == 0 ? 0.f : 1.f);
-			rect.right = Bounds().right + 1;
+			rect.right = bounds.right + 1;
 		}
 		else
 		{
@@ -953,7 +954,7 @@ EFilePanelTitleView::ScrollTo(EPoint where)
 	EListView *listView = (EListView*)Parent()->FindView("PoseView");
 
 	EView::ScrollTo(where);
-	listView->ScrollTo(where.x, listView->ConvertToParent(EPoint(0, 0)).y - listView->Frame().top);
+	listView->ScrollTo(where.x, listView->Frame().top - listView->ConvertToParent(EPoint(0, 0)).y);
 }
 
 

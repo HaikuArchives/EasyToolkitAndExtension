@@ -202,7 +202,7 @@ EBox::ContentBounds() const
 
 	float labelHeight = ((fLabelView == NULL || fLabelView->Frame().Width() <= 0) ? 0.f : fLabelView->Frame().Height());
 
-	ERect bounds = Bounds();
+	ERect bounds = Frame().OffsetToSelf(E_ORIGIN);
 	bounds.left += l;
 	bounds.top += max_c(t, labelHeight);
 	bounds.right -= r;
@@ -223,7 +223,7 @@ EBox::Draw(ERect updateRect)
 	float l = 0, t = 0, r = 0, b = 0;
 	theme->get_border_margins(theme, this, &l, &t, &r, &b, fBorder, PenSize());
 
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	if(!(fLabelView == NULL || fLabelView->Frame().Width() <= 0 || fLabelView->Frame().Height() < t))
 		rect.top += (fLabelView->Frame().Height() - t) / 2.f;
 

@@ -389,7 +389,7 @@ ETabView::SetTabWidth(e_button_width tabWidth)
 	{
 		fTabWidth = tabWidth;
 
-		ERect r = Bounds();
+		ERect r = Frame().OffsetToSelf(E_ORIGIN);
 		r.bottom = r.top + fTabHeight;
 		Invalidate(r);
 	}
@@ -412,7 +412,7 @@ ETabView::SetTabHeight(float tabHeight)
 
 		if(fContainer != NULL)
 		{
-			ERect frame = Bounds();
+			ERect frame = Frame().OffsetToSelf(E_ORIGIN);
 			frame.top += fTabHeight;
 			frame.InsetBy(2, 2);
 
@@ -455,7 +455,7 @@ ETabView::TabFrame(eint32 tabIndex) const
 	EFont font;
 	GetFont(&font);
 
-	ERect r = Bounds();
+	ERect r = Frame().OffsetToSelf(E_ORIGIN);
 	r.bottom = r.top + fTabHeight;
 	r.right = r.left;
 
@@ -513,7 +513,7 @@ ETabView::DrawTabs()
 void
 ETabView::DrawBox(ERect selTabRect)
 {
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.top += fTabHeight;
 
 	e_rgb_color shineColor = e_ui_color(E_SHINE_COLOR);
@@ -567,7 +567,7 @@ ETabView::MouseDown(EPoint where)
 	ETab *tab = (ETab*)fTabs.ItemAt(index);
 	tab->Select();
 
-	ERect r = Bounds();
+	ERect r = Frame().OffsetToSelf(E_ORIGIN);
 	r.bottom = r.top + fTabHeight;
 	Invalidate(r);
 }

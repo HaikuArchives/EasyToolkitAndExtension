@@ -97,7 +97,7 @@ EListView::MakeFocus(bool focusState)
 		{
 			PushState();
 			SetHighColor(IsFocus() ? e_ui_color(E_NAVIGATION_BASE_COLOR) : ViewColor());
-			StrokeRect(ConvertFromParent(Frame()));
+			StrokeRect(Bounds());
 			PopState();
 
 			InvalidateItem(fPos);
@@ -113,7 +113,7 @@ EListView::WindowActivated(bool state)
 	if(!(IsFocus() && (Flags() & E_WILL_DRAW))) return;
 	PushState();
 	SetHighColor(state ? e_ui_color(E_NAVIGATION_BASE_COLOR) : ViewColor());
-	StrokeRect(ConvertFromParent(Frame()));
+	StrokeRect(Bounds());
 	PopState();
 }
 
@@ -296,7 +296,7 @@ EListView::IndexOf(EPoint where, bool mustVisible) const
 		boundsBottom = vRect.bottom;
 	}
 
-	ERect rect(UnitsPerPixel(), UnitsPerPixel(), ConvertFromParent(Frame()).right, UnitsPerPixel());
+	ERect rect(1, 1, Frame().Width() - 1, 1);
 
 	eint32 retVal = -1;
 
@@ -307,7 +307,7 @@ EListView::IndexOf(EPoint where, bool mustVisible) const
 
 		rect.top = rect.bottom;
 		rect.bottom = rect.top + item->Height();
-		if(rect.top > UnitsPerPixel()) rect.OffsetBy(0, UnitsPerPixel());
+		if(rect.top > 1) rect.OffsetBy(0, 1);
 
 		if(rect.Contains(where))
 		{
@@ -368,7 +368,7 @@ void
 EListView::Draw(ERect updateRect)
 {
 	if(Window() == NULL) return;
-	ERect bounds = ConvertFromParent(Frame());
+	ERect bounds = Bounds();
 	bool winActivated = Window()->IsActivate();
 
 	if(IsFocus() && winActivated)
@@ -381,8 +381,8 @@ EListView::Draw(ERect updateRect)
 		PopState();
 	}
 
-	bounds.InsetBy(UnitsPerPixel(), UnitsPerPixel());
-	ERect rect(UnitsPerPixel(), UnitsPerPixel(), bounds.right, UnitsPerPixel());
+	bounds.InsetBy(1, 1);
+	ERect rect(1, 1, bounds.right - 1, 1);
 
 	for(eint32 i = 0; i < fItems.CountItems(); i++)
 	{
@@ -391,7 +391,7 @@ EListView::Draw(ERect updateRect)
 
 		rect.top = rect.bottom;
 		rect.bottom = rect.top + item->Height();
-		if(rect.top > UnitsPerPixel()) rect.OffsetBy(0, UnitsPerPixel());
+		if(rect.top > 1) rect.OffsetBy(0, 1);
 		if(rect.Intersects(updateRect) == false) continue;
 		if(rect.top >= bounds.bottom) break;
 		if(rect.Intersects(bounds) == false) continue;
@@ -504,11 +504,8 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 
 	if(oldPos >= 0 || newPos >= 0)
 	{
-		float xLocalOrigin = ConvertToParent(EPoint(0, 0)).x - Frame().left;
-
 		ERect rect = ItemFrame(newPos);
-		ERect vRect = VisibleBounds();
-		if(rect.IsValid() == false || (vRect.top <= rect.top && vRect.bottom >= rect.bottom) ||
+		if(rect.IsValid() == false ||
 		   e_is_kind_of(Parent(), EScrollView) == false || e_cast_as(Parent(), EScrollView)->Target() != this)
 		{
 			InvalidateItem(oldPos);
@@ -516,10 +513,20 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 		}
 		else
 		{
-			if(doDown == false)
-				ScrollTo(xLocalOrigin, -rect.top);
+			ERect vRect = ConvertFromParent(e_cast_as(Parent(), EScrollView)->TargetFrame());
+			if(vRect.top <= rect.top && vRect.bottom >= rect.bottom)
+			{
+				InvalidateItem(oldPos);
+				if(rect.IsValid()) Invalidate(rect);
+			}
 			else
-				ScrollTo(xLocalOrigin, -(rect.bottom - vRect.Height()));
+			{
+				float xOffset = Frame().left - ConvertToParent(EPoint(0, 0)).x;
+				if(doDown == false)
+					ScrollTo(xOffset, rect.top);
+				else
+					ScrollTo(xOffset, rect.bottom - vRect.Height());
+			}
 		}
 	}
 
@@ -527,7 +534,7 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 	     e_is_kind_of(Parent(), EScrollView) == false ||
 	     e_cast_as(Parent(), EScrollView)->Target() != this))
 	{
-		float visibleWidth = VisibleBounds().Width();
+		float visibleWidth = e_cast_as(Parent(), EScrollView)->TargetFrame().Width();
 		ERect frame = Frame();
 
 		if(visibleWidth >= frame.Width()) return;
@@ -535,18 +542,18 @@ EListView::KeyDown(const char *bytes, eint32 numBytes)
 		EScrollBar *hsb = e_cast_as(Parent(), EScrollView)->ScrollBar(E_HORIZONTAL);
 		if(hsb == NULL) return;
 
-		EPoint LocalOrigin = ConvertToParent(EPoint(0, 0)) - frame.LeftTop();
+		EPoint originOffset = frame.LeftTop() - ConvertToParent(EPoint(0, 0));
 
 		float step = 0;
 		hsb->GetSteps(NULL, &step);
 
-		if(bytes[0] == E_LEFT_ARROW) LocalOrigin.x += step;
-		else LocalOrigin.x -= step;
+		if(bytes[0] == E_LEFT_ARROW) originOffset.x -= step;
+		else originOffset.x += step;
 
-		if(LocalOrigin.x < visibleWidth - frame.Width()) LocalOrigin.x = visibleWidth - frame.Width();
-		else if(LocalOrigin.x > 0) LocalOrigin.x = 0;
+		if(originOffset.x > frame.Width() - visibleWidth) originOffset.x = frame.Width() - visibleWidth;
+		else if(originOffset.x < 0) originOffset.x = 0;
 
-		ScrollTo(LocalOrigin);
+		ScrollTo(originOffset);
 	}
 }
 
@@ -1015,7 +1022,7 @@ EListView::ItemFrame(eint32 index) const
 		EListItem *item = (EListItem*)fItems.ItemAt(index);
 		if(item->Height() >= 0)
 		{
-			r.Set(UnitsPerPixel(), UnitsPerPixel(), ConvertFromParent(Frame()).right, UnitsPerPixel());
+			r.Set(1, 1, Frame().Width() - 1, 1);
 
 			for(eint32 i = 0; i <= index; i++)
 			{
@@ -1024,7 +1031,7 @@ EListView::ItemFrame(eint32 index) const
 
 				r.top = r.bottom;
 				r.bottom = r.top + item->Height();
-				if(r.top > UnitsPerPixel()) r.OffsetBy(0, UnitsPerPixel());
+				if(r.top > 1) r.OffsetBy(0, 1);
 			}
 		}
 	}
@@ -1047,28 +1054,34 @@ EListView::ScrollToItem(eint32 index)
 	ERect rect = ItemFrame(index);
 	if(rect.IsValid() == false) return;
 
-	ERect vRect = VisibleBounds();
+	ERect vRect = Bounds();
 	if(vRect.top <= rect.top && vRect.bottom >= rect.bottom) return;
 
 	EPoint pt = rect.LeftTop();
 	pt.ConstrainTo(vRect);
 
-	ScrollTo(ConvertToParent(EPoint(0, 0)).x - Frame().left,
-		 pt.y == vRect.top ? -rect.top : -(rect.bottom - vRect.Height()));
+	ScrollTo(Frame().left - ConvertToParent(EPoint(0, 0)).x,
+		 pt.y == vRect.top ? rect.top : rect.bottom - vRect.Height());
 }
 
 
 void
 EListView::ScrollToSelection()
 {
-	if(fFirstSelected < 0) return;
-
 	EScrollView *scrollView = e_cast_as(Parent(), EScrollView);
 	if(scrollView == NULL || scrollView->Target() != this) return;
 
 	ERect rect = ItemFrame(fFirstSelected);
-	if(rect.IsValid())
-		ScrollTo(ConvertToParent(EPoint(0, 0)).x - Frame().left, -rect.top);
+	if(rect.IsValid() == false) return;
+
+	ERect vRect = ConvertFromParent(scrollView->TargetFrame());
+	if(vRect.top <= rect.top && vRect.bottom >= rect.bottom) return;
+
+	EPoint pt = rect.LeftTop();
+	pt.ConstrainTo(vRect);
+
+	ScrollTo(Frame().left - ConvertToParent(EPoint(0, 0)).x,
+		 pt.y == vRect.top ? rect.top : rect.bottom - vRect.Height());
 }
 
 

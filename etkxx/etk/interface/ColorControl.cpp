@@ -147,7 +147,7 @@ EColorControl::_MarkFrame(ERect colorsFrame, euint8 channel)
 ERect
 EColorControl::_ColorsFrame()
 {
-	ERect r = Bounds();
+	ERect r = Frame().OffsetToSelf(E_ORIGIN);
 
 	if(r.IsValid())
 	{
@@ -166,7 +166,7 @@ EColorControl::_ColorsFrame()
 ERect
 EColorControl::_DescriptionFrame()
 {
-	ERect r = Bounds();
+	ERect r = Frame().OffsetToSelf(E_ORIGIN);
 
 	if(r.IsValid())
 	{

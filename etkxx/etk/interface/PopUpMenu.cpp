@@ -239,7 +239,7 @@ EPopUpMenu::MessageReceived(EMessage *msg)
 					Window()->PostMessage(E_QUIT_REQUESTED);
 					return;
 				}
-				if(msg->FindPoint("where", &where) == false || Bounds().Contains(where)) break;
+				if(msg->FindPoint("where", &where) == false || VisibleBounds().Contains(where)) break;
 				ConvertToScreen(&where);
 
 				EMenu *submenu = this;
@@ -307,7 +307,7 @@ EPopUpMenu::MouseUp(EPoint where)
 
 		ConvertToScreen(&mousePos);
 
-		if(!Bounds().Contains(where))
+		if(!VisibleBounds().Contains(where))
 		{
 			while(submenu != NULL)
 			{

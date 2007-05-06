@@ -69,8 +69,8 @@ ETextControl::SetDivider(float divider)
 
 		ERect margins(1, 1, 1, 1);
 		margins.left += (fDivider >= 0 ? fDivider : max_c(font.StringWidth(Label()), 0)) + UnitsPerPixel();
-		if(sHeight + 2.f * UnitsPerPixel() > Bounds().Height())
-			margins.top = margins.bottom = (sHeight - Bounds().Height()) / 2.f + UnitsPerPixel();
+		if(sHeight + 2.f * UnitsPerPixel() > Frame().Height())
+			margins.top = margins.bottom = (sHeight - Frame().Height()) / 2.f + UnitsPerPixel();
 		SetMargins(margins.left, margins.top, margins.right, margins.bottom);
 	}
 }
@@ -120,8 +120,8 @@ ETextControl::SetLabel(const char *label)
 	font.GetHeight(&fontHeight);
 	float sHeight = fontHeight.ascent + fontHeight.descent;
 	margins.left += (fDivider >= 0 ? fDivider : max_c(font.StringWidth(Label()), 0)) + UnitsPerPixel();
-	if(sHeight + 2.f * UnitsPerPixel() > Bounds().Height())
-		margins.top = margins.bottom = (sHeight - Bounds().Height()) / 2.f + UnitsPerPixel();
+	if(sHeight + 2.f * UnitsPerPixel() > Frame().Height())
+		margins.top = margins.bottom = (sHeight - Frame().Height()) / 2.f + UnitsPerPixel();
 
 	SetMargins(margins.left, margins.top, margins.right, margins.bottom);
 }
@@ -138,7 +138,7 @@ ETextControl::Draw(ERect updateRect)
 		font.GetHeight(&fontHeight);
 		float sHeight = fontHeight.ascent + fontHeight.descent;
 
-		ERect rect = Bounds();
+		ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 		rect.right = (fDivider >= 0 ? fDivider : max_c(font.StringWidth(Label()), 0));
 
 		EPoint penLocation;
@@ -181,7 +181,7 @@ ETextControl::Draw(ERect updateRect)
 
 	float l, t, r, b;
 	GetMargins(&l, &t, &r, &b);
-	ERect rect = Bounds();
+	ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 	rect.left += l;
 	rect.top += t;
 	rect.right -= r;

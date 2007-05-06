@@ -175,7 +175,7 @@ EMenuField::Draw(ERect updateRect)
 		font.GetHeight(&fontHeight);
 		float sHeight = fontHeight.ascent + fontHeight.descent;
 
-		ERect rect = Bounds();
+		ERect rect = Frame().OffsetToSelf(E_ORIGIN);
 		rect.right = (fDivider >= 0 ? fDivider : max_c(font.StringWidth(fLabel), 0));
 
 		EPoint penLocation;
@@ -208,7 +208,7 @@ EMenuField::Draw(ERect updateRect)
 	{
 		PushState();
 		SetHighColor(e_ui_color(E_NAVIGATION_BASE_COLOR));
-		StrokeRect(Bounds());
+		StrokeRect(Frame().OffsetToSelf(E_ORIGIN));
 		PopState();
 	}
 #endif
@@ -272,7 +272,7 @@ EMenuField::WindowActivated(bool state)
 	if(!(IsFocus() && (Flags() & E_WILL_DRAW))) return;
 	PushState();
 	SetHighColor(state ? e_ui_color(E_NAVIGATION_BASE_COLOR) : ViewColor());
-	StrokeRect(Bounds());
+	StrokeRect(Frame().OffsetToSelf(E_ORIGIN));
 	PopState();
 #endif
 }
@@ -290,7 +290,7 @@ EMenuField::MakeFocus(bool focusState)
 		{
 			PushState();
 			SetHighColor(IsFocus() ? e_ui_color(E_NAVIGATION_BASE_COLOR) : ViewColor());
-			StrokeRect(Bounds());
+			StrokeRect(Frame().OffsetToSelf(E_ORIGIN));
 			PopState();
 		}
 #endif

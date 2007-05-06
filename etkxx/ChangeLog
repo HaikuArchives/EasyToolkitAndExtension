@@ -1,3 +1,6 @@
+2007-05-06  anthonylee
+	Fixed EView::ScrollTo()/ScrollBy/Bounds().
+
 2007-05-04  anthonylee
 	Added ENetAddress/ENetEndpoint for Net Kit.
 
