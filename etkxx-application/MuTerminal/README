@@ -18,6 +18,7 @@ Purpose:   Running on other systems more than BeOS
 	$ patch -p1 < ../MuTerminal-2.4-with-etkxx.patch
 	$ cd src
 	$ make -f Makefile_with_etkxx
+	$ make -f Makefile_with_etkxx install
 
 
 - ChangeLog

@@ -8,10 +8,6 @@
 // class
 #define BView				EView
 
-// functions: different with BeAPI
-#define BView_ScrollTo(x, y)		ScrollTo(-(x), -(y))
-#define BView_ScrollBy(dh, dv)		ScrollBy(-(dh), -(dv))
-
 #endif /* __cplusplus */
 
 /* others */
