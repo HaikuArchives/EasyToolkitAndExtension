@@ -1,6 +1,6 @@
 diff -Nur MuTerm/src/AboutDlg.cpp MuTerm working/src/AboutDlg.cpp
---- MuTerm/src/AboutDlg.cpp	2001-07-01 12:28:10.000000000 +0800
-+++ MuTerm working/src/AboutDlg.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/AboutDlg.cpp	Sun Jul  1 12:28:10 2001
++++ MuTerm working/src/AboutDlg.cpp	Sun May  6 17:52:52 2007
 @@ -16,6 +16,10 @@
   AboutDlg.cpp,v Implementation for MuTerminal About Dialog.
  
@@ -79,8 +79,8 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm working/src/AboutDlg.cpp
 +#endif
  }
 diff -Nur MuTerm/src/AboutDlg.h MuTerm working/src/AboutDlg.h
---- MuTerm/src/AboutDlg.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/AboutDlg.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/AboutDlg.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/AboutDlg.h	Sun May  6 17:52:52 2007
 @@ -18,8 +18,12 @@
  #ifndef ABOUTDLG_H_INCLUDED
  #define ABOUTDLG_H_INCLUDED
@@ -95,8 +95,8 @@ diff -Nur MuTerm/src/AboutDlg.h MuTerm working/src/AboutDlg.h
  const ulong MSG_ABOUT_CLOSED = 'msac';
  
 diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm working/src/AppearPrefView.cpp
---- MuTerm/src/AppearPrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/AppearPrefView.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/AppearPrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/AppearPrefView.cpp	Sun May  6 17:52:52 2007
 @@ -16,6 +16,7 @@
  
  ***************************************************************************/
@@ -116,8 +116,8 @@ diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm working/src/AppearPrefView.cpp
  #include <stdlib.h>
  
 diff -Nur MuTerm/src/CodeConv.cpp MuTerm working/src/CodeConv.cpp
---- MuTerm/src/CodeConv.cpp	2001-06-08 21:22:49.000000000 +0800
-+++ MuTerm working/src/CodeConv.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/CodeConv.cpp	Fri Jun  8 21:22:49 2001
++++ MuTerm working/src/CodeConv.cpp	Sun May  6 17:52:52 2007
 @@ -32,14 +32,20 @@
  ************************************************************************/
  
@@ -153,8 +153,8 @@ diff -Nur MuTerm/src/CodeConv.cpp MuTerm working/src/CodeConv.cpp
  	  {
  	     if (errno == EILSEQ)  //char not defined in code table, or wrong table
 diff -Nur MuTerm/src/CodeConv.h MuTerm working/src/CodeConv.h
---- MuTerm/src/CodeConv.h	2001-06-08 21:18:47.000000000 +0800
-+++ MuTerm working/src/CodeConv.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/CodeConv.h	Fri Jun  8 21:18:47 2001
++++ MuTerm working/src/CodeConv.h	Sun May  6 17:52:52 2007
 @@ -19,9 +19,19 @@
  #ifndef CODECONV_H
  #define CODECONV_H
@@ -176,8 +176,8 @@ diff -Nur MuTerm/src/CodeConv.h MuTerm working/src/CodeConv.h
  #define BEGINS_CHAR(byte) ((byte & 0xc0) >= 0x80)
  
 diff -Nur MuTerm/src/CurPos.h MuTerm working/src/CurPos.h
---- MuTerm/src/CurPos.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/CurPos.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/CurPos.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/CurPos.h	Sun May  6 17:52:52 2007
 @@ -19,7 +19,11 @@
  #ifndef	CURPOS_H_INCLUDED
  #define	CURPOS_H_INCLUDED
@@ -191,8 +191,8 @@ diff -Nur MuTerm/src/CurPos.h MuTerm working/src/CurPos.h
  class CurPos
  {
 diff -Nur MuTerm/src/LangPrefView.cpp MuTerm working/src/LangPrefView.cpp
---- MuTerm/src/LangPrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/LangPrefView.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/LangPrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/LangPrefView.cpp	Sun May  6 17:52:52 2007
 @@ -16,6 +16,9 @@
  
  ***************************************************************************/
@@ -233,8 +233,8 @@ diff -Nur MuTerm/src/LangPrefView.cpp MuTerm working/src/LangPrefView.cpp
      if(!strcmp(buf, gTermPref->getString(PREF_GUI_LANGUAGE))){
        item->SetMarked(true);
 diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
---- MuTerm/src/Makefile_with_etkxx	1970-01-01 08:00:00.000000000 +0800
-+++ MuTerm working/src/Makefile_with_etkxx	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/Makefile_with_etkxx	Thu Jan  1 08:00:00 1970
++++ MuTerm working/src/Makefile_with_etkxx	Tue May  8 02:06:08 2007
 @@ -0,0 +1,110 @@
 +DEBUG_OPTIONS = -g -Wall
 +OPTIMIZE = -O3
@@ -242,28 +242,28 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
 +MIN_ETKXX_VER = 0.3.1
 +
 +ifeq ($(OSTYPE),msys)
-+PREFIX=/MinGW
++PREFIX = /MinGW
 +else
-+PREFIX=/usr/local
++PREFIX = /usr/local
 +endif
 +
-+DESTDIR=$(PREFIX)
-+EXEC_SUFFIX=
++DESTDIR = $(PREFIX)
++EXEC_SUFFIX =
 +
-+EXTRA_CFLAGS=-DUSE_ETKXX -DPREF_FOLDER=\"$(PREFIX)/etc/MuTerminal/\"
++EXTRA_CFLAGS = -DUSE_ETKXX -DPREF_FOLDER=\"$(PREFIX)/etc/MuTerminal/\"
 +
 +ifeq ($(OSTYPE),msys)
-+LIBICONV_CFLAGS=-I /MinGW/include
-+LIBICONV_LIBS=-L /MinGW/lib -liconv
-+EXEC_SUFFIX=.exe
++LIBICONV_CFLAGS = -I /MinGW/include
++LIBICONV_LIBS = -L /MinGW/lib -liconv
++EXEC_SUFFIX = .exe
 +else
 +
 +ifeq ($(findstring Linux,$(shell uname -a)),Linux)
-+LIBICONV_CFLAGS=
-+LIBICONV_LIBS=
++LIBICONV_CFLAGS =
++LIBICONV_LIBS =
 +else
-+LIBICONV_CFLAGS=
-+LIBICONV_LIBS=-liconv
++LIBICONV_CFLAGS =
++LIBICONV_LIBS = -liconv
 +endif
 +
 +endif
@@ -322,7 +322,7 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
 +	-mkdir -p $(DESTDIR)/bin
 +	cp $(TARGET)$(EXEC_SUFFIX) $(DESTDIR)/bin/$(TARGET)$(EXEC_SUFFIX)
 +	mkdir -p $(DESTDIR)/etc/MuTerminal/menu
-+	cp -a menu $(DESTDIR)/etc/MuTerminal/menu
++	cp -af menu $(DESTDIR)/etc/MuTerminal/
 +	cp ../etc/sample.mp $(DESTDIR)/etc/MuTerminal/setting.mp
 +
 +uninstall:
@@ -347,8 +347,8 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
 +	$(CXX) $(CXXFLAGS) -c $< -o $@
 +
 diff -Nur MuTerm/src/MenuUtil.cpp MuTerm working/src/MenuUtil.cpp
---- MuTerm/src/MenuUtil.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/MenuUtil.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/MenuUtil.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/MenuUtil.cpp	Sun May  6 17:52:52 2007
 @@ -16,12 +16,17 @@
  
  ***************************************************************************/
@@ -429,8 +429,8 @@ diff -Nur MuTerm/src/MenuUtil.cpp MuTerm working/src/MenuUtil.cpp
    return;
    
 diff -Nur MuTerm/src/MenuUtil.h MuTerm working/src/MenuUtil.h
---- MuTerm/src/MenuUtil.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/MenuUtil.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/MenuUtil.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/MenuUtil.h	Sun May  6 17:52:52 2007
 @@ -19,7 +19,11 @@
  #ifndef MENUUTIL_H_INCLUDED
  #define MENUUTIL_H_INCLUDED
@@ -444,8 +444,8 @@ diff -Nur MuTerm/src/MenuUtil.h MuTerm working/src/MenuUtil.h
  #ifdef __cplusplus
  extern "C" {
 diff -Nur MuTerm/src/MousePrefView.cpp MuTerm working/src/MousePrefView.cpp
---- MuTerm/src/MousePrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/MousePrefView.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/MousePrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/MousePrefView.cpp	Sun May  6 17:52:52 2007
 @@ -16,6 +16,10 @@
  
  ***************************************************************************/
@@ -470,8 +470,8 @@ diff -Nur MuTerm/src/MousePrefView.cpp MuTerm working/src/MousePrefView.cpp
  #include "MousePrefView.h"
  #include "PrefHandler.h"
 diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
---- MuTerm/src/PrefDlg.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefDlg.cpp	2007-05-06 11:09:28.000000000 +0800
+--- MuTerm/src/PrefDlg.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefDlg.cpp	Tue May  8 02:46:25 2007
 @@ -15,6 +15,8 @@
   PrefDlg.cpp,v: Implementation for MuTerminal Preference Dialog.
  
@@ -571,21 +571,17 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
    
    fDirty = false;
  }
-@@ -269,7 +302,12 @@
+@@ -269,7 +302,8 @@
    // Set window Title
    sprintf (titlestr, "%s MuTerm (%s)",
  	   LabelText.getString ("PrefWindow"),
 -	   &tty_name[8]);
-+#ifndef _WIN32
 +	   &tty_name[8]
-+#else
-+	   "unknown"
-+#endif
 +	  );
    this->SetTitle(titlestr);
    // Set Tab Lables and Control labels
    for (int32 i = 0; i < fTabView->CountTabs(); i++) {
-@@ -296,7 +334,7 @@
+@@ -296,7 +330,7 @@
    switch (msg->what) {  
    case MSG_SAVE_PRESSED:
      doSave();
@@ -594,7 +590,7 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
      break;
  
    case MSG_SAVEAS_PRESSED:
-@@ -349,9 +387,11 @@
+@@ -349,9 +383,11 @@
  
    b = new BButton(r, "", label, new BMessage(msg));
    parent->AddChild(b);
@@ -607,7 +603,7 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
  
    return b;
  }
-@@ -362,6 +402,7 @@
+@@ -362,6 +398,7 @@
  BRect
  PrefDlg::CenteredRect(BRect r)
  {
@@ -615,7 +611,7 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
    BRect screenRect = BScreen().Frame();
  
    screenRect.InsetBy(10,10);
-@@ -372,4 +413,7 @@
+@@ -372,4 +409,7 @@
    r.OffsetTo(x, y);
    
    return r;
@@ -624,8 +620,8 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm working/src/PrefDlg.cpp
 +#endif
  }
 diff -Nur MuTerm/src/PrefDlg.h MuTerm working/src/PrefDlg.h
---- MuTerm/src/PrefDlg.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefDlg.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/PrefDlg.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefDlg.h	Sun May  6 17:52:52 2007
 @@ -18,7 +18,12 @@
  #ifndef PREFDLG_H_INCLUDED
  #define PREFDLG_H_INCLUDED
@@ -640,8 +636,8 @@ diff -Nur MuTerm/src/PrefDlg.h MuTerm working/src/PrefDlg.h
  
  // local message, so these are in .cpp files....
 diff -Nur MuTerm/src/PrefHandler.cpp MuTerm working/src/PrefHandler.cpp
---- MuTerm/src/PrefHandler.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefHandler.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/PrefHandler.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefHandler.cpp	Sun May  6 17:52:52 2007
 @@ -20,11 +20,15 @@
  #include <stdlib.h>
  #include <string.h>
@@ -797,8 +793,8 @@ diff -Nur MuTerm/src/PrefHandler.cpp MuTerm working/src/PrefHandler.cpp
  /////////////////////////////////////////////////////////////////////////////
  //
 diff -Nur MuTerm/src/PrefHandler.h MuTerm working/src/PrefHandler.h
---- MuTerm/src/PrefHandler.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefHandler.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/PrefHandler.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefHandler.h	Sun May  6 17:52:52 2007
 @@ -18,10 +18,14 @@
  #ifndef PREFHANDLER_H_INCLUDED
  #define PREFHANDLER_H_INCLUDED
@@ -815,8 +811,8 @@ diff -Nur MuTerm/src/PrefHandler.h MuTerm working/src/PrefHandler.h
  struct prefDefaults
  {
 diff -Nur MuTerm/src/PrefView.cpp MuTerm working/src/PrefView.cpp
---- MuTerm/src/PrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefView.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/PrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefView.cpp	Sun May  6 17:52:52 2007
 @@ -16,6 +16,7 @@
  
  ***************************************************************************/
@@ -863,8 +859,8 @@ diff -Nur MuTerm/src/PrefView.cpp MuTerm working/src/PrefView.cpp
    return col;
  }
 diff -Nur MuTerm/src/PrefView.h MuTerm working/src/PrefView.h
---- MuTerm/src/PrefView.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/PrefView.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/PrefView.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/PrefView.h	Sun May  6 17:52:52 2007
 @@ -18,9 +18,14 @@
  
  #ifndef PREFVIEW_H_INCLUDED
@@ -881,8 +877,8 @@ diff -Nur MuTerm/src/PrefView.h MuTerm working/src/PrefView.h
  // Interface Element's Coordinate System to BRect.
  #define IERECT(X,Y,W,H)  BRect((X),(Y),(X+W-1),(Y+H-1))
 diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm working/src/ShellPrefView.cpp
---- MuTerm/src/ShellPrefView.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/ShellPrefView.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/ShellPrefView.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/ShellPrefView.cpp	Sun May  6 17:52:52 2007
 @@ -16,6 +16,9 @@
  
  ***************************************************************************/
@@ -906,8 +902,8 @@ diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm working/src/ShellPrefView.cpp
  #include "ShellPrefView.h"
  #include "PrefHandler.h"
 diff -Nur MuTerm/src/TTextControl.cpp MuTerm working/src/TTextControl.cpp
---- MuTerm/src/TTextControl.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TTextControl.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TTextControl.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TTextControl.cpp	Sun May  6 17:52:52 2007
 @@ -16,7 +16,6 @@
  
  ***************************************************************************/
@@ -917,8 +913,8 @@ diff -Nur MuTerm/src/TTextControl.cpp MuTerm working/src/TTextControl.cpp
  
  /************************************************************************
 diff -Nur MuTerm/src/TTextControl.h MuTerm working/src/TTextControl.h
---- MuTerm/src/TTextControl.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TTextControl.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TTextControl.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TTextControl.h	Sun May  6 17:52:52 2007
 @@ -18,7 +18,12 @@
  
  #ifndef TTEXTCTL_H_INCLUDED
@@ -933,8 +929,8 @@ diff -Nur MuTerm/src/TTextControl.h MuTerm working/src/TTextControl.h
  class TTextControl : public BTextControl
  {
 diff -Nur MuTerm/src/TermApp.cpp MuTerm working/src/TermApp.cpp
---- MuTerm/src/TermApp.cpp	2001-07-01 12:27:21.000000000 +0800
-+++ MuTerm working/src/TermApp.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermApp.cpp	Sun Jul  1 12:27:21 2001
++++ MuTerm working/src/TermApp.cpp	Mon May  7 02:26:02 2007
 @@ -24,19 +24,37 @@
  char *muterm_ver = "2.4";
  char *last_update = "2001/7/1";
@@ -1050,7 +1046,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm working/src/TermApp.cpp
      kill (-sh_pid, SIGHUP);
      wait (&status);
 +#else
-+    // TODO
++    TerminateProcess((HANDLE)handleProcess, 0);
 +#endif
    }
    
@@ -1191,8 +1187,8 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm working/src/TermApp.cpp
  
  ////////////////////////////////////////////////////////////////////////////
 diff -Nur MuTerm/src/TermApp.h MuTerm working/src/TermApp.h
---- MuTerm/src/TermApp.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermApp.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermApp.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermApp.h	Sun May  6 17:52:52 2007
 @@ -19,8 +19,12 @@
  #ifndef TERMAPP_H
  #define TERMAPP_H
@@ -1207,8 +1203,8 @@ diff -Nur MuTerm/src/TermApp.h MuTerm working/src/TermApp.h
  extern int pfd;
  extern char *ptyname;
 diff -Nur MuTerm/src/TermBaseView.h MuTerm working/src/TermBaseView.h
---- MuTerm/src/TermBaseView.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermBaseView.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermBaseView.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermBaseView.h	Sun May  6 17:52:52 2007
 @@ -18,7 +18,12 @@
  
  #ifndef TERMBASEVIEW_H_INCLUDED
@@ -1223,8 +1219,8 @@ diff -Nur MuTerm/src/TermBaseView.h MuTerm working/src/TermBaseView.h
  class TermView;
  
 diff -Nur MuTerm/src/TermBuffer.cpp MuTerm working/src/TermBuffer.cpp
---- MuTerm/src/TermBuffer.cpp	2001-06-28 14:50:39.000000000 +0800
-+++ MuTerm working/src/TermBuffer.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermBuffer.cpp	Thu Jun 28 14:50:39 2001
++++ MuTerm working/src/TermBuffer.cpp	Sun May  6 17:52:52 2007
 @@ -81,13 +81,19 @@
  
  ************************************************************************/
@@ -1247,8 +1243,8 @@ diff -Nur MuTerm/src/TermBuffer.cpp MuTerm working/src/TermBuffer.cpp
  #include "TermBuffer.h"
  #include "TermConst.h"
 diff -Nur MuTerm/src/TermBuffer.h MuTerm working/src/TermBuffer.h
---- MuTerm/src/TermBuffer.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermBuffer.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermBuffer.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermBuffer.h	Sun May  6 17:52:52 2007
 @@ -18,7 +18,12 @@
  #ifndef TERMBUFFER_H_INCLUDED
  #define TERMBUFFER_H_INCLUDED
@@ -1263,8 +1259,8 @@ diff -Nur MuTerm/src/TermBuffer.h MuTerm working/src/TermBuffer.h
  #include "CurPos.h"
  
 diff -Nur MuTerm/src/TermConst.h MuTerm working/src/TermConst.h
---- MuTerm/src/TermConst.h	2001-06-28 14:43:48.000000000 +0800
-+++ MuTerm working/src/TermConst.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermConst.h	Thu Jun 28 14:43:48 2001
++++ MuTerm working/src/TermConst.h	Sun May  6 17:52:52 2007
 @@ -24,6 +24,10 @@
  #define MALLOC_DEBUG
  #endif
@@ -1289,8 +1285,8 @@ diff -Nur MuTerm/src/TermConst.h MuTerm working/src/TermConst.h
  const char * const LOCALE_FILE_DEFAULT = PREF_FOLDER "menu/en";
  
 diff -Nur MuTerm/src/TermIM.cpp MuTerm working/src/TermIM.cpp
---- MuTerm/src/TermIM.cpp	2001-06-08 21:32:57.000000000 +0800
-+++ MuTerm working/src/TermIM.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermIM.cpp	Fri Jun  8 21:32:57 2001
++++ MuTerm working/src/TermIM.cpp	Sun May  6 17:52:52 2007
 @@ -17,18 +17,29 @@
  
  ***************************************************************************/
@@ -1433,8 +1429,8 @@ diff -Nur MuTerm/src/TermIM.cpp MuTerm working/src/TermIM.cpp
 +#endif
  }
 diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
---- MuTerm/src/TermParse.cpp	2001-06-28 14:47:13.000000000 +0800
-+++ MuTerm working/src/TermParse.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermParse.cpp	Thu Jun 28 14:47:13 2001
++++ MuTerm working/src/TermParse.cpp	Tue May  8 05:34:50 2007
 @@ -25,10 +25,14 @@
  #include <signal.h>
  #include <unistd.h>
@@ -1450,7 +1446,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
  
  #include "TermParse.h"
  #include "TermView.h"
-@@ -36,7 +40,12 @@
+@@ -36,9 +40,19 @@
  #include "TermConst.h"
  #include "CodeConv.h"
  #include "Coding.h"
@@ -1461,9 +1457,43 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
 +#include <iconv.h>
 +#endif
  
++#ifndef _WIN32
  extern int pfd; // defined Muterminal.cpp
++#else
++extern int fdRead;
++#define pfd fdRead
++#endif
  
-@@ -96,7 +105,11 @@
+ /////////////////////////////////////////////////////////////////////////////
+ // PtyReader ... Get character from pty device.
+@@ -52,7 +66,7 @@
+ 
+   TermParse *theObj = (TermParse *) data;
+   
+-  uchar buf [READ_BUF_SIZE];
++  uchar buf [READ_BUF_SIZE * 2];
+ 
+   while (theObj->fQuitting) {
+     /*
+@@ -68,6 +82,17 @@
+      */
+     nread = read (pfd, buf,
+ 		  READ_BUF_SIZE - (read_p - theObj->fParser_p));
++#ifdef _WIN32
++	if(nread > 0)
++	{
++		EString aStr;
++		aStr.SetTo((char*)buf, nread);
++		aStr.ReplaceAll("\r\n", "\n");
++		aStr.ReplaceAll("\n", "\r\n");
++		aStr.CopyInto((char*)buf, READ_BUF_SIZE * 2, 0, aStr.Length());
++		nread = aStr.Length();
++	}
++#endif
+     if (nread <= 0) {
+       be_app->PostMessage(B_QUIT_REQUESTED);
+       exit_thread (B_ERROR);
+@@ -96,7 +121,11 @@
      release_sem_etc (theObj->fReaderSem, nread, 0);
  
    }
@@ -1475,7 +1505,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    exit_thread (B_OK);
    return B_OK;
  }
-@@ -159,11 +172,19 @@
+@@ -159,11 +188,19 @@
  				      new BMessage (MSGRUN_CURSOR),
  				      1000000);
    
@@ -1495,7 +1525,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    
    return (resume_thread ( fParseThread));
  
-@@ -177,8 +198,12 @@
+@@ -177,8 +214,12 @@
  {
  
    fWinObj = inWinObj;
@@ -1509,7 +1539,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
      fReaderThread =
        spawn_thread (PtyReader, "PtyReader", B_NORMAL_PRIORITY, this);
    else
-@@ -198,9 +223,17 @@
+@@ -198,9 +239,17 @@
  
  TermParse::TermParse (void)
  {
@@ -1528,7 +1558,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    fLockFlag = 0;
    fParser_p = 0;
    fQuitting = 1;
-@@ -214,9 +247,16 @@
+@@ -214,9 +263,16 @@
    //status_t sts;
    if (cd2utf8 != (iconv_t)(-1))  iconv_close(cd2utf8);  // close libiconv
    fQuitting = 0;
@@ -1546,7 +1576,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    delete_sem (fReaderSem);
    delete_sem (fReaderLocker);
  
-@@ -691,7 +731,11 @@
+@@ -691,7 +747,11 @@
          size_t res;      //status report of iconv
          for(;;)
          {
@@ -1558,7 +1588,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
             if( res == (size_t)(-1) )
             {
                if (errno == EILSEQ)  //char not defined in code table, or wrong table
-@@ -720,7 +764,11 @@
+@@ -720,7 +780,11 @@
          viewObj->PutChar(dstbuf, attr, width);
       }
    }
@@ -1571,8 +1601,8 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    return B_OK;
  }
 diff -Nur MuTerm/src/TermParse.h MuTerm working/src/TermParse.h
---- MuTerm/src/TermParse.h	2001-06-08 19:54:00.000000000 +0800
-+++ MuTerm working/src/TermParse.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermParse.h	Fri Jun  8 19:54:00 2001
++++ MuTerm working/src/TermParse.h	Sun May  6 17:52:52 2007
 @@ -19,8 +19,13 @@
  #ifndef TERMPARSE_H
  #define TERMPARSE_H
@@ -1588,8 +1618,8 @@ diff -Nur MuTerm/src/TermParse.h MuTerm working/src/TermParse.h
  
  class TermView;
 diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
---- MuTerm/src/TermView.cpp	2001-07-01 15:37:51.000000000 +0800
-+++ MuTerm working/src/TermView.cpp	2007-05-06 11:01:56.000000000 +0800
+--- MuTerm/src/TermView.cpp	Sun Jul  1 15:37:51 2001
++++ MuTerm working/src/TermView.cpp	Tue May  8 05:52:14 2007
 @@ -17,6 +17,7 @@
  
  ***************************************************************************/
@@ -1625,7 +1655,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  #include <signal.h>
  #include "spawn.h"
  
-@@ -146,13 +158,24 @@
+@@ -146,13 +158,25 @@
    SetIMAware (gTermPref->getInt32 (PREF_IM_AWARE));
    fIMflag = false;
    
@@ -1636,6 +1666,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
 +#else
 +  fViewThread = NULL;
 +  fMouseThread = NULL;
++  fMouseThreadPort = NULL;
 +  fDrawRectSem = NULL;
 +#endif
 +
@@ -1650,7 +1681,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  }
  
  ////////////////////////////////////////////////////////////////////////////
-@@ -164,8 +187,16 @@
+@@ -164,8 +188,17 @@
  //  delete InputMessenger;
    delete fTextBuffer;
    fQuitting = 0;
@@ -1662,12 +1693,13 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
 +  // TODO
 +  etk_delete_thread (fViewThread);
 +  etk_delete_thread (fMouseThread);
++  etk_delete_port(fMouseThreadPort);
 +#endif
 +
    delete_sem (fDrawRectSem);
  }
  
-@@ -806,7 +837,9 @@
+@@ -806,7 +839,9 @@
      FillRect (r);
    }
  
@@ -1677,7 +1709,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
    return;
  }
-@@ -960,7 +993,11 @@
+@@ -960,7 +995,11 @@
    /*
     * spwan Draw Engine thread.
     */
@@ -1689,7 +1721,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      fViewThread = spawn_thread (ViewThread,
  				"DrawEngine",
  				B_DISPLAY_PRIORITY,
-@@ -976,7 +1013,11 @@
+@@ -976,11 +1015,19 @@
    /*
     * spwan Mouse Tracking thread.
     */
@@ -1701,7 +1733,15 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      fMouseThread = spawn_thread (MouseTracking,
  				 "MouseTracking",
  				 B_NORMAL_PRIORITY,
-@@ -1083,7 +1124,11 @@
+ 				 this);
++#ifdef USE_ETKXX
++    fMouseThreadPort = etk_create_port(1, NULL);
++    ETK_WARNING("fMouseThreadPort: %p", fMouseThreadPort);
++#endif
+   }
+   else {
+     return B_BAD_THREAD_ID;
+@@ -1083,7 +1130,11 @@
  TermView::MouseTracking (void *data)
  {
    int32 code, selected = false;
@@ -1713,17 +1753,19 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    thread_id sender;
    CurPos stpos, edpos;
    BPoint stpoint, edpoint;
-@@ -1128,7 +1173,9 @@
+@@ -1128,7 +1179,11 @@
      }
      else {
  #endif
 +#ifndef USE_ETKXX
        code = receive_data (&sender, (void *)&stpoint, sizeof(BPoint));
++#else
++      etk_read_port(theObj->fMouseThreadPort, &code, (void *)&stpoint, sizeof(BPoint));
 +#endif
      }
      
      if (code != MOUSE_THR_CODE) continue;
-@@ -1290,9 +1337,13 @@
+@@ -1290,9 +1345,13 @@
    if (IS_BOLD (attr)) {
      inView->MovePenTo (x1 + 1, y1 + fFontAscent);
  	  
@@ -1737,7 +1779,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    }
  	
    /*
-@@ -1379,18 +1430,21 @@
+@@ -1379,18 +1438,21 @@
  void
  TermView::UpdateSIGWINCH()
  {
@@ -1761,7 +1803,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
      fFrameResized = 0;
      if (fScrRegionSet == 0) {
-@@ -1489,8 +1543,10 @@
+@@ -1489,8 +1551,10 @@
  
    y1 = (int)updateRect.top / fFontHeight;
    y2 = (int)updateRect.bottom / fFontHeight;
@@ -1773,7 +1815,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    
    for (j = y1; j <= y2; j++) {
      /*
-@@ -1535,8 +1591,10 @@
+@@ -1535,8 +1599,10 @@
    if (fCursorStatus == CURON) {
      DrawCursor();
    }
@@ -1785,7 +1827,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
    return;
  }
-@@ -1614,7 +1672,13 @@
+@@ -1614,7 +1680,13 @@
  TermView::KeyDown (const char *bytes, int32 numBytes)
  {
    char c;
@@ -1799,7 +1841,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    int32 key, mod;
  
    uchar dstbuf[1024];
-@@ -1623,7 +1687,13 @@
+@@ -1623,7 +1695,13 @@
  
    if (fIMflag)
      return;
@@ -1814,15 +1856,30 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    /*
     * If bytes[0] equal intr charactor,
     * send signal to shell process group.
-@@ -1634,6 +1704,7 @@
+@@ -1634,6 +1712,9 @@
        kill (-sh_pid, SIGINT);
      }
    }
++#else
++  // TODO
 +#endif
  
    /*
     * MuTerminal changes RET, ENTER, F1...F12, and ARROW key code.
-@@ -1809,11 +1880,13 @@
+@@ -1655,7 +1736,12 @@
+         return;
+       }
+       else {
++#ifndef _WIN32
+       	write (pfd, bytes, numBytes);
++#else
++	char tmp[3] = "\r\n";
++      	write (pfd, tmp, 2);
++#endif
+ 	return;
+       }
+ 
+@@ -1809,11 +1895,13 @@
  void 
  TermView::MessageReceived(BMessage *msg)
  {
@@ -1837,7 +1894,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    case B_SIMPLE_DATA:
      if (msg->FindRef("refs", &ref) == B_OK ){
        this->DoFileDrop(ref);
-@@ -1841,7 +1914,7 @@
+@@ -1841,7 +1929,7 @@
        
      }
      break;
@@ -1846,7 +1903,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      
    case B_COPY:
      this->DoCopy();
-@@ -1866,6 +1939,7 @@
+@@ -1866,6 +1954,7 @@
      this->BlinkCursor ();
      break;
  
@@ -1854,7 +1911,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    case B_INPUT_METHOD_EVENT:
      {
        int32 op;
-@@ -1888,12 +1962,14 @@
+@@ -1888,12 +1977,14 @@
  	break;
        }
      }
@@ -1869,7 +1926,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoFileDrop
  //	Gets dropped file full path and display it at cursor position.
-@@ -1913,6 +1989,7 @@
+@@ -1913,6 +2004,7 @@
    return;
    
  }
@@ -1877,7 +1934,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoCopy()
  //	Copy selection text to Clipboard.
-@@ -2169,7 +2246,11 @@
+@@ -2169,7 +2261,11 @@
  	if (mod & B_CONTROL_KEY || gTermPref->getInt32 (PREF_DRAGN_COPY)) {
  	  
  	  BPoint p;
@@ -1889,7 +1946,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  	  
  	  do {
  	    GetMouse (&p, &bt);
-@@ -2205,8 +2286,10 @@
+@@ -2205,8 +2301,10 @@
  		   fTermColumns * fFontWidth, ed.y + fFontHeight - fTop);
  	  }
  	  r = r & Bounds();
@@ -1901,7 +1958,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  	  return;
  	}
        }
-@@ -2231,10 +2314,12 @@
+@@ -2231,10 +2329,17 @@
      switch (clicks){
      case 1:
        fMouseTracking = true;
@@ -1910,13 +1967,18 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  		 MOUSE_THR_CODE,
  		 (void *)&where,
  		 sizeof (BPoint));
++#else
++      etk_write_port(fMouseThreadPort,
++		     MOUSE_THR_CODE,
++		     (void *)&where,
++		     sizeof (BPoint));
 +#endif
        break;
    
      case 2:
 diff -Nur MuTerm/src/TermView.h MuTerm working/src/TermView.h
---- MuTerm/src/TermView.h	2001-05-21 23:21:34.000000000 +0800
-+++ MuTerm working/src/TermView.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermView.h	Mon May 21 23:21:34 2001
++++ MuTerm working/src/TermView.h	Tue May  8 05:42:04 2007
 @@ -19,9 +19,14 @@
  #ifndef TERMVIEW_H
  #define TERMVIEW_H
@@ -1963,9 +2025,19 @@ diff -Nur MuTerm/src/TermView.h MuTerm working/src/TermView.h
    
    //
    // Flags.
+@@ -377,6 +386,9 @@
+   // thread ID / flags.
+   thread_id fViewThread;
+   thread_id fMouseThread;
++#ifdef USE_ETKXX
++  void *fMouseThreadPort;
++#endif
+   int fQuitting;
+ 
+   // DrawEngine parameter.
 diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
---- MuTerm/src/TermWindow.cpp	2001-06-07 20:29:35.000000000 +0800
-+++ MuTerm working/src/TermWindow.cpp	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermWindow.cpp	Thu Jun  7 20:29:35 2001
++++ MuTerm working/src/TermWindow.cpp	Tue May  8 02:46:48 2007
 @@ -16,6 +16,7 @@
  
  *****************************************************************************/
@@ -2100,19 +2172,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  // doShowHelp (unit32)
-@@ -640,7 +681,11 @@
-   sprintf(windowname,
- 	  //	    "MuTerm (%s) [%s]",
- 	  gWindowName,
-+#ifndef _WIN32
- 	  &tty_name[8],
-+#else
-+	  "unknown",
-+#endif
- 	  op2longname(gNowCoding));
- 
-   this->SetTitle (windowname);
-@@ -656,13 +701,16 @@
+@@ -656,13 +697,16 @@
    
    this->Activate();
    
@@ -2129,7 +2189,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
  ////////////////////////////////////////////////////////////////////////////
  // GetSupoprtedSuites (BMessage *)
  //
-@@ -709,6 +757,7 @@
+@@ -709,6 +753,7 @@
  
    return BWindow::ResolveSpecifier(msg, index, specifier, form, property);
  }
@@ -2137,7 +2197,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
  
  ////////////////////////////////////////////////////////////////////////////
  // SetCoding
-@@ -730,6 +779,7 @@
+@@ -730,6 +775,7 @@
  status_t
  TermWindow::DoPageSetup() 
  { 
@@ -2145,7 +2205,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
    status_t rv;
    BPrintJob job("PageSetup");
  
-@@ -740,6 +790,9 @@
+@@ -740,6 +786,9 @@
    fPrintSettings = job.Settings();
  
    return rv;
@@ -2155,7 +2215,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
  }
    
  ////////////////////////////////////////////////////////////////////////////
-@@ -749,7 +802,7 @@
+@@ -749,7 +798,7 @@
  void
  TermWindow::DoPrint()
  {
@@ -2165,8 +2225,8 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm working/src/TermWindow.cpp
  
    if((! fPrintSettings) && (DoPageSetup() != B_NO_ERROR)) {
 diff -Nur MuTerm/src/TermWindow.h MuTerm working/src/TermWindow.h
---- MuTerm/src/TermWindow.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/TermWindow.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/TermWindow.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/TermWindow.h	Sun May  6 17:52:52 2007
 @@ -20,8 +20,12 @@
  #ifndef TERMWIN_H
  #define TERMWIN_H
@@ -2204,8 +2264,8 @@ diff -Nur MuTerm/src/TermWindow.h MuTerm working/src/TermWindow.h
    // Printing
    status_t	DoPageSetup (void);
 diff -Nur MuTerm/src/etkxx-impl.h MuTerm working/src/etkxx-impl.h
---- MuTerm/src/etkxx-impl.h	1970-01-01 08:00:00.000000000 +0800
-+++ MuTerm working/src/etkxx-impl.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/etkxx-impl.h	Thu Jan  1 08:00:00 1970
++++ MuTerm working/src/etkxx-impl.h	Sun May  6 17:52:52 2007
 @@ -0,0 +1,210 @@
 +#ifndef __ETKXX_IMPL_H__
 +#define __ETKXX_IMPL_H__
@@ -2418,9 +2478,9 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm working/src/etkxx-impl.h
 +#endif /* __ETKXX_IMPL_H__ */
 +
 diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
---- MuTerm/src/spawn.cpp	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/spawn.cpp	2007-05-06 04:42:21.000000000 +0800
-@@ -26,11 +26,18 @@
+--- MuTerm/src/spawn.cpp	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/spawn.cpp	Tue May  8 05:40:07 2007
+@@ -26,11 +26,20 @@
  #include <stdio.h>
  #include <signal.h>
  #include <errno.h>
@@ -2429,6 +2489,8 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
 +#endif
 +#ifndef _WIN32
  #include <termios.h>
++#else
++#include <windows.h>
 +#endif
  #include <fcntl.h>
  #include <sys/stat.h>
@@ -2439,15 +2501,15 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
  
  #include "TermConst.h"
  #include "spawn.h"
-@@ -81,6 +88,7 @@
-  */
- 
+@@ -110,6 +119,7 @@
+ char tty_name[16];
+ int pfd_num = 0;
  
 +#ifndef _WIN32
- /*
-  *  spawn_shell(): spawn child process, create pty master/slave device and
-  *  execute SHELL program.
-@@ -118,7 +126,12 @@
+ int
+ spawn_shell (int row, int col, const char *command, const char *coding)
+ {
+@@ -118,7 +128,12 @@
    pid_t pgrp;
    
    int master, slave;
@@ -2460,22 +2522,207 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
    struct winsize ws;
    
    handshake_t handshake;
-@@ -470,4 +483,12 @@
+@@ -470,4 +485,197 @@
    
    return (done > 0) ? master : -1;
  }
 +#else
++intptr_t handleProcess = -1;
++int fdRead = -1;
++
 +int
 +spawn_shell (int row, int col, const char *command, const char *coding)
 +{
-+  // TODO
-+  return -1;
++	int pipes[2] = {-1, -1};
++
++	void *port = NULL;
++	eint32 code;
++
++	handshake_t handshake;
++
++	memcpy(tty_name, "        Win32", 14);
++
++	if((port = etk_open_port("MuTerminal Port")) == NULL)
++	{
++		if((port = etk_create_port(1, "MuTerminal Port")) == NULL) return -1;
++
++		if(_pipe(pipes, 512, _O_NOINHERIT) == -1)
++		{
++			etk_delete_port(port);
++			ETK_OUTPUT("%s(%d): _pipe() failed !!!", __FILE__, __LINE__);
++			return -1;
++		}
++
++		int saveStdin = _dup(_fileno(stdin));
++		int saveStdout = _dup(_fileno(stdout));
++		int saveStderr = _dup(_fileno(stderr));
++
++		HANDLE hSaveStdin = GetStdHandle(STD_INPUT_HANDLE);
++		HANDLE hSaveStdout = GetStdHandle(STD_OUTPUT_HANDLE);
++		HANDLE hSaveStderr = GetStdHandle(STD_ERROR_HANDLE);
++
++		_dup2(pipes[0], _fileno(stdin));
++		_dup2(pipes[1], _fileno(stdout));
++		_dup2(pipes[1], _fileno(stderr));
++
++		SetStdHandle(STD_INPUT_HANDLE, (HANDLE)_get_osfhandle(pipes[0]));
++		SetStdHandle(STD_OUTPUT_HANDLE, (HANDLE)_get_osfhandle(pipes[1]));
++		SetStdHandle(STD_ERROR_HANDLE, (HANDLE)_get_osfhandle(pipes[1]));
++
++		char buf[E_MAXPATH + 1];
++		bzero(buf, sizeof(buf));
++		GetShortPathName(__argv[0], buf, sizeof(buf));
++
++		handleProcess = _spawnl(_P_NOWAIT, buf, buf, NULL);
++
++		_dup2(saveStdin, _fileno(stdin));
++		_dup2(saveStdout, _fileno(stdout));
++		_dup2(saveStderr, _fileno(stderr));
++
++		SetStdHandle(STD_INPUT_HANDLE, hSaveStdin);
++		SetStdHandle(STD_OUTPUT_HANDLE, hSaveStdout);
++		SetStdHandle(STD_ERROR_HANDLE, hSaveStderr);
++
++		if(handleProcess == -1)
++		{
++			close(pipes[0]);
++			close(pipes[1]);
++			etk_delete_port(port);
++			return -1;
++		}
++	}
++	else // child
++	{
++		/* set signal default */
++		signal(SIGTERM, SIG_DFL);
++		signal(SIGINT, SIG_DFL);
++
++		// set window size.
++		handshake.status = PTY_WS;
++		etk_write_port(port, 0, &handshake, sizeof(handshake));
++		etk_read_port(port, &code, &handshake, sizeof(handshake));
++
++		if(handshake.status != PTY_WS)
++		{
++			handshake.status = PTY_NG;
++			sprintf(handshake.msg, "missmatch handshake.");
++			etk_write_port(port, 0, &handshake, sizeof(handshake));
++			exit(1);
++		}
++
++		// TODO: set columns & rows
++
++		/* pty open and set termios successful. */
++		handshake.status = PTY_OK;
++		etk_write_port(port, 0, &handshake, sizeof(handshake));
++
++		etk_delete_port(port);
++
++		Setenv("TERM=", "xterm");
++		Setenv("TTYPE=", coding);
++
++#if 0
++		EString comStr(command ? command : SHELL_COMMAND);
++#else
++		EString comStr("C:/Windows/system32/cmd.exe");
++#endif
++		EStringArray *argsArray;
++		comStr.ReplaceAll("\t", " ");
++		while(true)
++		{
++			eint32 oldLength = comStr.Length();
++			comStr.ReplaceAll("  ", " ");
++			if(oldLength == comStr.Length())
++			{
++				if(comStr[0] == ' ') comStr.Remove(0, 1);
++				if(comStr[0] == '/')
++				{
++					EPath aPath;
++					e_find_directory(E_BIN_DIRECTORY, &aPath);
++					aPath.GetParent(&aPath);
++					comStr.Prepend(aPath.Path());
++				}
++
++				EString prog;
++				eint32 last = comStr.FindFirst(" ");
++				comStr.MoveInto(prog, 0, last < 0 ? comStr.Length() : last);
++				if(prog.FindLast(".exe") != prog.Length() - 4) prog.Append(".exe");
++				prog.ReplaceAll("/", "\\");
++
++				char buf[E_MAXPATH + 1];
++				bzero(buf, sizeof(buf));
++				if(GetShortPathName(prog.String(), buf, sizeof(buf)) != 0) prog = buf;
++
++				comStr.Prepend(prog);
++
++				break;
++			}
++		}
++		argsArray = comStr.Split(" ");
++
++		char **args = new char*[argsArray->CountItems() + 1];
++		for(eint32 i = 0; i <= argsArray->CountItems(); i++)
++			args[i] = (i < argsArray->CountItems() ? (char*)argsArray->ItemAt(i)->String() : NULL);
++		comStr = argsArray->ItemAt(0)->String();
++		delete argsArray;
++
++		Setenv("SHELL=", *args);
++
++		EEntry aEntry(comStr.String());
++		if(!aEntry.Exists())
++			ETK_ERROR("%s(%d): \"%s\" doesn't exist !!!", __FILE__, __LINE__, comStr.String());
++
++		if(_execve(comStr.String(), args, environ) == -1);
++			ETK_ERROR("%s(%d): Failed to spawn process !!!", __FILE__, __LINE__);
++
++		delete[] args;
++
++		exit(1);
++	}
++
++	int done = 0;
++	while(done == 0)
++	{
++		if(etk_read_port(port, &code, &handshake, sizeof(handshake)) != E_OK) break;
++		switch(handshake.status)
++		{
++			case PTY_OK:
++				done = 1;
++				break;
++
++			case PTY_NG:
++				ETK_OUTPUT("%s\n", handshake.msg);
++				done = -1;
++				break;
++
++			case PTY_WS:
++//				handshake.row = row;
++//				handshake.col = col;
++				handshake.status = PTY_WS;
++				etk_write_port(port, 0, &handshake, sizeof(handshake));
++				break;
++		}
++	}
++
++	etk_on_exit_thread((void (*)(void*))etk_delete_port, port);
++
++	if(done == 1)
++	{
++		fdRead = pipes[0];
++		return pipes[1];
++	}
++	else
++	{
++		close(pipes[0]);
++		close(pipes[1]);
++		return -1;
++	}
 +}
 +#endif
  
 diff -Nur MuTerm/src/spawn.h MuTerm working/src/spawn.h
---- MuTerm/src/spawn.h	2000-04-02 23:00:00.000000000 +0800
-+++ MuTerm working/src/spawn.h	2007-05-06 04:42:21.000000000 +0800
+--- MuTerm/src/spawn.h	Sun Apr  2 23:00:00 2000
++++ MuTerm working/src/spawn.h	Tue May  8 02:44:51 2007
 @@ -23,15 +23,23 @@
   * allow for mobility of the pty master/slave directories
   */
@@ -2503,3 +2750,17 @@ diff -Nur MuTerm/src/spawn.h MuTerm working/src/spawn.h
  #define MAXPTTYS 16 * 4
  
  #ifndef CEOF
+@@ -87,9 +95,12 @@
+ int spawn_shell (int, int, const char *, const char *);
+ void Setenv (const char *, const char *);
+ 
++#ifdef _WIN32
++#define pid_t int
++#endif
++
+ extern pid_t sh_pid;	/* shell process ID */
+ extern char tty_name[];	/* tty device file name */
+ extern int pfd_num;	/* number of pfd */
+-
+ 
+ #endif /* SPAWN_H */
