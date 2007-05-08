@@ -263,7 +263,7 @@ diff -Nur MuTerm/src/LangPrefView.cpp MuTerm working/src/LangPrefView.cpp
        item->SetMarked(true);
 diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
 --- MuTerm/src/Makefile_with_etkxx	Thu Jan  1 08:00:00 1970
-+++ MuTerm working/src/Makefile_with_etkxx	Tue May  8 10:10:43 2007
++++ MuTerm working/src/Makefile_with_etkxx	Tue May  8 18:09:06 2007
 @@ -0,0 +1,113 @@
 +DEBUG_OPTIONS = -g -Wall
 +OPTIMIZE = -O3
@@ -271,7 +271,7 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm working/src/Makefile_with_etkxx
 +MIN_ETKXX_VER = 0.3.1
 +
 +ifeq ($(OSTYPE),msys)
-+PREFIX = 
++PREFIX =
 +SETTINGS_SAMPLE = ../etc/sample.mp.msys
 +else
 +PREFIX = /usr/local
@@ -1507,10 +1507,15 @@ diff -Nur MuTerm/src/TermIM.cpp MuTerm working/src/TermIM.cpp
  }
 diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
 --- MuTerm/src/TermParse.cpp	Thu Jun 28 14:47:13 2001
-+++ MuTerm working/src/TermParse.cpp	Tue May  8 13:35:49 2007
-@@ -25,10 +25,14 @@
++++ MuTerm working/src/TermParse.cpp	Tue May  8 17:21:03 2007
+@@ -23,12 +23,19 @@
+ #include <errno.h>
+ #include <stdio.h>
  #include <signal.h>
++
++#ifndef _WIN32
  #include <unistd.h>
++#endif
  
 +#ifndef USE_ETKXX
  #include <app/Application.h>
@@ -1523,7 +1528,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
  
  #include "TermParse.h"
  #include "TermView.h"
-@@ -36,9 +40,61 @@
+@@ -36,9 +43,61 @@
  #include "TermConst.h"
  #include "CodeConv.h"
  #include "Coding.h"
@@ -1585,7 +1590,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
  
  /////////////////////////////////////////////////////////////////////////////
  // PtyReader ... Get character from pty device.
-@@ -52,7 +108,7 @@
+@@ -52,7 +111,7 @@
  
    TermParse *theObj = (TermParse *) data;
    
@@ -1594,7 +1599,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
  
    while (theObj->fQuitting) {
      /*
-@@ -66,8 +122,18 @@
+@@ -66,8 +125,18 @@
      /*
       * Read PTY.
       */
@@ -1615,7 +1620,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
      if (nread <= 0) {
        be_app->PostMessage(B_QUIT_REQUESTED);
        exit_thread (B_ERROR);
-@@ -96,7 +162,11 @@
+@@ -96,7 +165,11 @@
      release_sem_etc (theObj->fReaderSem, nread, 0);
  
    }
@@ -1627,7 +1632,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    exit_thread (B_OK);
    return B_OK;
  }
-@@ -159,11 +229,19 @@
+@@ -159,11 +232,19 @@
  				      new BMessage (MSGRUN_CURSOR),
  				      1000000);
    
@@ -1647,7 +1652,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    
    return (resume_thread ( fParseThread));
  
-@@ -177,8 +255,12 @@
+@@ -177,8 +258,12 @@
  {
  
    fWinObj = inWinObj;
@@ -1661,7 +1666,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
      fReaderThread =
        spawn_thread (PtyReader, "PtyReader", B_NORMAL_PRIORITY, this);
    else
-@@ -198,9 +280,17 @@
+@@ -198,9 +283,17 @@
  
  TermParse::TermParse (void)
  {
@@ -1680,7 +1685,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    fLockFlag = 0;
    fParser_p = 0;
    fQuitting = 1;
-@@ -214,9 +304,16 @@
+@@ -214,9 +307,16 @@
    //status_t sts;
    if (cd2utf8 != (iconv_t)(-1))  iconv_close(cd2utf8);  // close libiconv
    fQuitting = 0;
@@ -1698,7 +1703,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
    delete_sem (fReaderSem);
    delete_sem (fReaderLocker);
  
-@@ -691,7 +788,11 @@
+@@ -691,7 +791,11 @@
          size_t res;      //status report of iconv
          for(;;)
          {
@@ -1710,7 +1715,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm working/src/TermParse.cpp
             if( res == (size_t)(-1) )
             {
                if (errno == EILSEQ)  //char not defined in code table, or wrong table
-@@ -720,7 +821,11 @@
+@@ -720,7 +824,11 @@
          viewObj->PutChar(dstbuf, attr, width);
       }
    }
@@ -1749,7 +1754,7 @@ diff -Nur MuTerm/src/TermParse.h MuTerm working/src/TermParse.h
    static int32 EscParse (void *);
 diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
 --- MuTerm/src/TermView.cpp	Sun Jul  1 15:37:51 2001
-+++ MuTerm working/src/TermView.cpp	Tue May  8 14:59:44 2007
++++ MuTerm working/src/TermView.cpp	Tue May  8 18:31:44 2007
 @@ -17,6 +17,7 @@
  
  ***************************************************************************/
@@ -1774,7 +1779,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  #include <string.h>
  #include <stdlib.h>
  
-@@ -44,10 +53,15 @@
+@@ -44,10 +53,19 @@
  #include "MenuUtil.h"
  #include "PrefView.h"
  
@@ -1785,12 +1790,16 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  #include <signal.h>
  #include "spawn.h"
  
++#ifdef _WIN32
++extern PROCESS_INFORMATION sh_process_info;
++#endif
++
 +#define STD_WRITE(fd, data, len) write(fd, data, len)
 +
  // defined VTKeyTbl.c
  extern int function_keycode_table[];
  extern char *function_key_char_table[];
-@@ -146,13 +160,25 @@
+@@ -146,13 +164,25 @@
    SetIMAware (gTermPref->getInt32 (PREF_IM_AWARE));
    fIMflag = false;
    
@@ -1816,7 +1825,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  }
  
  ////////////////////////////////////////////////////////////////////////////
-@@ -164,8 +190,17 @@
+@@ -164,8 +194,17 @@
  //  delete InputMessenger;
    delete fTextBuffer;
    fQuitting = 0;
@@ -1834,7 +1843,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    delete_sem (fDrawRectSem);
  }
  
-@@ -806,7 +841,9 @@
+@@ -806,7 +845,9 @@
      FillRect (r);
    }
  
@@ -1844,7 +1853,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
    return;
  }
-@@ -960,7 +997,11 @@
+@@ -960,7 +1001,11 @@
    /*
     * spwan Draw Engine thread.
     */
@@ -1856,7 +1865,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      fViewThread = spawn_thread (ViewThread,
  				"DrawEngine",
  				B_DISPLAY_PRIORITY,
-@@ -972,21 +1013,29 @@
+@@ -972,21 +1017,29 @@
    fDrawRectSem = create_sem (0, "draw_engine_sem");
    resume_thread (fViewThread);
  
@@ -1888,7 +1897,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    return (fViewThread);
  }
  
-@@ -1083,7 +1132,11 @@
+@@ -1083,7 +1136,11 @@
  TermView::MouseTracking (void *data)
  {
    int32 code, selected = false;
@@ -1900,7 +1909,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    thread_id sender;
    CurPos stpos, edpos;
    BPoint stpoint, edpoint;
-@@ -1128,7 +1181,11 @@
+@@ -1128,7 +1185,11 @@
      }
      else {
  #endif
@@ -1912,7 +1921,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      }
      
      if (code != MOUSE_THR_CODE) continue;
-@@ -1290,9 +1347,13 @@
+@@ -1290,9 +1351,13 @@
    if (IS_BOLD (attr)) {
      inView->MovePenTo (x1 + 1, y1 + fFontAscent);
  	  
@@ -1926,7 +1935,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    }
  	
    /*
-@@ -1379,18 +1440,21 @@
+@@ -1379,18 +1444,21 @@
  void
  TermView::UpdateSIGWINCH()
  {
@@ -1950,7 +1959,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
      fFrameResized = 0;
      if (fScrRegionSet == 0) {
-@@ -1415,11 +1479,11 @@
+@@ -1415,11 +1483,11 @@
    switch (n) {
    case 5:
      len = sprintf(sbuf,"\033[0n") ;
@@ -1964,7 +1973,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      break ;
    default:
      return;
-@@ -1489,8 +1553,10 @@
+@@ -1489,8 +1557,10 @@
  
    y1 = (int)updateRect.top / fFontHeight;
    y2 = (int)updateRect.bottom / fFontHeight;
@@ -1976,7 +1985,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    
    for (j = y1; j <= y2; j++) {
      /*
-@@ -1535,8 +1601,10 @@
+@@ -1535,8 +1605,10 @@
    if (fCursorStatus == CURON) {
      DrawCursor();
    }
@@ -1988,7 +1997,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
    return;
  }
-@@ -1614,7 +1682,13 @@
+@@ -1614,7 +1686,13 @@
  TermView::KeyDown (const char *bytes, int32 numBytes)
  {
    char c;
@@ -2002,7 +2011,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    int32 key, mod;
  
    uchar dstbuf[1024];
-@@ -1623,7 +1697,13 @@
+@@ -1623,7 +1701,13 @@
  
    if (fIMflag)
      return;
@@ -2017,20 +2026,20 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    /*
     * If bytes[0] equal intr charactor,
     * send signal to shell process group.
-@@ -1634,6 +1714,12 @@
+@@ -1634,6 +1718,12 @@
        kill (-sh_pid, SIGINT);
      }
    }
 +#else
 +  if(*bytes == 0x03 && numBytes == 1)
 +  {
-+	  ETK_WARNING("[MUTERM]: FIXME: CTRL+C");
++    GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, sh_process_info.dwProcessId);
 +  }
 +#endif
  
    /*
     * MuTerminal changes RET, ENTER, F1...F12, and ARROW key code.
-@@ -1643,32 +1729,36 @@
+@@ -1643,32 +1733,36 @@
      if (mod & B_OPTION_KEY) {
        c = *bytes;
        c  |= 0x80;
@@ -2072,7 +2081,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
          return;
        }
        break;
-@@ -1683,7 +1773,7 @@
+@@ -1683,7 +1777,7 @@
        }
        
        if (key == UP_ARROW_KEY) {
@@ -2081,7 +2090,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
          return;
        }
        break;
-@@ -1696,20 +1786,20 @@
+@@ -1696,20 +1790,20 @@
        }
        
        if (key == DOWN_ARROW_KEY) {
@@ -2105,7 +2114,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
          return;
        }
  
-@@ -1723,7 +1813,7 @@
+@@ -1723,7 +1817,7 @@
        }
        
        if (key == PAGE_UP_KEY) {
@@ -2114,7 +2123,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
          return;
        }
  
-@@ -1735,13 +1825,13 @@
+@@ -1735,13 +1829,13 @@
        }
        
        if (key == PAGE_DOWN_KEY) {
@@ -2130,7 +2139,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
          return;
        }
        
-@@ -1749,7 +1839,7 @@
+@@ -1749,7 +1843,7 @@
      case B_FUNCTION_KEY:
        for (c = 0; c < 12; c++) {
          if (key == function_keycode_table[c]) {
@@ -2139,7 +2148,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
            return;
          }
        }
-@@ -1764,12 +1854,12 @@
+@@ -1764,12 +1858,12 @@
      
      if (gNowCoding != M_UTF8) {
        int cnum = fCodeConv->ConvertFromInternal((uchar *)bytes, dstbuf);
@@ -2154,7 +2163,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  
  }
  
-@@ -1809,11 +1899,13 @@
+@@ -1809,11 +1903,13 @@
  void 
  TermView::MessageReceived(BMessage *msg)
  {
@@ -2169,7 +2178,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    case B_SIMPLE_DATA:
      if (msg->FindRef("refs", &ref) == B_OK ){
        this->DoFileDrop(ref);
-@@ -1841,7 +1933,7 @@
+@@ -1841,7 +1937,7 @@
        
      }
      break;
@@ -2178,7 +2187,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
      
    case B_COPY:
      this->DoCopy();
-@@ -1859,13 +1951,14 @@
+@@ -1859,13 +1955,14 @@
      
    case MENU_CLEAR_ALL:
      this->DoClearAll();
@@ -2194,7 +2203,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    case B_INPUT_METHOD_EVENT:
      {
        int32 op;
-@@ -1888,12 +1981,14 @@
+@@ -1888,12 +1985,14 @@
  	break;
        }
      }
@@ -2209,7 +2218,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoFileDrop
  //	Gets dropped file full path and display it at cursor position.
-@@ -1913,6 +2008,7 @@
+@@ -1913,6 +2012,7 @@
    return;
    
  }
@@ -2217,7 +2226,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoCopy()
  //	Copy selection text to Clipboard.
-@@ -2068,10 +2164,10 @@
+@@ -2068,10 +2168,10 @@
    if (gNowCoding != M_UTF8) {
      uchar *dstbuf = (uchar *)malloc (num_bytes * 4);
      num_bytes = fCodeConv->ConvertFromInternal(text, dstbuf);
@@ -2230,7 +2239,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
    }
  
  }
-@@ -2169,7 +2265,11 @@
+@@ -2169,7 +2269,11 @@
  	if (mod & B_CONTROL_KEY || gTermPref->getInt32 (PREF_DRAGN_COPY)) {
  	  
  	  BPoint p;
@@ -2242,7 +2251,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  	  
  	  do {
  	    GetMouse (&p, &bt);
-@@ -2205,8 +2305,10 @@
+@@ -2205,8 +2309,10 @@
  		   fTermColumns * fFontWidth, ed.y + fFontHeight - fTop);
  	  }
  	  r = r & Bounds();
@@ -2254,7 +2263,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm working/src/TermView.cpp
  	  return;
  	}
        }
-@@ -2231,10 +2333,17 @@
+@@ -2231,10 +2337,17 @@
      switch (clicks){
      case 1:
        fMouseTracking = true;
@@ -2813,7 +2822,7 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm working/src/etkxx-impl.h
 +
 diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
 --- MuTerm/src/spawn.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm working/src/spawn.cpp	Tue May  8 15:16:26 2007
++++ MuTerm working/src/spawn.cpp	Tue May  8 18:33:09 2007
 @@ -26,11 +26,20 @@
  #include <stdio.h>
  #include <signal.h>
@@ -2856,7 +2865,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
    struct winsize ws;
    
    handshake_t handshake;
-@@ -470,4 +485,219 @@
+@@ -470,4 +485,206 @@
    
    return (done > 0) ? master : -1;
  }
@@ -2891,16 +2900,6 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
 +		int saveStdout = _dup(_fileno(stdout));
 +		int saveStderr = _dup(_fileno(stderr));
 +
-+#if 0
-+		HANDLE hSaveStdin = GetStdHandle(STD_INPUT_HANDLE);
-+		HANDLE hSaveStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-+		HANDLE hSaveStderr = GetStdHandle(STD_ERROR_HANDLE);
-+
-+		SetStdHandle(STD_INPUT_HANDLE, (HANDLE)_get_osfhandle(pc_pipe[0]));
-+		SetStdHandle(STD_OUTPUT_HANDLE, (HANDLE)_get_osfhandle(cp_pipe[1]));
-+		SetStdHandle(STD_ERROR_HANDLE, (HANDLE)_get_osfhandle(cp_pipe[1]));
-+#endif
-+
 +		_dup2(pc_pipe[0], _fileno(stdin));
 +		_dup2(cp_pipe[1], _fileno(stdout));
 +		_dup2(cp_pipe[1], _fileno(stderr));
@@ -2920,12 +2919,6 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
 +		_dup2(saveStdin, _fileno(stdin));
 +		_dup2(saveStdout, _fileno(stdout));
 +		_dup2(saveStderr, _fileno(stderr));
-+
-+#if 0
-+		SetStdHandle(STD_INPUT_HANDLE, hSaveStdin);
-+		SetStdHandle(STD_OUTPUT_HANDLE, hSaveStdout);
-+		SetStdHandle(STD_ERROR_HANDLE, hSaveStderr);
-+#endif
 +
 +		if(sh_pid == -1)
 +		{
@@ -3062,6 +3055,9 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm working/src/spawn.cpp
 +
 +	if(done == 1)
 +	{
++		close(cp_pipe[1]);
++		close(pc_pipe[0]);
++
 +		fdRead = cp_pipe[0];
 +		return pc_pipe[1];
 +	}
@@ -3120,3 +3116,245 @@ diff -Nur MuTerm/src/spawn.h MuTerm working/src/spawn.h
 -
  
  #endif /* SPAWN_H */
+diff -Nur MuTerm/src/win32/MuTerminal.sln MuTerm working/src/win32/MuTerminal.sln
+--- MuTerm/src/win32/MuTerminal.sln	Thu Jan  1 08:00:00 1970
++++ MuTerm working/src/win32/MuTerminal.sln	Tue May  8 18:43:21 2007
+@@ -0,0 +1,21 @@
++Microsoft Visual Studio Solution File, Format Version 8.00
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MuTerminal", "MuTerminal.vcproj", "{5C049672-3C3B-40E8-AD4F-A714DE50F405}"
++	ProjectSection(ProjectDependencies) = postProject
++	EndProjectSection
++EndProject
++Global
++	GlobalSection(SolutionConfiguration) = preSolution
++		Debug = Debug
++		Release = Release
++	EndGlobalSection
++	GlobalSection(ProjectConfiguration) = postSolution
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Debug.ActiveCfg = Debug|Win32
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Debug.Build.0 = Debug|Win32
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Release.ActiveCfg = Release|Win32
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Release.Build.0 = Release|Win32
++	EndGlobalSection
++	GlobalSection(ExtensibilityGlobals) = postSolution
++	EndGlobalSection
++	GlobalSection(ExtensibilityAddIns) = postSolution
++	EndGlobalSection
++EndGlobal
+diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm working/src/win32/MuTerminal.vcproj
+--- MuTerm/src/win32/MuTerminal.vcproj	Thu Jan  1 08:00:00 1970
++++ MuTerm working/src/win32/MuTerminal.vcproj	Tue May  8 18:43:21 2007
+@@ -0,0 +1,213 @@
++﻿<?xml version="1.0" encoding="UTF-8"?>
++<VisualStudioProject
++	ProjectType="Visual C++"
++	Version="7.10"
++	Name="MuTerminal"
++	ProjectGUID="{5C049672-3C3B-40E8-AD4F-A714DE50F405}"
++	Keyword="Win32Proj">
++	<Platforms>
++		<Platform
++			Name="Win32"/>
++	</Platforms>
++	<Configurations>
++		<Configuration
++			Name="Debug|Win32"
++			OutputDirectory="Debug"
++			IntermediateDirectory="Debug"
++			ConfigurationType="1"
++			CharacterSet="0">
++			<Tool
++				Name="VCCLCompilerTool"
++				Optimization="0"
++				AdditionalIncludeDirectories="..\..\..\etkxx\;.\win32\libiconv"
++				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;USE_ETKXX"
++				MinimalRebuild="TRUE"
++				BasicRuntimeChecks="3"
++				RuntimeLibrary="1"
++				RuntimeTypeInfo="TRUE"
++				UsePrecompiledHeader="0"
++				WarningLevel="3"
++				Detect64BitPortabilityProblems="FALSE"
++				DebugInformationFormat="4"/>
++			<Tool
++				Name="VCCustomBuildTool"/>
++			<Tool
++				Name="VCLinkerTool"
++				AdditionalDependencies="etkxx.lib iconv.lib"
++				OutputFile="$(OutDir)/MuTerminal.exe"
++				LinkIncremental="2"
++				AdditionalLibraryDirectories="..\..\..\etkxx\build\win32\etkxx\Debug;.\win32\libiconv"
++				GenerateDebugInformation="TRUE"
++				ProgramDatabaseFile="$(OutDir)/MuTerminal.pdb"
++				SubSystem="2"
++				TargetMachine="1"/>
++			<Tool
++				Name="VCMIDLTool"/>
++			<Tool
++				Name="VCPostBuildEventTool"/>
++			<Tool
++				Name="VCPreBuildEventTool"/>
++			<Tool
++				Name="VCPreLinkEventTool"/>
++			<Tool
++				Name="VCResourceCompilerTool"/>
++			<Tool
++				Name="VCWebServiceProxyGeneratorTool"/>
++			<Tool
++				Name="VCXMLDataGeneratorTool"/>
++			<Tool
++				Name="VCWebDeploymentTool"/>
++			<Tool
++				Name="VCManagedWrapperGeneratorTool"/>
++			<Tool
++				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
++		</Configuration>
++		<Configuration
++			Name="Release|Win32"
++			OutputDirectory="Release"
++			IntermediateDirectory="Release"
++			ConfigurationType="1"
++			CharacterSet="0"
++			WholeProgramOptimization="FALSE">
++			<Tool
++				Name="VCCLCompilerTool"
++				AdditionalIncludeDirectories="..\..\..\etkxx\;.\win32\libiconv"
++				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;USE_ETKXX"
++				RuntimeLibrary="0"
++				RuntimeTypeInfo="TRUE"
++				UsePrecompiledHeader="0"
++				WarningLevel="3"
++				Detect64BitPortabilityProblems="FALSE"
++				DebugInformationFormat="3"/>
++			<Tool
++				Name="VCCustomBuildTool"/>
++			<Tool
++				Name="VCLinkerTool"
++				AdditionalDependencies="etkxx.lib iconv.lib"
++				OutputFile="$(OutDir)/MuTerminal.exe"
++				LinkIncremental="1"
++				AdditionalLibraryDirectories="..\..\..\etkxx\build\win32\etkxx\Release;.\win32\libiconv"
++				GenerateDebugInformation="TRUE"
++				SubSystem="2"
++				OptimizeReferences="2"
++				EnableCOMDATFolding="2"
++				TargetMachine="1"/>
++			<Tool
++				Name="VCMIDLTool"/>
++			<Tool
++				Name="VCPostBuildEventTool"/>
++			<Tool
++				Name="VCPreBuildEventTool"/>
++			<Tool
++				Name="VCPreLinkEventTool"/>
++			<Tool
++				Name="VCResourceCompilerTool"/>
++			<Tool
++				Name="VCWebServiceProxyGeneratorTool"/>
++			<Tool
++				Name="VCXMLDataGeneratorTool"/>
++			<Tool
++				Name="VCWebDeploymentTool"/>
++			<Tool
++				Name="VCManagedWrapperGeneratorTool"/>
++			<Tool
++				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
++		</Configuration>
++	</Configurations>
++	<References>
++	</References>
++	<Files>
++		<Filter
++			Name="Source files"
++			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
++			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
++			<File
++				RelativePath="..\AboutDlg.cpp">
++			</File>
++			<File
++				RelativePath="..\AppearPrefView.cpp">
++			</File>
++			<File
++				RelativePath="..\CodeConv.cpp">
++			</File>
++			<File
++				RelativePath="..\CurPos.cpp">
++			</File>
++			<File
++				RelativePath="..\LangPrefView.cpp">
++			</File>
++			<File
++				RelativePath="..\MenuUtil.cpp">
++			</File>
++			<File
++				RelativePath="..\MousePrefView.cpp">
++			</File>
++			<File
++				RelativePath="..\MuTerminal.cpp">
++			</File>
++			<File
++				RelativePath="..\PrefDlg.cpp">
++			</File>
++			<File
++				RelativePath="..\PrefHandler.cpp">
++			</File>
++			<File
++				RelativePath="..\PrefView.cpp">
++			</File>
++			<File
++				RelativePath="..\ShellPrefView.cpp">
++			</File>
++			<File
++				RelativePath="..\spawn.cpp">
++			</File>
++			<File
++				RelativePath="..\TermApp.cpp">
++			</File>
++			<File
++				RelativePath="..\TermApp.cpp">
++			</File>
++			<File
++				RelativePath="..\TermBaseView.cpp">
++			</File>
++			<File
++				RelativePath="..\TermBuffer.cpp">
++			</File>
++			<File
++				RelativePath="..\TermIM.cpp">
++			</File>
++			<File
++				RelativePath="..\TermParse.cpp">
++			</File>
++			<File
++				RelativePath="..\TermView.cpp">
++			</File>
++			<File
++				RelativePath="..\TermWindow.cpp">
++			</File>
++			<File
++				RelativePath="..\TTextControl.cpp">
++			</File>
++			<File
++				RelativePath="..\UTF8WidthTbl.c">
++			</File>
++			<File
++				RelativePath="..\VTKeyTbl.c">
++			</File>
++			<File
++				RelativePath="..\VTPrsTbl.c">
++			</File>
++		</Filter>
++		<Filter
++			Name="Head files"
++			Filter="h;hpp;hxx;hm;inl;inc;xsd"
++			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
++		</Filter>
++		<Filter
++			Name="Resource files"
++			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
++			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
++		</Filter>
++	</Files>
++	<Globals>
++	</Globals>
++</VisualStudioProject>
