@@ -89,7 +89,7 @@
 				OptimizeForProcessor="0"
 				OptimizeForWindowsApplication="1"
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
 				StringPooling="1"
 				ExceptionHandling="1"
 				RuntimeLibrary="2"

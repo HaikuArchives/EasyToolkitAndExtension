@@ -55,6 +55,15 @@
 /* define if system have freetype2 */
 /* #undef HAVE_FT2 */
 
+/* Define to 1 if you have the `gethostbyaddr_r' function. */
+/* #undef HAVE_GETHOSTBYADDR_R */
+
+/* Define to 1 if you have the `gethostbyname_r' function. */
+/* #undef HAVE_GETHOSTBYNAME_R */
+
+/* Define to 1 if you have the `getservbyname_r' function. */
+/* #undef HAVE_GETSERVBYNAME_R */
+
 /* Define to 1 if you have the `gettimeofday' function. */
 /* #undef HAVE_GETTIMEOFDAY */
 
@@ -69,6 +78,9 @@
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
+
+/* Define to 1 if you have the `localtime_r' function. */
+/* #undef HAVE_LOCALTIME_R */
 
 /* Define if you have the 'long long' type. */
 #define HAVE_LONG_LONG 1
@@ -91,8 +103,14 @@
 /* define if system have sem_timedwait */
 /* #undef HAVE_SEM_TIMEDWAIT */
 
+/* Define to 1 if you have the `shm_open' function. */
+/* #undef HAVE_SHM_OPEN */
+
 /* Define to 1 if you have the `sigaction' function. */
 /* #undef HAVE_SIGACTION */
+
+/* Define to 1 if you have the `stat64' function. */
+/* #undef HAVE_STAT64 */
 
 /* Define to 1 if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */

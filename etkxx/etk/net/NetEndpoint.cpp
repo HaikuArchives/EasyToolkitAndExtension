@@ -32,11 +32,11 @@
 #include <errno.h>
 #include <string.h>
 
-#include <sys/time.h>
 #include <sys/types.h>
 #include <signal.h>
 
 #ifndef _WIN32
+#	include <sys/time.h>
 #	include <netdb.h>
 #	include <unistd.h>
 #	include <fcntl.h>

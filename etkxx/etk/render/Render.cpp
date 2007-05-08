@@ -41,6 +41,10 @@
 #include "ArcGenerator.h"
 #include "Render.h"
 
+#ifdef _MSC_VER
+	#define isnan(a)	_isnan(a)
+#endif
+
 
 extern bool etk_get_arc_12(EPoint &radius, EPoint &start, EPoint &end, eint32 &x, eint32 &y, EPoint &radius2, float &deltaNext);
 

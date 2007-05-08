@@ -85,7 +85,7 @@
 				OptimizeForProcessor="0"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
 				StringPooling="TRUE"
 				ExceptionHandling="TRUE"
 				RuntimeLibrary="2"
@@ -148,6 +148,9 @@
 					RelativePath="..\..\..\etk\support\Archivable.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\support\ByteOrder.c">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\support\List.cpp">
 				</File>
 				<File
@@ -161,9 +164,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\StringArray.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\support\ByteOrder.c">
 				</File>
 			</Filter>
 			<Filter
@@ -207,6 +207,9 @@
 					RelativePath="..\..\..\etk\interface\Alert.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\Bitmap.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\Box.cpp">
 				</File>
 				<File
@@ -216,10 +219,10 @@
 					RelativePath="..\..\..\etk\interface\CheckBox.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Control.cpp">
+					RelativePath="..\..\..\etk\interface\ColorControl.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ColorControl.cpp">
+					RelativePath="..\..\..\etk\interface\Control.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\win32\etk-application.cpp">
@@ -264,15 +267,6 @@
 					RelativePath="..\..\..\etk\interface\OutlineListView.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TabView.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\interface\TextView.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\interface\Bitmap.cpp">
-				</File>
-				<File
 					RelativePath="..\..\..\etk\interface\Point.cpp">
 				</File>
 				<File
@@ -303,10 +297,16 @@
 					RelativePath="..\..\..\etk\interface\StringView.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\TabView.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\TextControl.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\TextEditable.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\TextView.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\Theme.cpp">
@@ -325,6 +325,12 @@
 					RelativePath="..\..\..\etk\app\Application.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\app\Clipboard.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\app\Cursor.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\app\Handler.cpp">
 				</File>
 				<File
@@ -337,19 +343,13 @@
 					RelativePath="..\..\..\etk\app\Message.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\app\MessageFilter.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\app\MessageQueue.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\app\MessageRunner.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\app\MessageFilter.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\app\Clipboard.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\app\Cursor.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\app\Messenger.cpp">
@@ -381,6 +381,9 @@
 					RelativePath="..\..\..\etk\storage\File.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\storage\FilePanel.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\storage\FindDirectory.cpp">
 				</File>
 				<File
@@ -397,9 +400,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\storage\VolumeRoster.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\storage\FilePanel.cpp">
 				</File>
 			</Filter>
 			<Filter
@@ -464,6 +464,9 @@
 				RelativePath="..\..\..\etk\KernelKit.h">
 			</File>
 			<File
+				RelativePath="..\..\..\etk\NetKit.h">
+			</File>
+			<File
 				RelativePath="..\..\..\etk\RenderKit.h">
 			</File>
 			<File
@@ -475,9 +478,6 @@
 			<File
 				RelativePath="..\..\..\etk\XmlKit.h">
 			</File>
-			<File
-				RelativePath="..\..\..\etk\NetKit.h">
-			</File>
 			<Filter
 				Name="support"
 				Filter="">
@@ -486,6 +486,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\Autolock.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\support\ByteOrder.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\ClassInfo.h">
@@ -511,9 +514,6 @@
 				<File
 					RelativePath="..\..\..\etk\support\SupportDefs.h">
 				</File>
-				<File
-					RelativePath="..\..\..\etk\support\ByteOrder.h">
-				</File>
 			</Filter>
 			<Filter
 				Name="kernel"
@@ -535,6 +535,9 @@
 					RelativePath="..\..\..\etk\interface\Alert.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\Bitmap.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\Box.h">
 				</File>
 				<File
@@ -544,10 +547,10 @@
 					RelativePath="..\..\..\etk\interface\CheckBox.h">
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Control.h">
+					RelativePath="..\..\..\etk\interface\ColorControl.h">
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ColorControl.h">
+					RelativePath="..\..\..\etk\interface\Control.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\win32\etk-win32gdi.h">
@@ -583,15 +586,6 @@
 					RelativePath="..\..\..\etk\interface\OutlineListView.h">
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TabView.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\interface\TextView.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\interface\Bitmap.h">
-				</File>
-				<File
 					RelativePath="..\..\..\etk\interface\Point.h">
 				</File>
 				<File
@@ -622,10 +616,16 @@
 					RelativePath="..\..\..\etk\interface\StringView.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\TabView.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\TextControl.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\TextEditable.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\TextView.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\View.h">
@@ -644,6 +644,12 @@
 					RelativePath="..\..\..\etk\app\Application.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\app\Clipboard.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\app\Cursor.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\app\Handler.h">
 				</File>
 				<File
@@ -656,19 +662,13 @@
 					RelativePath="..\..\..\etk\app\Message.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\app\MessageFilter.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\app\MessageQueue.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\app\MessageRunner.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\app\MessageFilter.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\app\Clipboard.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\app\Cursor.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\app\Messenger.h">
@@ -700,6 +700,9 @@
 					RelativePath="..\..\..\etk\storage\File.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\storage\FilePanel.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\storage\FindDirectory.h">
 				</File>
 				<File
@@ -716,9 +719,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\storage\VolumeRoster.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\storage\FilePanel.h">
 				</File>
 			</Filter>
 			<Filter
