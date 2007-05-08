@@ -23,6 +23,9 @@ Purpose:   Running on other systems more than BeOS
 
 - ChangeLog
 
+2007-05-08 anthonylee
+	Can run on MinGW.
+
 2007-05-05 anthonylee
 	Can run on Linux.
 	Crash on Windows once it runs.
