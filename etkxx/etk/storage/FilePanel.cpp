@@ -1192,10 +1192,21 @@ EFilePanelWindow::MessageReceived(EMessage *msg)
 					if(textControl->Text() == NULL) break;
 				}
 			}
+
 			msgr = (fTarget == NULL ? &etk_app_messenger : fTarget);
 			if(fMessage) aMsg = new EMessage(*fMessage);
+			else aMsg = new EMessage(E_SAVE_REQUESTED);
+			aMsg->AddString("directory", fPath.Path());
+			for(eint32 i = 0; (index = listView->CurrentSelection(i)) > 0; i++)
+			{
+				item = (EFilePanelListItem*)listView->ItemAt(index);
+				aMsg->AddString("name", EPath(item->Path()).Leaf());
+			}
+			if(fMode == E_SAVE_PANEL)
+				aMsg->AddString("name",	((ETextControl*)FindView("text control"))->Text());
 			fPanel->SendMessage(msgr, aMsg);
-			if(aMsg) delete aMsg;
+			delete aMsg;
+
 			if(fHidesWhenDone && !IsHidden())
 			{
 				Hide();
