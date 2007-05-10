@@ -365,7 +365,7 @@ EMenuItem::GetContentSize(float *width, float *height) const
 	{
 		e_font_height fontHeight;
 		font.GetHeight(&fontHeight);
-		*height = Label() ? (float)ceil((double)(fontHeight.ascent + fontHeight.descent)) : 0;
+		*height = (float)ceil((double)(fontHeight.ascent + fontHeight.descent));
 		*height += 4;
 	}
 }

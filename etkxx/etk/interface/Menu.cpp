@@ -1222,9 +1222,6 @@ EMenu::FindItem(EPoint where)
 void
 EMenu::Refresh()
 {
-	if(Window() == NULL) return;
-	if(!IsVisible()) return;
-
 	if(e_is_instance_of(Window(), ESubmenuWindow) || fResizeToFit)
 	{
 		ERect rect = Frame();

@@ -1051,7 +1051,7 @@ EFilePanelWindow::EFilePanelWindow(EFilePanel *panel,
 
 	rect.OffsetTo(E_ORIGIN);
 
-	fDirMenu = new EMenu(" ", E_ITEMS_IN_COLUMN);
+	fDirMenu = new EMenu(NULL, E_ITEMS_IN_COLUMN);
 	menuField = new EMenuField(rect, "DirMenuField", TEXT_LOCATION, fDirMenu, false);
 	menuField->GetPreferredSize(NULL, &rect.bottom);
 	menuField->ResizeTo(rect.Width(), rect.Height());
