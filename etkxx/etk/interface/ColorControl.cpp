@@ -370,11 +370,15 @@ EColorControl::MouseDown(EPoint where)
 	if(IsEnabled() == false) return;
 
 	ERect rect = _ColorsFrame();
-	rect.InsetBy(1.f, 1.f);
+	rect.InsetBy(-5, -2);
 	if(rect.Contains(where) == false) return;
+	rect.InsetBy(6, 3);
 
 	EPoint ptOffset = where - rect.LeftTop();
-	if(ptOffset.x > 255.f || ptOffset.y >= 60.f) return;
+	if(ptOffset.x < 0) ptOffset.x = 0;
+	if(ptOffset.x > 255) ptOffset.x = 255;
+	if(ptOffset.y < 0) ptOffset.y = 0;
+	if(ptOffset.y >= 60) ptOffset.y = 59;
 
 	e_rgb_color color = ValueAsColor();
 
