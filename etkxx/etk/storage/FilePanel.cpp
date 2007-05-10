@@ -1195,7 +1195,7 @@ EFilePanelWindow::MessageReceived(EMessage *msg)
 
 			msgr = (fTarget == NULL ? &etk_app_messenger : fTarget);
 			if(fMessage) aMsg = new EMessage(*fMessage);
-			else aMsg = new EMessage(E_SAVE_REQUESTED);
+			else aMsg = new EMessage(fMode == E_OPEN_PANEL ? (euint32)E_REFS_RECEIVED : (euint32)E_SAVE_REQUESTED);
 			aMsg->AddString("directory", fPath.Path());
 			for(eint32 i = 0; (index = listView->CurrentSelection(i)) > 0; i++)
 			{
