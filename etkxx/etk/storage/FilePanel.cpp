@@ -1031,7 +1031,7 @@ EFilePanelWindow::EFilePanelWindow(EFilePanel *panel,
 	menu->AddSeparatorItem();
 	menu->AddItem(new EMenuItem(TEXT_SHOW_HIDDEN_FILES, new EMessage(MSG_PANEL_TOGGLE_HIDDEN)));
 	menu->AddSeparatorItem();
-	menu->AddItem(new EMenuItem(TEXT_CANCEL, new EMessage(E_QUIT_REQUESTED)));
+	menu->AddItem(new EMenuItem(TEXT_CANCEL, new EMessage(E_CANCEL)));
 	for(eint32 i = 0; (menuItem = menu->ItemAt(i)) != NULL; i++) menuItem->SetTarget(this);
 
 	menuBar = new EMenuBar(rect, NULL,
@@ -1080,7 +1080,7 @@ EFilePanelWindow::EFilePanelWindow(EFilePanel *panel,
 	rect.OffsetBy(-110, 0);
 	button = new EButton(rect, "cancel button",
 			     TEXT_CANCEL,
-			     new EMessage(E_QUIT_REQUESTED),
+			     new EMessage(E_CANCEL),
 			     E_FOLLOW_RIGHT | E_FOLLOW_BOTTOM);
 	aView->AddChild(button);
 
@@ -1212,6 +1212,25 @@ EFilePanelWindow::MessageReceived(EMessage *msg)
 				Hide();
 				fPanel->WasHidden();
 			}
+			break;
+
+		case E_CANCEL:
+			msgr = (fTarget == NULL ? &etk_app_messenger : fTarget);
+			if(fMessage)
+			{
+				aMsg = new EMessage(*fMessage);
+				aMsg->AddInt32("old_what", aMsg->what);
+				aMsg->what = E_CANCEL;
+			}
+			else
+			{
+				aMsg = new EMessage(E_CANCEL);
+			}
+			aMsg->AddPointer("source", fPanel);
+			fPanel->SendMessage(msgr, aMsg);
+			delete aMsg;
+
+			PostMessage(E_QUIT_REQUESTED);
 			break;
 
 		default:
