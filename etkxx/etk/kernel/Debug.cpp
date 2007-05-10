@@ -54,23 +54,8 @@
 
 
 #ifdef _WIN32
-static char* etk_win32_convert_utf8_to_active(const char *str, eint32 length)
-{
-	eunichar *wStr = e_utf8_convert_to_unicode(str, length);
-	eint32 len = e_unicode_strlen(wStr);
-
-	if(wStr == NULL) return NULL;
-
-	char *aStr = (char*)malloc((size_t)len * 2 + 1);
-	if(aStr == NULL) {free(wStr); return NULL;}
-
-	bzero(aStr, (size_t)len * 2 + 1);
-	WideCharToMultiByte(CP_ACP, 0, (WCHAR*)wStr, -1, aStr, len * 2, NULL, NULL);
-
-	free(wStr);
-
-	return aStr;
-}
+// defined in etk-os.cpp
+extern "C" char* etk_win32_convert_utf8_to_active(const char *str, eint32 length);
 #endif
 
 
