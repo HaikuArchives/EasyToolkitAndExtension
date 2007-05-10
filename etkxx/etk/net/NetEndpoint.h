@@ -90,6 +90,10 @@ public:
 
 	virtual bool		IsDataPending(e_bigtime_t timeout = 0);
 
+protected:
+	// Socket(): use it carefully please.
+	int			Socket() const;
+
 private:
 	int fSocket;
 	int fProtocol;

@@ -560,3 +560,10 @@ ENetEndpoint::IsDataPending(e_bigtime_t _timeout)
 	return(status > 0 && FD_ISSET(fSocket, &rset));
 }
 
+
+int
+ENetEndpoint::Socket() const
+{
+	return fSocket;
+}
+
