@@ -996,7 +996,7 @@ EWindow::RemoveChild(EView *child)
 	if(e_is_kind_of(child, EScrollBar))
 	{
 		EScrollBar *scrollbar = e_cast_as(child, EScrollBar);
-		if(scrollbar->fTarget == NULL)
+		if(scrollbar->fTarget != NULL)
 		{
 			scrollbar->fTarget->fScrollBar.RemoveItem(scrollbar);
 			scrollbar->fTarget = NULL;
