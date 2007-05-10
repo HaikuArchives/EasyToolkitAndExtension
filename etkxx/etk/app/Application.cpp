@@ -449,6 +449,7 @@ EApplication::LooperAt(eint32 index)
 bool
 EApplication::etk_quit_all_loopers(bool force)
 {
+	eint32 index;
 	ELooper *looper = NULL;
 	ELocker *hLocker = etk_get_handler_operator_locker();
 
@@ -459,10 +460,11 @@ EApplication::etk_quit_all_loopers(bool force)
 		if(etk_app != this) {hLocker->Unlock(); return false;}
 
 		looper = NULL;
-		for(eint32 i = 0; i < ELooper::sLooperList.CountItems(); i++)
+		for(index = 0; index < ELooper::sLooperList.CountItems(); index++)
 		{
-			if((looper = (ELooper*)(ELooper::sLooperList.ItemAt(i))) == NULL || looper == etk_app) {looper = NULL; continue;}
-			else break;
+			looper = (ELooper*)(ELooper::sLooperList.ItemAt(index));
+			if(looper == etk_app) looper = NULL; // ignore etk_app
+			if(looper != NULL) break;
 		}
 
 		if(looper == NULL)
@@ -473,6 +475,7 @@ EApplication::etk_quit_all_loopers(bool force)
 
 		if(looper->Lock() == false)
 		{
+			ELooper::sLooperList.SwapItems(index, ELooper::sLooperList.CountItems() - 1);
 			hLocker->Unlock();
 			ETK_DEBUG("[APP]: %s --- Lock looper failed, retry again...", __PRETTY_FUNCTION__);
 			e_snooze(5000);
