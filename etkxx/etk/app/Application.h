@@ -82,6 +82,7 @@ private:
 	friend class EWindow;
 	friend class EView;
 	friend class EBitmap;
+	friend class EScreen;
 
 	friend _IMPEXP_ETK bool etk_update_font_families(bool);
 

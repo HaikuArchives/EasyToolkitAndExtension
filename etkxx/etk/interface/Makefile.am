@@ -53,6 +53,8 @@ libetk_interface_la_SOURCES =		\
 		Font.cpp		\
 		Font.h			\
 		Theme.cpp		\
+		Screen.cpp		\
+		Screen.h		\
 		Window.cpp		\
 		Window.h		\
 		View.cpp		\
@@ -118,6 +120,7 @@ etk_interfaceinclude_HEADERS =		\
 		Polygon.h		\
 		Region.h		\
 		Font.h			\
+		Screen.h		\
 		Window.h		\
 		View.h			\
 		ScrollBar.h		\

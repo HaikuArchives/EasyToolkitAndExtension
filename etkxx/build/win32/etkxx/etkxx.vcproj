@@ -317,6 +317,9 @@
 				<File
 					RelativePath="..\..\..\etk\interface\Window.cpp">
 				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\Screen.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="app"
@@ -632,6 +635,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\Window.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\Screen.h">
 				</File>
 			</Filter>
 			<Filter

@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
  * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
  *
@@ -22,43 +22,72 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: InterfaceKit.h
- * 
+ *
+ * File: Screen.cpp
+ *
  * --------------------------------------------------------------------------*/
 
-#include <etk/interface/GraphicsDefs.h>
-#include <etk/interface/InterfaceDefs.h>
-#include <etk/interface/Point.h>
-#include <etk/interface/Rect.h>
-#include <etk/interface/Polygon.h>
-#include <etk/interface/Region.h>
-#include <etk/interface/Font.h>
-#include <etk/interface/Screen.h>
-#include <etk/interface/Window.h>
-#include <etk/interface/View.h>
-#include <etk/interface/ScrollBar.h>
-#include <etk/interface/ScrollView.h>
-#include <etk/interface/Control.h>
-#include <etk/interface/ColorControl.h>
-#include <etk/interface/Button.h>
-#include <etk/interface/Alert.h>
-#include <etk/interface/CheckBox.h>
-#include <etk/interface/RadioButton.h>
-#include <etk/interface/MenuItem.h>
-#include <etk/interface/Menu.h>
-#include <etk/interface/PopUpMenu.h>
-#include <etk/interface/MenuBar.h>
-#include <etk/interface/MenuField.h>
-#include <etk/interface/StringView.h>
-#include <etk/interface/Box.h>
-#include <etk/interface/StatusBar.h>
-#include <etk/interface/TextEditable.h>
-#include <etk/interface/TextControl.h>
-#include <etk/interface/ListItem.h>
-#include <etk/interface/ListView.h>
-#include <etk/interface/OutlineListView.h>
-#include <etk/interface/TabView.h>
-#include <etk/interface/TextView.h>
-#include <etk/interface/Bitmap.h>
+#include <etk/add-ons/graphics/GraphicsEngine.h>
+#include <etk/app/Application.h>
+
+#include "Screen.h"
+#include "Window.h"
+
+EScreen::EScreen(euint32 id)
+	: fID(id)
+{
+	// TODO
+}
+
+
+EScreen::EScreen(EWindow *win)
+	: fID(E_MAXUINT32)
+{
+	// TODO
+	if(win) fID = 0;
+}
+
+
+EScreen::~EScreen()
+{
+	// TODO
+}
+
+
+bool
+EScreen::IsValid() const
+{
+	// TODO
+	if(fID != 0) return false;
+	return(!(etk_app == NULL || etk_app->fGraphicsEngine == NULL));
+}
+
+
+e_status_t
+EScreen::SetToNext()
+{
+	// TODO
+	return E_ERROR;
+}
+
+
+ERect
+EScreen::Frame() const
+{
+	ERect r;
+	if(fID == 0 && !(etk_app == NULL || etk_app->fGraphicsEngine == NULL))
+	{
+		euint32 scrW = 0, scrH = 0;
+		etk_app->fGraphicsEngine->GetDesktopBounds(&scrW, &scrH);
+		if(scrW > 0 && scrH > 0) r.Set(0, 0, scrW - 1, scrH - 1);
+	}
+	return r;
+}
+
+
+euint32
+EScreen::ID() const
+{
+	return fID;
+}
 

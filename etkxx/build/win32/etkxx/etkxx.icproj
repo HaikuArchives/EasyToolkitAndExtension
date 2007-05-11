@@ -248,6 +248,8 @@
 		<File 
 			RelativePath="..\..\..\etk\interface\Window.cpp"/>
 		<File 
+			RelativePath="..\..\..\etk\interface\Screen.cpp"/>
+		<File 
 			RelativePath="..\..\..\etk\app\Application.cpp"/>
 		<File 
 			RelativePath="..\..\..\etk\app\Handler.cpp"/>
@@ -431,6 +433,8 @@
 			RelativePath="..\..\..\etk\interface\View.h"/>
 		<File 
 			RelativePath="..\..\..\etk\interface\Window.h"/>
+		<File 
+			RelativePath="..\..\..\etk\interface\Screen.h"/>
 		<File 
 			RelativePath="..\..\..\etk\app\AppDefs.h"/>
 		<File 

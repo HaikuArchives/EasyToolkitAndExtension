@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
  * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
  *
@@ -22,43 +22,37 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: InterfaceKit.h
- * 
+ *
+ * File: Screen.h
+ *
  * --------------------------------------------------------------------------*/
 
-#include <etk/interface/GraphicsDefs.h>
-#include <etk/interface/InterfaceDefs.h>
-#include <etk/interface/Point.h>
+#ifndef __ETK_SCREEN_H__
+#define __ETK_SCREEN_H__
+
 #include <etk/interface/Rect.h>
-#include <etk/interface/Polygon.h>
-#include <etk/interface/Region.h>
-#include <etk/interface/Font.h>
-#include <etk/interface/Screen.h>
-#include <etk/interface/Window.h>
-#include <etk/interface/View.h>
-#include <etk/interface/ScrollBar.h>
-#include <etk/interface/ScrollView.h>
-#include <etk/interface/Control.h>
-#include <etk/interface/ColorControl.h>
-#include <etk/interface/Button.h>
-#include <etk/interface/Alert.h>
-#include <etk/interface/CheckBox.h>
-#include <etk/interface/RadioButton.h>
-#include <etk/interface/MenuItem.h>
-#include <etk/interface/Menu.h>
-#include <etk/interface/PopUpMenu.h>
-#include <etk/interface/MenuBar.h>
-#include <etk/interface/MenuField.h>
-#include <etk/interface/StringView.h>
-#include <etk/interface/Box.h>
-#include <etk/interface/StatusBar.h>
-#include <etk/interface/TextEditable.h>
-#include <etk/interface/TextControl.h>
-#include <etk/interface/ListItem.h>
-#include <etk/interface/ListView.h>
-#include <etk/interface/OutlineListView.h>
-#include <etk/interface/TabView.h>
-#include <etk/interface/TextView.h>
-#include <etk/interface/Bitmap.h>
+
+#ifdef __cplusplus /* Just for C++ */
+
+class EWindow;
+
+class _IMPEXP_ETK EScreen {
+public:
+	EScreen(euint32 id = 0);
+	EScreen(EWindow *win);
+	~EScreen();
+
+	bool		IsValid() const;
+	e_status_t	SetToNext();
+
+	ERect		Frame() const;
+	euint32		ID() const;
+
+private:
+	euint32 fID;
+};
+
+#endif /* __cplusplus */
+
+#endif /* __ETK_SCREEN_H__ */
 

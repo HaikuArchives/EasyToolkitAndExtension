@@ -41,6 +41,7 @@
 #include "View.h"
 #include "ScrollBar.h"
 #include "Window.h"
+#include "Screen.h"
 
 #ifndef HAVE_ROUND
 inline double etk_round(double value)
@@ -1776,10 +1777,10 @@ EWindow::MoveTo(EPoint where)
 void
 EWindow::MoveToCenter()
 {
-	euint32 scrW = 0, scrH = 0;
-	etk_app->fGraphicsEngine->GetDesktopBounds(&scrW, &scrH);
-
-	MoveTo(EPoint(((float)scrW - Frame().Width()) / 2, ((float)scrH - Frame().Height()) / 2));
+	EScreen scr(this);
+	ERect r = scr.Frame();
+	if(!r.IsValid()) return;
+	MoveTo(EPoint((r.Width() - Frame().Width()) / 2, (r.Height() - Frame().Height()) / 2));
 }
 
 
