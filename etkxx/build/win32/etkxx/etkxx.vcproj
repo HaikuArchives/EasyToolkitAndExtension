@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
@@ -23,6 +23,7 @@
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_ENABLE_DEBUG"
 				MinimalRebuild="TRUE"
+				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
@@ -87,7 +88,7 @@
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
 				StringPooling="TRUE"
-				ExceptionHandling="TRUE"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
@@ -285,6 +286,9 @@
 					RelativePath="..\..\..\etk\interface\Region.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\Screen.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\ScrollBar.cpp">
 				</File>
 				<File
@@ -316,9 +320,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\Window.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\interface\Screen.cpp">
 				</File>
 			</Filter>
 			<Filter
@@ -607,6 +608,9 @@
 					RelativePath="..\..\..\etk\interface\Region.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\Screen.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\ScrollBar.h">
 				</File>
 				<File
@@ -635,9 +639,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\Window.h">
-				</File>
-				<File
-					RelativePath="..\..\..\etk\interface\Screen.h">
 				</File>
 			</Filter>
 			<Filter

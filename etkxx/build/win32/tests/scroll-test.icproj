@@ -17,50 +17,54 @@
 				ConfigurationType="1"
 				CharacterSet="0"/>
 			<Tool 
-				Name="DebugTool"/>
-			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
-				MinimalRebuild="1"
+				MinimalRebuild="TRUE"
+				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="0"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"
 				SupportMultibyteCharSource="1"/>
 			<Tool 
+				Name="CustomTool"/>
+			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
 				AdditionalDependencies="etkxx.lib"
 				OutputFile="$(OutDir)/scroll-test.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\etkxx\Debug"
-				GenerateDebugInformation="1"
+				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/scroll-test.pdb"
 				SubSystem="2"
 				TargetMachine="1"/>
 			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
 				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"/>
+				Name="ResCmplrTool"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Release|Win32">
@@ -70,54 +74,74 @@
 				IntermediateDirectory="Release"
 				ConfigurationType="1"
 				CharacterSet="0"
-				WholeProgramOptimization="0"/>
-			<Tool 
-				Name="DebugTool"/>
+				WholeProgramOptimization="FALSE"/>
 			<Tool 
 				Name="CppCmplrTool"
 				AdditionalIncludeDirectories="..\..\..\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="0"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool 
+				Name="CustomTool"/>
+			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
 				AdditionalDependencies="etkxx.lib"
 				OutputFile="$(OutDir)/scroll-test.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\etkxx\Release"
-				GenerateDebugInformation="1"
+				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"/>
 			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
 				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"/>
+				Name="ResCmplrTool"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 	</Configurations>
 	<Files>
-		<File 
-			RelativePath="..\..\..\tests\scroll-test.cpp"/>
+		<Filter 
+			Name="Source files"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			<File 
+				RelativePath="..\..\..\tests\scroll-test.cpp">
+			</File>
+		</Filter>
+		<Filter 
+			Name="Head files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+		</Filter>
+		<Filter 
+			Name="Resource files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+		</Filter>
 	</Files>
 </VisualStudioProject>
 

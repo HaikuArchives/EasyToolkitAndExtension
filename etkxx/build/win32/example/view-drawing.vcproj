@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="view-drawing example"
-	ProjectGUID="{F4EA7EE6-0483-47D3-8C43-C4A174F52383}"
+	ProjectGUID="{3B5A4105-C3E3-423B-BA1D-DF27042E7264}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -22,6 +22,7 @@
 				AdditionalIncludeDirectories="..\..\..\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="TRUE"
+				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
@@ -73,6 +74,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\..\..\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
