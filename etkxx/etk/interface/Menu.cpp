@@ -169,7 +169,7 @@ EMenu::AddItem(EMenuItem *item, eint32 index)
 	if(fSelectedIndex == index) fSelectedIndex++;
 	if(fMarkedIndex == index) fMarkedIndex++;
 
-	Refresh();
+	if(Window() != NULL) Refresh();
 
 	return true;
 }
@@ -186,7 +186,7 @@ EMenu::AddItem(EMenuItem *item, ERect frame)
 
 	item->fFrame = frame;
 
-	Refresh();
+	if(Window() != NULL) Refresh();
 
 	return true;
 }
@@ -220,7 +220,7 @@ EMenu::AddItem(EMenu *menu, eint32 index)
 	if(fSelectedIndex == index) fSelectedIndex++;
 	if(fMarkedIndex == index) fMarkedIndex++;
 
-	Refresh();
+	if(Window() != NULL) Refresh();
 
 	return true;
 }
@@ -295,7 +295,7 @@ EMenu::RemoveItem(eint32 index)
 		if(fRadioMode) FindMarked(&fMarkedIndex);
 	}
 
-	Refresh();
+	if(Window() != NULL) Refresh();
 
 	return item;
 }
@@ -324,7 +324,7 @@ EMenu::RemoveItem(EMenu *menu)
 		if(fRadioMode) FindMarked(&fMarkedIndex);
 	}
 
-	Refresh();
+	if(Window() != NULL) Refresh();
 
 	return true;
 }
