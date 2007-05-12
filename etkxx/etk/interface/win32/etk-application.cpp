@@ -995,11 +995,12 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 				{
 					if(winMsg->message == WM_SIZE)
 					{
+						handled = false;
+
+						if(winMsg->wParam == SIZE_MINIMIZED) break;
 						message.what = E_WINDOW_RESIZED;
 						message.AddFloat("width", (float)((short)LOWORD(winMsg->lParam) - 1));
 						message.AddFloat("height", (float)((short)HIWORD(winMsg->lParam) - 1));
-
-						handled = false;
 					}
 					else if(winMsg->message == WM_MOVE)
 					{
