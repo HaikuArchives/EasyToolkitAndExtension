@@ -176,7 +176,7 @@ EEntry::IsDirectory() const
 
 	struct _stat st;
 	if(_stat(filename, &st) != 0) return false;
-	return(st.st_mode & _S_IFDIR);
+	return((st.st_mode & _S_IFDIR) ? true : false);
 #else
 	struct stat st;
 	if(stat(filename, &st) != 0) return false;

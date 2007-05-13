@@ -66,16 +66,15 @@ typedef enum etk_debug_level {
 
 _IMPEXP_ETK void etk_debug_log(etk_debug_level level, const char *format, va_list ap);
 
+#ifndef ETK_DEBUG
 #if defined(ETK_DISABLE_MORE_CHECKS)
 #	if __GNUC__ >= 3 || defined(__INTEL_COMPILER)
 #		define ETK_DEBUG(...)				(void)0
 #	else
 #		ifdef __GNUC__
 #			define ETK_DEBUG(a...)			(void)0
-#		elif defined(_MSC_VER)
-#			define ETK_DEBUG(a, b, c, d, e, f, g)	(void)0
 #		else
-inline void ETK_DEBUG(const char *format, ...)
+static void ETK_DEBUG(const char *format, ...)
 {
 }
 #		endif
@@ -83,25 +82,26 @@ inline void ETK_DEBUG(const char *format, ...)
 #else
 _IMPEXP_ETK void ETK_DEBUG(const char *format, ...);
 #endif
+#endif
 
 _IMPEXP_ETK void ETK_OUTPUT(const char *format, ...);
 
+#ifndef ETK_WARNING
 #if defined(ETK_DISABLE_CHECKS)
 #	if __GNUC__ >= 3 || defined(__INTEL_COMPILER)
 #		define ETK_WARNING(...)				(void)0
 #	else
 #		ifdef __GNUC__
 #			define ETK_WARNING(a...)		(void)0
-#		elif defined(_MSC_VER)
-#			define ETK_WARNING(a, b, c, d, e, f, g)	(void)0
 #		else
-inline void ETK_WARNING(const char *format, ...)
+static void ETK_WARNING(const char *format, ...)
 {
 }
 #		endif
 #	endif
 #else
 _IMPEXP_ETK void ETK_WARNING(const char *format, ...);
+#endif
 #endif
 
 _IMPEXP_ETK void ETK_ERROR(const char *format, ...);

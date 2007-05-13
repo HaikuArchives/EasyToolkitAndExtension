@@ -37,7 +37,12 @@
 
 #include <etk/config.h>
 
+#define ETK_DEBUG
+#define ETK_WARNING
 #include "Debug.h"
+#undef ETK_DEBUG
+#undef ETK_WARNING
+
 #include "Kernel.h"
 
 #include <etk/support/String.h>
@@ -197,9 +202,6 @@ _IMPEXP_ETK void etk_debug_log(etk_debug_level level, const char *format, va_lis
 }
 
 
-#ifdef ETK_DEBUG
-	#undef ETK_DEBUG
-#endif
 _IMPEXP_ETK void ETK_DEBUG(const char *format, ...)
 {
 	va_list args;
@@ -218,9 +220,6 @@ _IMPEXP_ETK void ETK_OUTPUT(const char *format, ...)
 }
 
 
-#ifdef ETK_WARNING
-	#undef ETK_WARNING
-#endif
 _IMPEXP_ETK void ETK_WARNING(const char *format, ...)
 {
 	va_list args;

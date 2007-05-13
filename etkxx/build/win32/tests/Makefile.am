@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = 1.7
 
-EXTRA_DIST = scroll-test.vcproj scroll-test.icproj
+EXTRA_DIST = scroll-test.vcproj
 
 DISTCLEANFILES = Makefile.in
 

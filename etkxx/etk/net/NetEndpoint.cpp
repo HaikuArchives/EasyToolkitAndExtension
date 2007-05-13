@@ -549,8 +549,8 @@ ENetEndpoint::IsDataPending(e_bigtime_t _timeout)
 	if(fSocket == -1) return false;
 
 	struct timeval timeout;
-	timeout.tv_sec = _timeout / E_INT64_CONSTANT(1000000);
-	timeout.tv_usec = _timeout % E_INT64_CONSTANT(1000000);
+	timeout.tv_sec = (long)(_timeout / E_INT64_CONSTANT(1000000));
+	timeout.tv_usec = (long)(_timeout % E_INT64_CONSTANT(1000000));
 
 	fd_set rset;
 	FD_ZERO(&rset);

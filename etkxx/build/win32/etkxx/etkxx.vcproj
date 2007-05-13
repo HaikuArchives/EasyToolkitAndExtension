@@ -36,11 +36,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib msvcrtd.lib advapi32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/libetkxx.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
-				IgnoreAllDefaultLibraries="FALSE"
+				IgnoreAllDefaultLibraries="TRUE"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile=""
 				GenerateDebugInformation="TRUE"
@@ -100,10 +100,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib"
+				IgnoreImportLibrary="FALSE"
+				AdditionalDependencies="imm32.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib msvcrt.lib advapi32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/libetkxx.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
+				IgnoreAllDefaultLibraries="TRUE"
 				GenerateDebugInformation="FALSE"
 				SubSystem="2"
 				OptimizeReferences="2"

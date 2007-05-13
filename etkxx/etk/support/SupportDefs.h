@@ -174,7 +174,7 @@ extern _IMPEXP_ETK const euint8 etk_major_version;
 extern _IMPEXP_ETK const euint8 etk_minor_version;
 extern _IMPEXP_ETK const euint8 etk_micro_version;
 extern _IMPEXP_ETK const euint8 etk_interface_age;
-extern _IMPEXP_ETK const euint8 etk_binary_age;
+extern _IMPEXP_ETK const euint16 etk_binary_age;
 
 #ifdef __cplusplus
 } /* extern "C" */

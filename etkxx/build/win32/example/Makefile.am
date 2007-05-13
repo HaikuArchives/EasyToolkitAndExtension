@@ -2,11 +2,8 @@ AUTOMAKE_OPTIONS = 1.7
 
 EXTRA_DIST =			\
 	window-wmaction.vcproj	\
-	window-wmaction.icproj	\
 	view-drawing.vcproj	\
-	view-drawing.icproj	\
-	menu.vcproj		\
-	menu.icproj
+	menu.vcproj
 
 DISTCLEANFILES = Makefile.in
 

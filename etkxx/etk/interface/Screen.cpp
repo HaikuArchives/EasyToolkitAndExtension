@@ -79,7 +79,7 @@ EScreen::Frame() const
 	{
 		euint32 scrW = 0, scrH = 0;
 		etk_app->fGraphicsEngine->GetDesktopBounds(&scrW, &scrH);
-		if(scrW > 0 && scrH > 0) r.Set(0, 0, scrW - 1, scrH - 1);
+		if(scrW > 0 && scrH > 0) r.Set(0, 0, (float)(scrW - 1), (float)(scrH - 1));
 	}
 	return r;
 }

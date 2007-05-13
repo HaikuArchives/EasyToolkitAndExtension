@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = 1.7
 
-EXTRA_DIST = etkxx.vcproj etkxx.icproj
+EXTRA_DIST = etkxx.vcproj
 
 DISTCLEANFILES = Makefile.in
 

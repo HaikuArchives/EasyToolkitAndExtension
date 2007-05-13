@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
@@ -34,10 +34,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="etkxx.lib X11.lib ws2_32.lib"
+				AdditionalDependencies="etkxx.lib msvcrtd.lib kernel32.lib user32.lib X11.lib ws2_32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/libgraphics-x11.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\etkxx\Debug;C:\XWIN32\lib"
+				IgnoreAllDefaultLibraries="TRUE"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/helloworld.pdb"
 				SubSystem="2"
@@ -85,10 +86,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="etkxx.lib X11.lib ws2_32.lib"
+				AdditionalDependencies="etkxx.lib msvcrt.lib kernel32.lib user32.lib X11.lib ws2_32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/libgraphics-x11.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\etkxx\Release;C:\XWIN32\lib"
+				IgnoreAllDefaultLibraries="TRUE"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"

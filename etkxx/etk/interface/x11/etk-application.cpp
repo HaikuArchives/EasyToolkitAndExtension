@@ -836,6 +836,10 @@ static void etk_process_x_event(EXGraphicsEngine *x11Engine, XEvent *event)
 				bzero(keybuffer, sizeof(keybuffer));
 
 				eint32 modifiers = 0;
+
+				x11Engine->Lock();
+				keynum = XLookupString(&event->xkey, keybuffer, 16, &keysym, &status);
+
 #if 0
 				if(event->type == KeyRelease)
 					ETK_DEBUG("event->xkey.state & ShiftMask --- %s",
@@ -854,8 +858,6 @@ static void etk_process_x_event(EXGraphicsEngine *x11Engine, XEvent *event)
 
 				event->xkey.state &= ~(ControlMask | Mod1Mask);
 
-				x11Engine->Lock();
-				keynum = XLookupString(&event->xkey, keybuffer, 16, &keysym, &status);
 				while(x11Engine->xInputContext != NULL && event->type == KeyPress)
 				{
 					wchar_t *im_buf = (wchar_t*)malloc(sizeof(wchar_t) * 20);

@@ -389,7 +389,8 @@ EPixmap::DrawXPM(const char **xpm_data, eint32 destX, eint32 destY, eint32 srcX,
 
 	str.SetTo(*xpm_data++);
 
-	for(eint32 i = 0, offset = 0; i < 4; i++)
+	offset = 0;
+	for(eint32 i = 0; i < 4; i++)
 	{
 		eint32 oldOffset = offset;
 		offset = (i == 3 ? str.Length() : str.FindFirst(" ", offset));

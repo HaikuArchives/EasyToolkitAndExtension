@@ -76,7 +76,7 @@
 
 #ifndef HAVE_STRCASECMP
 	#ifdef _MSC_VER
-	#define e_strcasecmp(a, b)	stricmp(a, b)
+	#define e_strcasecmp(a, b)	_stricmp(a, b)
 	#endif
 #else
 	#define e_strcasecmp(a, b)	strcasecmp(a, b)
@@ -84,7 +84,7 @@
 
 #ifndef HAVE_STRNCASECMP
 	#ifdef _MSC_VER
-	#define e_strncasecmp(a, b, c)	strnicmp(a, b, c)
+	#define e_strncasecmp(a, b, c)	_strnicmp(a, b, c)
 	#endif
 #else
 	#define e_strncasecmp(a, b, c)	strncasecmp(a, b, c)

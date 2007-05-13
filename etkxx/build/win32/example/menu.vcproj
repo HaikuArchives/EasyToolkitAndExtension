@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
@@ -34,10 +34,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="etkxx.lib"
+				AdditionalDependencies="etkxx.lib msvcrtd.lib kernel32.lib user32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/menu.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\etkxx\Debug"
+				IgnoreAllDefaultLibraries="TRUE"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/menu.pdb"
 				SubSystem="2"
@@ -85,10 +86,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="etkxx.lib"
+				AdditionalDependencies="etkxx.lib msvcrt.lib kernel32.lib user32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/menu.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\etkxx\Release"
+				IgnoreAllDefaultLibraries="TRUE"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"

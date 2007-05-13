@@ -35,7 +35,7 @@ extern _IMPEXP_ETK const euint8 etk_major_version = ETK_MAJOR_VERSION;
 extern _IMPEXP_ETK const euint8 etk_minor_version = ETK_MINOR_VERSION;
 extern _IMPEXP_ETK const euint8 etk_micro_version = ETK_MICRO_VERSION;
 extern _IMPEXP_ETK const euint8 etk_interface_age = ETK_INTERFACE_AGE;
-extern _IMPEXP_ETK const euint8 etk_binary_age = ETK_BINARY_AGE;
+extern _IMPEXP_ETK const euint16 etk_binary_age = ETK_BINARY_AGE;
 
 } // extern "C"
 
