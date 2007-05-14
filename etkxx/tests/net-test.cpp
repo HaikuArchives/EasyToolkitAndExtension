@@ -47,6 +47,7 @@ static void client(const char *address)
 
 	if(endpoint.InitCheck() != E_OK) ETK_ERROR("Failed to create endpoint: %s.", endpoint.ErrorStr());
 	if(endpoint.Connect(address, DEFAULT_PORT) != E_OK) ETK_ERROR("Connect() failed: %s.", endpoint.ErrorStr());
+	endpoint.SetTimeout(E_INFINITE_TIMEOUT);
 
 	char buf[BUF_SIZE];
 	size_t pos = 0;

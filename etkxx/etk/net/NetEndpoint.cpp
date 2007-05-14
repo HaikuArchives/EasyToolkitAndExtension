@@ -549,14 +549,23 @@ ENetEndpoint::IsDataPending(e_bigtime_t _timeout)
 	if(fSocket == -1) return false;
 
 	struct timeval timeout;
-	timeout.tv_sec = (long)(_timeout / E_INT64_CONSTANT(1000000));
-	timeout.tv_usec = (long)(_timeout % E_INT64_CONSTANT(1000000));
+	if(fNonBlocking)
+	{
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 0;
+	}
+	else if(_timeout != E_INFINITE_TIMEOUT)
+	{
+		timeout.tv_sec = (long)(_timeout / E_INT64_CONSTANT(1000000));
+		timeout.tv_usec = (long)(_timeout % E_INT64_CONSTANT(1000000));
+	}
 
 	fd_set rset;
 	FD_ZERO(&rset);
 	FD_SET(fSocket, &rset);
 
-	int status = select(fSocket + 1, &rset, NULL, NULL, &timeout);
+	int status = select(fSocket + 1, &rset, NULL, NULL,
+			    (fNonBlocking || _timeout != E_INFINITE_TIMEOUT) ? &timeout : NULL);
 	return(status > 0 && FD_ISSET(fSocket, &rset));
 }
 
