@@ -1,5 +1,5 @@
 2007-05-14  anthonylee
-	Fixed EApplication::Quit()
+	Fixed ELooper::Quit()
 	Fixed some bugs when compiled by MSVC.
 
 2007-05-06  anthonylee

@@ -522,6 +522,8 @@ ELooper::Quit()
 
 	if(thread)
 	{
+		fDeconstructing = true;
+
 		if(PostMessage(_QUIT_) != E_OK)
 			ETK_ERROR("[APP]: %s --- Send \"_QUIT_\" to looper error!", __PRETTY_FUNCTION__);
 		euint64 token = etk_get_handler_token(this);
@@ -682,8 +684,11 @@ ELooper::_taskLooper(ELooper *self, void *sem)
 					flags = (looper == self ? 2 : 1);
 
 					looper->Lock();
-					looper->fDeconstructing = true;
-					looper->Quit();
+					if(looper->fDeconstructing == false)
+					{
+						looper->fDeconstructing = true;
+						looper->Quit();
+					}
 					delete looper;
 
 					break;
@@ -787,8 +792,11 @@ ELooper::NextLooperMessage(e_bigtime_t timeout)
 						looper->Lock();
 						if(looper->fLocksCount == E_INT64_CONSTANT(1))
 						{
-							looper->fDeconstructing = true;
-							looper->Quit();
+							if(looper->fDeconstructing == false)
+							{
+								looper->fDeconstructing = true;
+								looper->Quit();
+							}
 							delete looper;
 						}
 						else
