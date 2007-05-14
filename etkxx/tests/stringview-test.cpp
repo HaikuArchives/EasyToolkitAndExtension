@@ -146,12 +146,3 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-
-#ifdef _WIN32
-#include <windows.h>
-int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	return main(__argc, __argv);
-}
-#endif // _WIN32
-

@@ -496,7 +496,7 @@ EApplication::etk_quit_all_loopers(bool force)
 
 		hLocker->Unlock();
 
-		looper->Quit();
+		looper->ELooper::Quit();
 	}
 
 	return true;

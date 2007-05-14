@@ -1,12 +1,11 @@
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = etkxx graphics example tests
+SUBDIRS = etkxx graphics example
 
 EXTRA_DIST =				\
 	etkxx.sln			\
 	graphics.sln			\
-	example.sln			\
-	tests.sln
+	example.sln
 
 CLEANFILES =		\
 	etkxx.ncb	\
@@ -14,9 +13,7 @@ CLEANFILES =		\
 	graphics.ncb	\
 	graphics.suo	\
 	example.ncb	\
-	example.suo	\
-	tests.ncb	\
-	tests.suo
+	example.suo
 
 DISTCLEANFILES = Makefile.in
 

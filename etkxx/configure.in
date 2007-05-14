@@ -1716,7 +1716,6 @@ build/win32/Makefile
 build/win32/etkxx/Makefile
 build/win32/graphics/Makefile
 build/win32/example/Makefile
-build/win32/tests/Makefile
 build/beos/Makefile
 build/beos/example/Makefile
 etk/kernel/Makefile

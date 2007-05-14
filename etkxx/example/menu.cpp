@@ -319,11 +319,11 @@ int main(int argc, char **argv)
 }
 
 
-#ifdef _WIN32
+#if defined(_WIN32) && !(defined(_MSC_VER) && defined(_DEBUG))
 #include <windows.h>
 int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	return main(__argc, __argv);
 }
-#endif // _WIN32
+#endif // defined(_WIN32) && !(defined(_MSC_VER) && defined(_DEBUG))
 
