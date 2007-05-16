@@ -1260,10 +1260,26 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 					if((keyState[VK_CAPITAL] & 0x0f) > 0) modifiers |= E_CAPS_LOCK;
 					if((keyState[VK_SCROLL] & 0x0f) > 0) modifiers |= E_SCROLL_LOCK;
 					if((keyState[VK_NUMLOCK] & 0x0f) > 0) modifiers |= E_NUM_LOCK;
-					if(winMsg->wParam >= VK_F1 && winMsg->wParam <= VK_F12) modifiers |= E_FUNCTIONS_KEY;
-					if(winMsg->wParam == VK_PRINT) modifiers |= E_FUNCTIONS_KEY;
-					if(winMsg->wParam == VK_SCROLL) modifiers |= E_FUNCTIONS_KEY;
-					if(winMsg->wParam == VK_PAUSE) modifiers |= E_FUNCTIONS_KEY;
+					if(winMsg->wParam >= VK_F1 && winMsg->wParam <= VK_F12)
+					{
+						message.ReplaceInt32("key", winMsg->wParam - VK_F1 + E_F1_KEY);
+						modifiers |= E_FUNCTIONS_KEY;
+					}
+					else if(winMsg->wParam == VK_PRINT)
+					{
+						message.ReplaceInt32("key", E_PRINT_KEY);
+						modifiers |= E_FUNCTIONS_KEY;
+					}
+					else if(winMsg->wParam == VK_SCROLL)
+					{
+						message.ReplaceInt32("key", E_SCROLL_KEY);
+						modifiers |= E_FUNCTIONS_KEY;
+					}
+					else if(winMsg->wParam == VK_PAUSE)
+					{
+						message.ReplaceInt32("key", E_PAUSE_KEY);
+						modifiers |= E_FUNCTIONS_KEY;
+					}
 					message.AddInt32("modifiers", modifiers);
 
 					char keybuffer[3];

@@ -845,6 +845,25 @@ static void etk_process_x_event(EXGraphicsEngine *x11Engine, XEvent *event)
 					ETK_DEBUG("event->xkey.state & ShiftMask --- %s",
 						  (event->xkey.state & ShiftMask) ? "TRUE" : "FALSE");
 #endif
+				if((keysym >= XK_KP_F1 && keysym <= XK_KP_F4) || (keysym >= XK_F1 && keysym <= XK_F12) ||
+				    keysym == XK_Pause || keysym == XK_Scroll_Lock || keysym == XK_Print)
+				{
+					if(keysym >= XK_KP_F1 && keysym <= XK_KP_F4)
+						message.ReplaceInt32("key", keysym - XK_KP_F1 + E_F1_KEY);
+					else if(keysym >= XK_F1 && keysym <= XK_F12)
+						message.ReplaceInt32("key", keysym - XK_F1 + E_F1_KEY);
+					else if(keysym == XK_Pause)
+						message.ReplaceInt32("key", E_PAUSE_KEY);
+					else if(keysym == XK_Scroll_Lock)
+						message.ReplaceInt32("key", E_SCROLL_KEY);
+					else if(keysym == XK_Print)
+						message.ReplaceInt32("key", E_PRINT_KEY);
+					modifiers |= E_FUNCTIONS_KEY;
+					keybuffer[0] = E_FUNCTION_KEY;
+					keybuffer[1] = 0;
+					keynum = 1;
+				}
+
 				if(event->xkey.state & ShiftMask) modifiers |= E_SHIFT_KEY;
 				if(event->xkey.state & ControlMask) modifiers |= E_CONTROL_KEY;
 				if(event->xkey.state & Mod1Mask) modifiers |= E_COMMAND_KEY;
