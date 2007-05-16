@@ -864,7 +864,7 @@ EView::ConvertToScreen(EPoint* pt) const
 	EWindow *win = Window();
 	if(!win) return;
 
-	*pt += fLocalOrigin;
+	*pt -= fLocalOrigin;
 	*pt += fOrigin;
 
 	win->ConvertToScreen(pt);
@@ -889,7 +889,7 @@ EView::ConvertFromScreen(EPoint* pt) const
 	if(!win) return;
 
 	*pt -= fOrigin;
-	*pt -= fLocalOrigin;
+	*pt += fLocalOrigin;
 
 	win->ConvertFromScreen(pt);
 }
@@ -981,7 +981,7 @@ EView::ConvertToParent(EPoint *pt) const
 {
 	if(!pt) return;
 
-	*pt += fLocalOrigin;
+	*pt -= fLocalOrigin;
 	*pt += fFrame.LeftTop();
 }
 
@@ -1001,7 +1001,7 @@ EView::ConvertFromParent(EPoint *pt) const
 	if(!pt) return;
 
 	*pt -= fFrame.LeftTop();
-	*pt -= fLocalOrigin;
+	*pt += fLocalOrigin;
 }
 
 
@@ -1091,7 +1091,7 @@ EView::ConvertToWindow(EPoint* pt) const
 {
 	if(!pt) return;
 
-	*pt += fLocalOrigin;
+	*pt -= fLocalOrigin;
 	*pt += fOrigin;
 }
 
@@ -1111,7 +1111,7 @@ EView::ConvertFromWindow(EPoint* pt) const
 	if(!pt) return;
 
 	*pt -= fOrigin;
-	*pt -= fLocalOrigin;
+	*pt += fLocalOrigin;
 }
 
 
@@ -3358,7 +3358,7 @@ EView::_UpdateOriginAndVisibleRegion(bool deep)
 	if(win)
 	{
 		if(fParent)
-			fOrigin = fFrame.LeftTop() + fParent->fOrigin + fParent->fLocalOrigin;
+			fOrigin = fFrame.LeftTop() + fParent->fOrigin - fParent->fLocalOrigin;
 		else
 			fOrigin = fFrame.LeftTop();
 
@@ -3466,7 +3466,7 @@ EView::IsEnabled() const
 void
 EView::ScrollBy(float dh, float dv)
 {
-	ScrollTo(EPoint(dh, dv) - fLocalOrigin);
+	ScrollTo(EPoint(dh, dv) + fLocalOrigin);
 }
 
 
@@ -3480,7 +3480,8 @@ EView::ScrollTo(float x, float y)
 void
 EView::ScrollTo(EPoint where)
 {
-	where = E_ORIGIN - where;
+	if(where.x < 0) where.x = 0;
+	if(where.y < 0) where.y = 0;
 
 	if(fLocalOrigin != where)
 	{
@@ -3494,7 +3495,7 @@ EView::ScrollTo(EPoint where)
 		for(eint32 i = 0; i < fScrollBar.CountItems(); i++)
 		{
 			EScrollBar *scrollbar = (EScrollBar*)fScrollBar.ItemAt(i);
-			scrollbar->_SetValue(-(scrollbar->Orientation() == E_HORIZONTAL ? fLocalOrigin.x : fLocalOrigin.y), false);
+			scrollbar->_SetValue(scrollbar->Orientation() == E_HORIZONTAL ? fLocalOrigin.x : fLocalOrigin.y, false);
 		}
 	}
 }

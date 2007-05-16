@@ -247,16 +247,30 @@ EScrollView::FrameResized(float new_width, float new_height)
 
 	if(fHSB != NULL)
 	{
-		if(!fAlwaysShowHorizontal && TargetValidFrame(true).Width() >= targetFrame.Width()) fHSB->Hide();
-		else fHSB->Show();
-		fHSB->SetRange(0, max_c(targetFrame.Width() - TargetValidFrame(false).Width(), 0.f));
+		if(!fAlwaysShowHorizontal && TargetValidFrame(true).Width() >= targetFrame.Width())
+		{
+			fHSB->Hide();
+		}
+		else
+		{
+			fHSB->Show();
+			fHSB->SetEnabled(TargetValidFrame(true).Width() >= targetFrame.Width() ? false : true);
+			fHSB->SetRange(0, max_c(targetFrame.Width() - TargetValidFrame(false).Width(), 0.f));
+		}
 	}
 
 	if(fVSB != NULL)
 	{
-		if(!fAlwaysShowVertical && TargetValidFrame(true).Height() >= targetFrame.Height()) fVSB->Hide();
-		else fVSB->Show();
-		fVSB->SetRange(0, max_c(targetFrame.Height() - TargetValidFrame(false).Height(), 0.f));
+		if(!fAlwaysShowVertical && TargetValidFrame(true).Height() >= targetFrame.Height())
+		{
+			fVSB->Hide();
+		}
+		else
+		{
+			fVSB->Show();
+			fVSB->SetEnabled(TargetValidFrame(true).Height() >= targetFrame.Height() ? false : true);
+			fVSB->SetRange(0, max_c(targetFrame.Height() - TargetValidFrame(false).Height(), 0.f));
+		}
 	}
 
 	bool hsbHidden = (fHSB == NULL ? true : fHSB->IsHidden());
