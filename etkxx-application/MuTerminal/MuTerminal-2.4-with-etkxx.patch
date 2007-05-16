@@ -480,8 +480,8 @@ diff -Nur MuTerm/src/LangPrefView.cpp MuTerm_working/src/LangPrefView.cpp
  //
 diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm_working/src/Makefile_with_etkxx
 --- MuTerm/src/Makefile_with_etkxx	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/Makefile_with_etkxx	Sat May 12 03:08:52 2007
-@@ -0,0 +1,121 @@
++++ MuTerm_working/src/Makefile_with_etkxx	Wed May 16 16:20:44 2007
+@@ -0,0 +1,123 @@
 +DEBUG_OPTIONS = -g -Wall
 +OPTIMIZE = -O3
 +
@@ -544,19 +544,16 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm_working/src/Makefile_with_etkxx
 +	CodeConv.o \
 +	MenuUtil.o \
 +	UTF8WidthTbl.o \
-+	TermParse.o 
++	TermParse.o
++
++ifeq ($(OSTYPE),msys)
++OBJECTS += MuTerminal.rc.o
++endif
 +
 +CFLAGS = $(DEBUG_OPTIONS) $(OPTIMIZE) $(EXTRA_CFLAGS)
 +CFLAGS += $(shell etkxx-config --cflags) $(LIBICONV_CFLAGS)
-+LDFLAGS = $(shell etkxx-config --libs) $(LIBICONV_LIBS)
-+
-+ifeq ($(OSTYPE),msys)
-+# we don't use execptions, so we don't need mingwm10.dll
-+CFLAGS := $(subst -mthreads,-fno-exceptions,$(CFLAGS))
-+LDFLAGS := $(subst -mthreads,-fno-exceptions,$(LDFLAGS))
-+endif
-+
 +CXXFLAGS = $(CFLAGS)
++LDFLAGS = $(shell etkxx-config --libs) $(LIBICONV_LIBS)
 +
 +all:
 +ifneq ($(OSTYPE),beos)
@@ -588,6 +585,11 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm_working/src/Makefile_with_etkxx
 +
 +clean:
 +	rm -f *.o $(TARGET)$(EXEC_SUFFIX)
++endif
++
++ifeq ($(OSTYPE),msys)
++MuTerminal.rc.o: win32/MuTerminal.rc win32/MuTerminal.ico
++	windres -I ./win32 -o $@ $<
 +endif
 +
 +.SUFFIXES: .c .cpp .cxx .cc .o
@@ -754,17 +756,77 @@ diff -Nur MuTerm/src/MousePrefView.cpp MuTerm_working/src/MousePrefView.cpp
  ////////////////////////////////////////////////////////////////////////////
 diff -Nur MuTerm/src/MuTerminal.cpp MuTerm_working/src/MuTerminal.cpp
 --- MuTerm/src/MuTerminal.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/MuTerminal.cpp	Sat May 12 05:17:44 2007
-@@ -40,3 +40,12 @@
++++ MuTerm_working/src/MuTerminal.cpp	Wed May 16 16:15:53 2007
+@@ -32,6 +32,8 @@
+ // main (int argc, char **argv)
+ //	main routine of MuTerminal.
+ ////////////////////////////////////////////////////////////////////////////
++#ifndef _WIN32
++
+ int
+ main ()
+ {
+@@ -40,3 +42,63 @@
  
    return 0;
  }
 +
-+#ifdef _WIN32
++#else /* _WIN32 */
++
 +#include <windows.h>
-+int _stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
++
++static void run_app()
 +{
-+        return main();
++  TermApp app;
++  app.Run ();
++}
++
++int main(int argc, char **argv)
++{
++	void *port;
++	if((port = etk_open_port("MuTerminal Port")) != NULL)
++	{
++		etk_delete_port(port);
++		run_app();
++		return 0;
++	}
++
++	HANDLE mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, "MuTerminal Mutex");
++	if(mutex == NULL)
++	{
++		if((mutex = CreateMutex(NULL, FALSE, "MuTerminal Mutex")) == NULL)
++			ETK_ERROR("[MUTERM]: CreateMutex() failed !!!");
++		WaitForSingleObject(mutex, 0L);
++
++		STARTUPINFO sh_startup_info;
++		PROCESS_INFORMATION sh_process_info;
++
++		bzero(&sh_process_info, sizeof(sh_process_info));
++		bzero(&sh_startup_info, sizeof(sh_startup_info));
++		sh_startup_info.cb = sizeof(sh_startup_info);
++
++		if(CreateProcess(NULL, argv[0], NULL, NULL, FALSE, CREATE_NEW_CONSOLE,
++				 NULL, NULL, &sh_startup_info, &sh_process_info) == 0)
++			ETK_ERROR("[MUTERM]: CreateProcess() failed !!!");
++
++		do
++		{
++			ReleaseMutex(mutex);
++			Sleep(100);
++		} while(WaitForSingleObject(mutex, 0L) == WAIT_OBJECT_0);
++
++		CloseHandle(mutex);
++		CloseHandle(sh_process_info.hProcess);
++		CloseHandle(sh_process_info.hThread);
++	}
++	else
++	{
++		while(WaitForSingleObject(mutex, 100L) != WAIT_OBJECT_0) { /* nothing */ }
++		CloseHandle(mutex);
++		run_app();
++	}
++
++	return 0;
 +}
 +#endif // _WIN32
 +
@@ -1249,7 +1311,7 @@ diff -Nur MuTerm/src/TTextControl.h MuTerm_working/src/TTextControl.h
  {
 diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
 --- MuTerm/src/TermApp.cpp	Sun Jul  1 12:27:21 2001
-+++ MuTerm_working/src/TermApp.cpp	Sat May 12 02:29:18 2007
++++ MuTerm_working/src/TermApp.cpp	Tue May 15 23:48:26 2007
 @@ -24,6 +24,10 @@
  char *muterm_ver = "2.4";
  char *last_update = "2001/7/1";
@@ -1385,7 +1447,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  //
-@@ -211,10 +263,19 @@
+@@ -211,10 +263,20 @@
  TermApp::Quit (void)
  {
    if(!usage_requested){
@@ -1398,14 +1460,15 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
 +    if(sh_pid != (DWORD)-1)
 +    {
 +      HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sh_pid);
-+      TerminateProcess(hProcess, 0);
++      GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, sh_pid);
++      WaitForSingleObject(hProcess, INFINITE);
 +      CloseHandle(hProcess);
 +    }
 +#endif
    }
    
    delete gTermPref;
-@@ -244,7 +305,13 @@
+@@ -244,7 +306,13 @@
    case MSG_ACTIVATE_TERM:
      fTermWindow->TermWinActivate();
      break;
@@ -1420,7 +1483,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
    case MSG_ABOUT_CLOSED:
      fAboutPanel = NULL;
      break;
-@@ -348,14 +415,32 @@
+@@ -348,14 +416,32 @@
      status_t sts;
      off_t size = 0;
  
@@ -1453,7 +1516,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
      char *buffer = new char [size];
      inFile.Read (buffer, size);
      
-@@ -368,7 +453,31 @@
+@@ -368,7 +454,31 @@
  
  	if (text_to_rgb (value, &color, buffer)) {
  	  if (gTermPref->IsEmpty()){
@@ -1485,7 +1548,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
  	  }
  	  gTermPref->setRGB (standard_args[i].prefname, color);
  	}
-@@ -408,7 +517,9 @@
+@@ -408,7 +518,9 @@
  TermApp::AboutRequested (void)
  {
    if (fAboutPanel) {
@@ -1495,7 +1558,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
    }
    else {
      BRect rect(0, 0, 350 - 1, 170 - 1);
-@@ -427,6 +538,7 @@
+@@ -427,6 +539,7 @@
  void
  TermApp::RefsReceived(BMessage *message) 
  { 
@@ -1503,7 +1566,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
    // Works Only Launced by Double-Click file, or Drags file to App.
    if (!(this->IsLaunching())){
      return;
-@@ -457,6 +569,7 @@
+@@ -457,6 +570,7 @@
      //    beep();
      return;
    }
@@ -1511,7 +1574,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
  }  
  ////////////////////////////////////////////////////////////////////////////
  //
-@@ -481,7 +594,11 @@
+@@ -481,7 +595,11 @@
  void
  TermApp::RunNewTerm (void)
  {
@@ -1523,7 +1586,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  // ActivateTermWindow
-@@ -505,6 +622,7 @@
+@@ -505,6 +623,7 @@
  void
  TermApp::SwitchTerm()
  {
@@ -1531,7 +1594,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
    team_id myId = be_app->Team(); // My id
    BList teams;
    be_roster->GetAppList(MUTERM_SIGNATURE, &teams); 
-@@ -524,6 +642,7 @@
+@@ -524,6 +643,7 @@
  
    // Activare switched terminal.
    ActivateTermWindow(reinterpret_cast<team_id>(teams.ItemAt(i)));
@@ -1539,7 +1602,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  // IsMinimize
-@@ -541,7 +660,8 @@
+@@ -541,7 +661,8 @@
    BMessage reply;
    bool hidden;
  
@@ -1549,7 +1612,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
      return true;
  
    reply.FindBool("result", &hidden);
-@@ -560,6 +680,7 @@
+@@ -560,6 +681,7 @@
  void
  TermApp::ShowHTML(BMessage *msg)
  {
@@ -1557,7 +1620,7 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
    const char *url;
    msg->FindString("Url", &url);
    BMessage message;
-@@ -573,6 +694,7 @@
+@@ -573,6 +695,7 @@
  
    // Activate net+
    be_roster->ActivateApp(be_roster->TeamFor(B_NETPOSITIVE_APP_SIGNATURE));
@@ -1825,7 +1888,7 @@ diff -Nur MuTerm/src/TermIM.cpp MuTerm_working/src/TermIM.cpp
  }
 diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
 --- MuTerm/src/TermParse.cpp	Thu Jun 28 14:47:13 2001
-+++ MuTerm_working/src/TermParse.cpp	Sat May 12 03:53:12 2007
++++ MuTerm_working/src/TermParse.cpp	Wed May 16 00:57:33 2007
 @@ -23,12 +23,19 @@
  #include <errno.h>
  #include <stdio.h>
@@ -2009,7 +2072,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
    fLockFlag = 0;
    fParser_p = 0;
    fQuitting = 1;
-@@ -214,9 +313,29 @@
+@@ -214,19 +313,54 @@
    //status_t sts;
    if (cd2utf8 != (iconv_t)(-1))  iconv_close(cd2utf8);  // close libiconv
    fQuitting = 0;
@@ -2019,6 +2082,24 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
 +  kill_thread(fParseThread);
    kill_thread(fReaderThread);
 +#else
++  e_status_t st;
++  etk_wait_for_thread(fParseThread, &st);
++  etk_wait_for_thread(fReaderThread, &st);
++  etk_delete_thread(fParseThread);
++  etk_delete_thread(fReaderThread);
++#endif
++
+   delete_sem (fReaderSem);
+   delete_sem (fReaderLocker);
+ 
+ }
+ 
++#ifdef USE_ETKXX
++bool
++TermParse::QuitRequested(void)
++{
++  fQuitting = 0;
++
 +  etk_close_sem(fReaderSem);
 +  etk_close_sem(fReaderLocker);
 +
@@ -2030,17 +2111,15 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
 +  WriteFile(hStdPipe[1], &tmp, 1, &dwRead, NULL);
 +#endif
 +
-+  e_status_t st;
-+  etk_wait_for_thread(fParseThread, &st);
-+  etk_wait_for_thread(fReaderThread, &st);
-+  etk_delete_thread(fParseThread);
-+  etk_delete_thread(fReaderThread);
++  if(etk_get_thread_run_state(fParseThread) == ETK_THREAD_RUNNING) return false;
++  if(etk_get_thread_run_state(fReaderThread) == ETK_THREAD_RUNNING) return false;
++
++  return true;
++}
 +#endif
 +
-   delete_sem (fReaderSem);
-   delete_sem (fReaderLocker);
- 
-@@ -227,6 +346,8 @@
+ //////////////////////////////////////////////////////////////////////////////
+ // EscParse ... Escape sequence parse and character encoding.
  //
  //////////////////////////////////////////////////////////////////////////////
  
@@ -2049,7 +2128,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
  extern int utf8_groundtable[];		/* UTF8 Ground table */
  //extern int cs96_groundtable[];		/* CS96 Ground table */
  //extern int iso8859_groundtable[];	/* ISO8859 & EUC Ground table */
-@@ -241,6 +362,7 @@
+@@ -241,6 +375,7 @@
  extern int eigtable[];		/* ESC ignore table */
  //extern int mbcstable[];		/* ESC $ */
  
@@ -2057,7 +2136,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
  
  /* MuTerminal coding system (global variable) */
  int gNowCoding = M_UTF8;
-@@ -691,7 +813,11 @@
+@@ -691,7 +826,11 @@
          size_t res;      //status report of iconv
          for(;;)
          {
@@ -2069,7 +2148,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
             if( res == (size_t)(-1) )
             {
                if (errno == EILSEQ)  //char not defined in code table, or wrong table
-@@ -720,7 +846,11 @@
+@@ -720,7 +859,11 @@
          viewObj->PutChar(dstbuf, attr, width);
       }
    }
@@ -2083,7 +2162,7 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
  }
 diff -Nur MuTerm/src/TermParse.h MuTerm_working/src/TermParse.h
 --- MuTerm/src/TermParse.h	Fri Jun  8 19:54:00 2001
-+++ MuTerm_working/src/TermParse.h	Fri May 11 12:29:45 2007
++++ MuTerm_working/src/TermParse.h	Mon May 14 12:08:42 2007
 @@ -19,8 +19,13 @@
  #ifndef TERMPARSE_H
  #define TERMPARSE_H
@@ -2098,7 +2177,16 @@ diff -Nur MuTerm/src/TermParse.h MuTerm_working/src/TermParse.h
  #include "TermConst.h"
  
  class TermView;
-@@ -49,6 +54,7 @@
+@@ -44,11 +49,16 @@
+   status_t AbortTermParse (void);
+   status_t AbortPtyReader (void);
+   
++#ifdef USE_ETKXX
++  bool QuitRequested(void);
++#endif
++
+ private:
+   //
    // Hook Functions.
    //
  
@@ -2108,7 +2196,7 @@ diff -Nur MuTerm/src/TermParse.h MuTerm_working/src/TermParse.h
    static int32 EscParse (void *);
 diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
 --- MuTerm/src/TermView.cpp	Sun Jul  1 15:37:51 2001
-+++ MuTerm_working/src/TermView.cpp	Sat May 12 04:11:54 2007
++++ MuTerm_working/src/TermView.cpp	Wed May 16 00:58:44 2007
 @@ -17,6 +17,7 @@
  
  ***************************************************************************/
@@ -2218,7 +2306,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  }
  
  ////////////////////////////////////////////////////////////////////////////
-@@ -164,8 +230,23 @@
+@@ -164,11 +230,40 @@
  //  delete InputMessenger;
    delete fTextBuffer;
    fQuitting = 0;
@@ -2229,12 +2317,10 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
 +#else
 +  e_status_t st;
 +
-+  etk_close_sem(fDrawRectSem);
 +  etk_wait_for_thread(fViewThread, &st);
-+  etk_delete_thread(fViewThread);
-+
-+  etk_close_port(fMouseThreadPort);
 +  etk_wait_for_thread(fMouseThread, &st);
++
++  etk_delete_thread(fViewThread);
 +  etk_delete_thread(fMouseThread);
 +  etk_delete_port(fMouseThreadPort);
 +#endif
@@ -2242,7 +2328,26 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    delete_sem (fDrawRectSem);
  }
  
-@@ -286,7 +367,8 @@
++#ifdef USE_ETKXX
++bool
++TermView::QuitRequested(void)
++{
++  fQuitting = 0;
++
++  etk_close_sem(fDrawRectSem);
++  etk_close_port(fMouseThreadPort);
++
++  if(etk_get_thread_run_state(fViewThread) == ETK_THREAD_RUNNING) return false;
++  if(etk_get_thread_run_state(fMouseThread) == ETK_THREAD_RUNNING) return false;
++
++  return true;
++}
++#endif
++
+ /***************************************************************************
+  *
+  * Public Member Functions:
+@@ -286,7 +381,8 @@
    // calc half font's max width
    // Not Bounding, check only A-Z (For case of fHalfFont is KanjiFont. )
    for(int c = 0x20 ; c <= 0x7e; c++){
@@ -2252,7 +2357,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      int  tmpWidth = (int)fHalfFont.StringWidth(buf);
      if(tmpWidth > halfWidth)  halfWidth = tmpWidth;
    }
-@@ -806,7 +888,9 @@
+@@ -806,7 +902,9 @@
      FillRect (r);
    }
  
@@ -2262,7 +2367,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
    return;
  }
-@@ -960,7 +1044,11 @@
+@@ -960,7 +1058,11 @@
    /*
     * spwan Draw Engine thread.
     */
@@ -2274,7 +2379,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      fViewThread = spawn_thread (ViewThread,
  				"DrawEngine",
  				B_DISPLAY_PRIORITY,
-@@ -972,21 +1060,29 @@
+@@ -972,21 +1074,29 @@
    fDrawRectSem = create_sem (0, "draw_engine_sem");
    resume_thread (fViewThread);
  
@@ -2306,49 +2411,16 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    return (fViewThread);
  }
  
-@@ -1018,7 +1114,13 @@
+@@ -1018,7 +1128,7 @@
    while (theObj->fQuitting) {
  
      // Wait semaphore
 -    acquire_sem (theObj->fDrawRectSem);
 +    if (acquire_sem (theObj->fDrawRectSem) != B_OK) continue;
-+
-+    if (theObj->LockLooperWithTimeout(10000) != B_OK)
-+    {
-+      release_sem (theObj->fDrawRectSem);
-+      continue;
-+    }
  
      pos = theObj->fDrawRectBuffer[inDrawRect_p];
      inDrawRect_p++;
-@@ -1030,14 +1132,14 @@
- #ifdef INVALIDATE
-     BRect r(pos.x1 * width, pos.y1 * height,
- 	    (pos.x2 + 1) * width -1, (pos.y2 + 1) * height -1);
--    if (theObj->LockLooper()) {
-+//    if (theObj->LockLooper()) {
-       theObj->Invalidate (r);
-       theObj->UnlockLooper();
--    }
-+//    }
- 
- #else
-   
--    if (theObj->LockLooper()) {
-+//    if (theObj->LockLooper()) {
- 
-       for (j = pos.y1; j <= pos.y2; j++) {
- 	for (i = pos.x1; i <= pos.x2;) {
-@@ -1066,7 +1168,7 @@
- 	}
-       }
-       theObj->UnlockLooper();
--    }
-+//    }
- #endif
-   }
- 
-@@ -1083,7 +1185,11 @@
+@@ -1083,7 +1193,11 @@
  TermView::MouseTracking (void *data)
  {
    int32 code, selected = false;
@@ -2360,7 +2432,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    thread_id sender;
    CurPos stpos, edpos;
    BPoint stpoint, edpoint;
-@@ -1128,7 +1234,11 @@
+@@ -1128,7 +1242,11 @@
      }
      else {
  #endif
@@ -2372,7 +2444,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      }
      
      if (code != MOUSE_THR_CODE) continue;
-@@ -1290,9 +1400,13 @@
+@@ -1290,9 +1408,13 @@
    if (IS_BOLD (attr)) {
      inView->MovePenTo (x1 + 1, y1 + fFontAscent);
  	  
@@ -2386,7 +2458,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    }
  	
    /*
-@@ -1379,18 +1493,21 @@
+@@ -1379,18 +1501,21 @@
  void
  TermView::UpdateSIGWINCH()
  {
@@ -2410,7 +2482,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
      fFrameResized = 0;
      if (fScrRegionSet == 0) {
-@@ -1410,16 +1527,16 @@
+@@ -1410,16 +1535,16 @@
  TermView::DeviceStatusReport(int n)
  {
    char sbuf[16] ;
@@ -2432,7 +2504,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      break ;
    default:
      return;
-@@ -1489,8 +1606,10 @@
+@@ -1489,8 +1614,10 @@
  
    y1 = (int)updateRect.top / fFontHeight;
    y2 = (int)updateRect.bottom / fFontHeight;
@@ -2444,7 +2516,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    
    for (j = y1; j <= y2; j++) {
      /*
-@@ -1535,8 +1654,10 @@
+@@ -1535,8 +1662,10 @@
    if (fCursorStatus == CURON) {
      DrawCursor();
    }
@@ -2456,7 +2528,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
    return;
  }
-@@ -1614,7 +1735,13 @@
+@@ -1614,7 +1743,13 @@
  TermView::KeyDown (const char *bytes, int32 numBytes)
  {
    char c;
@@ -2470,7 +2542,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    int32 key, mod;
  
    uchar dstbuf[1024];
-@@ -1623,7 +1750,13 @@
+@@ -1623,7 +1758,13 @@
  
    if (fIMflag)
      return;
@@ -2485,20 +2557,21 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    /*
     * If bytes[0] equal intr charactor,
     * send signal to shell process group.
-@@ -1634,6 +1767,12 @@
+@@ -1634,6 +1775,13 @@
        kill (-sh_pid, SIGINT);
      }
    }
 +#else
 +  if(*bytes == 0x03 && numBytes == 1)
 +  {
-+    GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, sh_pid);
++    GenerateConsoleCtrlEvent(CTRL_C_EVENT, sh_pid);
++    return;
 +  }
 +#endif
  
    /*
     * MuTerminal changes RET, ENTER, F1...F12, and ARROW key code.
-@@ -1643,7 +1782,7 @@
+@@ -1643,7 +1791,7 @@
      if (mod & B_OPTION_KEY) {
        c = *bytes;
        c  |= 0x80;
@@ -2507,7 +2580,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        return;
      }
      
-@@ -1651,29 +1790,42 @@
+@@ -1651,29 +1799,42 @@
      case B_RETURN:
        c = 0x0d;
        if (key == RETURN_KEY || key == ENTER_KEY) {
@@ -2554,7 +2627,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          if (Bounds().top <= 0)
            return;
-@@ -1683,12 +1835,15 @@
+@@ -1683,12 +1844,15 @@
        }
        
        if (key == UP_ARROW_KEY) {
@@ -2571,7 +2644,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          ScrollBy (0, fFontHeight);
          Window()->UpdateIfNeeded();
-@@ -1696,24 +1851,33 @@
+@@ -1696,24 +1860,33 @@
        }
        
        if (key == DOWN_ARROW_KEY) {
@@ -2608,7 +2681,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          if (Bounds().top <= 0)
            return;
-@@ -1723,11 +1887,14 @@
+@@ -1723,11 +1896,14 @@
        }
        
        if (key == PAGE_UP_KEY) {
@@ -2624,7 +2697,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          ScrollBy (0, fFontHeight * fTermRows);
          Window()->UpdateIfNeeded();
-@@ -1735,13 +1902,16 @@
+@@ -1735,13 +1911,16 @@
        }
        
        if (key == PAGE_DOWN_KEY) {
@@ -2643,7 +2716,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
          return;
        }
        
-@@ -1749,7 +1919,7 @@
+@@ -1749,7 +1928,7 @@
      case B_FUNCTION_KEY:
        for (c = 0; c < 12; c++) {
          if (key == function_keycode_table[c]) {
@@ -2652,7 +2725,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
            return;
          }
        }
-@@ -1764,13 +1934,12 @@
+@@ -1764,13 +1943,12 @@
      
      if (gNowCoding != M_UTF8) {
        int cnum = fCodeConv->ConvertFromInternal((uchar *)bytes, dstbuf);
@@ -2668,7 +2741,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  }
  
  /////////////////////////////////////////////////////////////////////////////
-@@ -1809,11 +1978,13 @@
+@@ -1809,11 +1987,13 @@
  void 
  TermView::MessageReceived(BMessage *msg)
  {
@@ -2683,7 +2756,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    case B_SIMPLE_DATA:
      if (msg->FindRef("refs", &ref) == B_OK ){
        this->DoFileDrop(ref);
-@@ -1841,7 +2012,7 @@
+@@ -1841,7 +2021,7 @@
        
      }
      break;
@@ -2692,7 +2765,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      
    case B_COPY:
      this->DoCopy();
-@@ -1859,13 +2030,14 @@
+@@ -1859,13 +2039,14 @@
      
    case MENU_CLEAR_ALL:
      this->DoClearAll();
@@ -2708,7 +2781,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    case B_INPUT_METHOD_EVENT:
      {
        int32 op;
-@@ -1888,12 +2060,14 @@
+@@ -1888,12 +2069,14 @@
  	break;
        }
      }
@@ -2723,7 +2796,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoFileDrop
  //	Gets dropped file full path and display it at cursor position.
-@@ -1913,6 +2087,7 @@
+@@ -1913,6 +2096,7 @@
    return;
    
  }
@@ -2731,7 +2804,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoCopy()
  //	Copy selection text to Clipboard.
-@@ -2068,10 +2243,10 @@
+@@ -2068,10 +2252,10 @@
    if (gNowCoding != M_UTF8) {
      uchar *dstbuf = (uchar *)malloc (num_bytes * 4);
      num_bytes = fCodeConv->ConvertFromInternal(text, dstbuf);
@@ -2744,7 +2817,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    }
  
  }
-@@ -2169,7 +2344,11 @@
+@@ -2169,7 +2353,11 @@
  	if (mod & B_CONTROL_KEY || gTermPref->getInt32 (PREF_DRAGN_COPY)) {
  	  
  	  BPoint p;
@@ -2756,7 +2829,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  	  
  	  do {
  	    GetMouse (&p, &bt);
-@@ -2205,8 +2384,10 @@
+@@ -2205,8 +2393,10 @@
  		   fTermColumns * fFontWidth, ed.y + fFontHeight - fTop);
  	  }
  	  r = r & Bounds();
@@ -2768,7 +2841,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  	  return;
  	}
        }
-@@ -2231,10 +2412,17 @@
+@@ -2231,10 +2421,17 @@
      switch (clicks){
      case 1:
        fMouseTracking = true;
@@ -2788,7 +2861,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      case 2:
 diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
 --- MuTerm/src/TermView.h	Mon May 21 23:21:34 2001
-+++ MuTerm_working/src/TermView.h	Fri May 11 12:29:45 2007
++++ MuTerm_working/src/TermView.h	Tue May 15 23:59:53 2007
 @@ -19,9 +19,14 @@
  #ifndef TERMVIEW_H
  #define TERMVIEW_H
@@ -2804,7 +2877,7 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
  #include "TermConst.h"
  #include "TermWindow.h"
  #include "CurPos.h"
-@@ -166,7 +171,7 @@
+@@ -166,12 +171,16 @@
    //
    void	UpdateSIGWINCH();
    void	DeviceStatusReport (int);
@@ -2813,7 +2886,16 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    void	ScrollScreen (void);
    void	ScrollScreenDraw (void);
    void  GetFrameSize (float *width, float *height);
-@@ -208,8 +213,10 @@
+   void  GetFontInfo (int *, int*);
+ 
++#ifdef USE_ETKXX
++  bool QuitRequested(void);
++#endif
++
+   /*
+    *	PRIVATE MEMBER.
+    */
+@@ -208,8 +217,10 @@
    void DoPrint(BRect updateRect);
  
    void ResizeScrBarRange (void);
@@ -2825,7 +2907,7 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    
    // edit menu function.
    void DoCopy (void);
-@@ -267,7 +274,9 @@
+@@ -267,7 +278,9 @@
    int fFontHeight;
  
    int fFontAscent;
@@ -2835,7 +2917,7 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    
    //
    // Flags.
-@@ -377,6 +386,9 @@
+@@ -377,6 +390,9 @@
    // thread ID / flags.
    thread_id fViewThread;
    thread_id fMouseThread;
@@ -2847,7 +2929,7 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    // DrawEngine parameter.
 diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
 --- MuTerm/src/TermWindow.cpp	Thu Jun  7 20:29:35 2001
-+++ MuTerm_working/src/TermWindow.cpp	Sat May 12 00:35:50 2007
++++ MuTerm_working/src/TermWindow.cpp	Wed May 16 00:03:17 2007
 @@ -16,6 +16,7 @@
  
  *****************************************************************************/
@@ -3058,7 +3140,22 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
  
      fTermView->SetTermFont (&halfFont, &fullFont);
      r = fTermView->SetTermSize (0, 0, 0);
-@@ -583,12 +645,16 @@
+@@ -574,6 +636,14 @@
+   // T.Murai 1999-06-17
+   // (Future plan) When command is running, Alert to user whether quit or not....
+   //
++#ifdef USE_ETKXX
++  if(fTermParse->QuitRequested() == false ||
++     fTermView->QuitRequested() == false)
++  {
++	  etk_app->PostMessage(E_QUIT_REQUESTED);
++	  return false;
++  }
++#endif
+   return true;
+ }
+ ////////////////////////////////////////////////////////////////////////////
+@@ -583,12 +653,16 @@
  int
  TermWindow::GetTimeZone ()
  {
@@ -3075,7 +3172,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  // doShowHelp (unit32)
-@@ -636,15 +702,12 @@
+@@ -636,15 +710,12 @@
  void
  TermWindow::SetWindowTitle (void)
  {
@@ -3095,7 +3192,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  // GetSupoprtedSuites (BMessage *)
-@@ -656,13 +719,16 @@
+@@ -656,13 +727,16 @@
    
    this->Activate();
    
@@ -3112,7 +3209,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
  ////////////////////////////////////////////////////////////////////////////
  // GetSupoprtedSuites (BMessage *)
  //
-@@ -709,6 +775,7 @@
+@@ -709,6 +783,7 @@
  
    return BWindow::ResolveSpecifier(msg, index, specifier, form, property);
  }
@@ -3120,7 +3217,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
  
  ////////////////////////////////////////////////////////////////////////////
  // SetCoding
-@@ -730,6 +797,7 @@
+@@ -730,6 +805,7 @@
  status_t
  TermWindow::DoPageSetup() 
  { 
@@ -3128,7 +3225,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
    status_t rv;
    BPrintJob job("PageSetup");
  
-@@ -740,6 +808,9 @@
+@@ -740,6 +816,9 @@
    fPrintSettings = job.Settings();
  
    return rv;
@@ -3138,7 +3235,7 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
  }
    
  ////////////////////////////////////////////////////////////////////////////
-@@ -749,7 +820,7 @@
+@@ -749,7 +828,7 @@
  void
  TermWindow::DoPrint()
  {
@@ -3466,7 +3563,7 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
 +
 diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified Chinese
 --- MuTerm/src/menu/Simplified Chinese	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/menu/Simplified Chinese	Sat May 12 06:50:59 2007
++++ MuTerm_working/src/menu/Simplified Chinese	Wed May 16 00:26:51 2007
 @@ -0,0 +1,99 @@
 +######### -*- coding:utf-8-unix -*- ###################
 +# Simplified Chinese menu
@@ -3516,8 +3613,8 @@ diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified 
 +########################################################
 +# Appearance panel
 +########################################################
-+"Columns Label",	"行数"
-+"Rows Label",		"列数"
++"Columns Label",	"列数"
++"Rows Label",		"行数"
 +"HalfFont Label",	"半角字体"
 +"HalfSize Label",	"大小"
 +"FullFont Label",	"全角字体"
@@ -3530,9 +3627,9 @@ diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified 
 +"Cursor Back Label",	"光标背景颜色"
 +
 +"Disable",		"关闭"
-+"Button 1",		"第一键"
-+"Button 2",		"第二键"
-+"Button 3",		"第三键"
++"Button 1",		"左键"
++"Button 2",		"右键"
++"Button 3",		"中键"
 +"Red",			"红"
 +"Green",		"绿"
 +"Blue",			"蓝"
@@ -3567,9 +3664,30 @@ diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified 
 +"Help File Language",	"ch"
 +
 +# end
+diff -Nur MuTerm/src/menu/Traditional Chinese MuTerm_working/src/menu/Traditional Chinese
+--- MuTerm/src/menu/Traditional Chinese	Thu Jun 28 13:56:44 2001
++++ MuTerm_working/src/menu/Traditional Chinese	Wed May 16 00:27:13 2007
+@@ -47,8 +47,8 @@
+ ########################################################
+ # Appearance panel
+ ########################################################
+-"Columns Label",	"行數"
+-"Rows Label",		"列數"
++"Columns Label",	"列數"
++"Rows Label",		"行數"
+ "HalfFont Label",	"半形字型"
+ "HalfSize Label",	"大小"
+ "FullFont Label",	"全形字型"
+@@ -103,4 +103,4 @@
+ # Pleae correct this and let me know more appropriate  expression.
+ ########################################################
+ 
+-# end
+\ No newline at end of file
++# end
 diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 --- MuTerm/src/spawn.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/spawn.cpp	Sat May 12 06:02:44 2007
++++ MuTerm_working/src/spawn.cpp	Wed May 16 16:15:02 2007
 @@ -16,21 +16,37 @@
  
  */
@@ -3611,7 +3729,40 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
  
  #include "TermConst.h"
  #include "spawn.h"
-@@ -110,6 +126,40 @@
+@@ -41,7 +57,6 @@
+ 
+ /* default shell command and options. */
+ #define SHELL_COMMAND "/bin/sh -login"
+-extern char **environ;
+ 
+ char spawn_alert_msg [] = \
+ "alert --stop " \
+@@ -53,7 +68,7 @@
+ /*
+  * Set environment varriable.
+  */
+-
++#ifndef _WIN32
+ void
+ Setenv (const char *var, const char *value)
+ {
+@@ -75,6 +90,15 @@
+   sprintf (environ [envindex], "%s%s", var, value);
+   environ [++envindex] = NULL;
+ }
++#else
++void
++Setenv (const char *var, const char *value)
++{
++	EString str;
++	str << var << value;
++	_putenv(str.String());
++}
++#endif
+ 
+ /*
+  * reapchild. Child process is out there, let's catch its terminaltion.
+@@ -110,6 +134,40 @@
  char tty_name[16];
  int pfd_num = 0;
  
@@ -3645,14 +3796,14 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +    msg_rand = (float) rand() / (float)(RAND_MAX / LANG_MAX);
 +  }
 +
-+  fprintf(stdout, welcome_message[(int)msg_rand], hello_message[(int)msg_rand][now_hour], MUTERM_MESSAGE);
++  printf(welcome_message[(int)msg_rand], hello_message[(int)msg_rand][now_hour], MUTERM_MESSAGE);
 +}
 +
 +#ifndef _WIN32
  int
  spawn_shell (int row, int col, const char *command, const char *coding)
  {
-@@ -118,7 +168,12 @@
+@@ -118,7 +176,12 @@
    pid_t pgrp;
    
    int master, slave;
@@ -3665,7 +3816,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
    struct winsize ws;
    
    handshake_t handshake;
-@@ -126,17 +181,12 @@
+@@ -126,17 +189,12 @@
    char pty_name[16];
  
    int i = 0;
@@ -3683,7 +3834,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
  
    signal (SIGTTOU, SIG_IGN);
  
-@@ -393,31 +443,7 @@
+@@ -393,31 +451,7 @@
  
     Setenv ("SHELL=", *args);
    
@@ -3716,7 +3867,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
     
     execve (*args, args, environ);
  
-@@ -470,4 +496,246 @@
+@@ -470,4 +504,258 @@
    
    return (done > 0) ? master : -1;
  }
@@ -3772,6 +3923,28 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +
 +HANDLE hStdPipe[2] = {NULL, NULL};
 +
++BOOL WINAPI ConsoleHandle(DWORD event)
++{
++	HANDLE hProcess;
++
++	switch(event)
++	{
++		case CTRL_C_EVENT:
++			GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, sh_pid);
++			break;
++
++		default:
++			hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, sh_pid);
++			GenerateConsoleCtrlEvent(event, sh_pid);
++			TerminateProcess(hProcess, 0);
++			CloseHandle(hProcess);
++			break;
++	}
++
++	return TRUE;
++}
++
++
 +int
 +spawn_shell (int row, int col, const char *command, const char *coding)
 +{
@@ -3785,12 +3958,6 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +	if((port = etk_open_port("MuTerminal Port")) == NULL)
 +	{
 +		if((port = etk_create_port(1, "MuTerminal Port")) == NULL) return -1;
-+
-+		if(getenv("TERM") == NULL)
-+		{
-+			// FIXME: only works on Win2K/XP
-+			ShowWindowAsync(GetConsoleWindow(), SW_HIDE);
-+		}
 +
 +		SECURITY_ATTRIBUTES saAttr;
 +		saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -3840,19 +4007,14 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +	}
 +	else // child
 +	{
-+		/* set signal default */
-+		signal(SIGTERM, SIG_DFL);
-+		signal(SIGINT, SIG_DFL);
-+
-+		handshake.status = PTY_OK;
-+		etk_write_port(port, 0, &handshake, sizeof(handshake));
-+		etk_delete_port(port);
++		// FIXME: only works on Win2K/XP
++		ShowWindowAsync(GetConsoleWindow(), SW_HIDE);
 +
 +		Setenv("TERM=", "xterm");
 +		Setenv("TTYPE=", coding);
 +
 +		EString comStr(command ? command : SHELL_COMMAND);
-+		EStringArray *argsArray;
++		EString prog;
 +		comStr.ReplaceAll("\t", " ");
 +		while(true)
 +		{
@@ -3862,7 +4024,6 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +			{
 +				if(comStr[0] == ' ') comStr.Remove(0, 1);
 +
-+				EString prog;
 +				eint32 last = comStr.FindFirst(" ");
 +				comStr.MoveInto(prog, 0, last < 0 ? comStr.Length() : last);
 +				Setenv("SHELL=", prog.String());
@@ -3885,57 +4046,59 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +				break;
 +			}
 +		}
-+		argsArray = comStr.Split(" ");
-+
-+		char **args = new char*[argsArray->CountItems() + 1];
-+		for(eint32 i = 0; i <= argsArray->CountItems(); i++)
-+			args[i] = (i < argsArray->CountItems() ? (char*)argsArray->ItemAt(i)->String() : NULL);
-+		comStr = argsArray->ItemAt(0)->String();
 +
 +		char cmdPath[E_MAXPATH + 1];
 +		bzero(cmdPath, sizeof(cmdPath));
 +		GetWindowsDirectory(cmdPath, E_MAXPATH);
-+		if(GetVersion() < 0x80000000)
-+			memcpy(cmdPath + strlen(cmdPath), "\\system32\\cmd.exe", 18);
-+		else
-+			memcpy(cmdPath + strlen(cmdPath), "\\command.com", 13);
++		memcpy(cmdPath + strlen(cmdPath), "\\system32\\cmd.exe", 18);
 +		Setenv("COMSPEC=", cmdPath);
 +
-+		EEntry aEntry(comStr.String());
++		EEntry aEntry(prog.String());
 +		if(!aEntry.Exists())
 +		{
-+			fprintf(stdout, "[MUTERM]: Could not found \"%s\"\n\n", comStr.String());
-+			comStr = cmdPath;
-+			args[0] = cmdPath;
-+			args[1] = NULL;
++			printf("[MUTERM]: Could not found \"%s\"\n\n", prog.String());
++			prog = comStr = cmdPath;
 +		}
 +
 +		print_welcome_msg();
 +		_flushall();
 +
-+#if 0
-+		fprintf(stdout, "\n\n------------------ Command ------------------\n");
-+		fprintf(stdout, "%s\n", comStr.String());
-+		fprintf(stdout, "\n\n------------------ Argument -----------------\n");
-+		for(char **tmp = args; *tmp != NULL; tmp++) fprintf(stdout, "%s\n", *tmp);
-+		fprintf(stdout, "\n\n------------------ Environ ------------------\n");
-+		for(char **tmp = environ; *tmp != NULL; tmp++) fprintf(stdout, "%s\n", *tmp);
-+		fprintf(stdout, "\n\n---------------------------------------------\n");
-+		_flushall();
-+		_getch();
-+#endif
-+
-+		while(true)
++		if(SetConsoleCtrlHandler(NULL, FALSE) == 0 ||
++		   SetConsoleCtrlHandler(ConsoleHandle, TRUE) == 0)
 +		{
-+			if(_spawnve(_P_WAIT, comStr.String(), args, environ) == -1)
-+			{
-+				fprintf(stdout, "[MUTERM]: *** ERROR: Failed to spawn process !!!");
-+				break;
-+			}
++			handshake.status = PTY_NG;
++			sprintf(handshake.msg, "SetConsoleCtrlHandler() failed !!!");
++			etk_write_port(port, 0, &handshake, sizeof(handshake));
++			etk_delete_port(port);
++			exit(1);
 +		}
 +
-+		delete argsArray;
-+		delete[] args;
++		STARTUPINFO sh_startup_info;
++		PROCESS_INFORMATION sh_process_info;
++
++		bzero(&sh_process_info, sizeof(sh_process_info));
++		bzero(&sh_startup_info, sizeof(sh_startup_info));
++		sh_startup_info.cb = sizeof(sh_startup_info);
++
++		if(CreateProcess(prog.String(), (char*)comStr.String(), NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP,
++				 NULL, NULL, &sh_startup_info, &sh_process_info) == 0)
++		{
++			handshake.status = PTY_NG;
++			sprintf(handshake.msg, "Could not create the process !!!");
++			etk_write_port(port, 0, &handshake, sizeof(handshake));
++			etk_delete_port(port);
++			exit(1);
++		}
++
++		sh_pid = sh_process_info.dwProcessId;
++
++		handshake.status = PTY_OK;
++		etk_write_port(port, 0, &handshake, sizeof(handshake));
++		etk_delete_port(port);
++
++		WaitForSingleObject(sh_process_info.hProcess, INFINITE);
++		CloseHandle(sh_process_info.hProcess);
++		CloseHandle(sh_process_info.hThread);
 +
 +		exit(1);
 +	}
@@ -3951,7 +4114,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +				break;
 +
 +			case PTY_NG:
-+				ETK_OUTPUT("%s\n", handshake.msg);
++				ETK_OUTPUT("[MUTERM]: *** ERROR: %s\n", handshake.msg);
 +				done = -1;
 +				break;
 +		}
@@ -4072,8 +4235,8 @@ diff -Nur MuTerm/src/win32/MuTerminal.sln MuTerm_working/src/win32/MuTerminal.sl
 +EndGlobal
 diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal.vcproj
 --- MuTerm/src/win32/MuTerminal.vcproj	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/win32/MuTerminal.vcproj	Sat May 12 07:09:03 2007
-@@ -0,0 +1,221 @@
++++ MuTerm_working/src/win32/MuTerminal.vcproj	Tue May 15 23:24:08 2007
+@@ -0,0 +1,215 @@
 +﻿<?xml version="1.0" encoding="UTF-8"?>
 +<VisualStudioProject
 +	ProjectType="Visual C++"
@@ -4098,7 +4261,7 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +				AdditionalIncludeDirectories="..\..\..\etkxx;.\libiconv"
 +				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;USE_ETKXX"
 +				MinimalRebuild="TRUE"
-+				ExceptionHandling="FALSE"
++				ExceptionHandling="TRUE"
 +				BasicRuntimeChecks="3"
 +				RuntimeLibrary="1"
 +				RuntimeTypeInfo="TRUE"
@@ -4110,10 +4273,11 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +				Name="VCCustomBuildTool"/>
 +			<Tool
 +				Name="VCLinkerTool"
-+				AdditionalDependencies="etkxx.lib iconv.lib"
++				AdditionalDependencies="etkxx.lib iconv.lib kernel32.lib user32.lib msvcrtd.lib $(NOINHERIT)"
 +				OutputFile="$(OutDir)/MuTerminal.exe"
 +				LinkIncremental="2"
 +				AdditionalLibraryDirectories="..\..\..\etkxx\build\win32\etkxx\Debug;.\libiconv"
++				IgnoreAllDefaultLibraries="TRUE"
 +				GenerateDebugInformation="TRUE"
 +				ProgramDatabaseFile="$(OutDir)/MuTerminal.pdb"
 +				SubSystem="1"
@@ -4150,7 +4314,7 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +				Name="VCCLCompilerTool"
 +				AdditionalIncludeDirectories="..\..\..\etkxx;.\libiconv"
 +				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;USE_ETKXX"
-+				ExceptionHandling="FALSE"
++				ExceptionHandling="TRUE"
 +				RuntimeLibrary="0"
 +				RuntimeTypeInfo="TRUE"
 +				UsePrecompiledHeader="0"
@@ -4161,10 +4325,11 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +				Name="VCCustomBuildTool"/>
 +			<Tool
 +				Name="VCLinkerTool"
-+				AdditionalDependencies="etkxx.lib iconv.lib"
++				AdditionalDependencies="etkxx.lib iconv.lib kernel32.lib user32.lib msvcrt.lib $(NOINHERIT)"
 +				OutputFile="$(OutDir)/MuTerminal.exe"
 +				LinkIncremental="1"
 +				AdditionalLibraryDirectories="..\..\..\etkxx\build\win32\etkxx\Release;.\libiconv"
++				IgnoreAllDefaultLibraries="TRUE"
 +				GenerateDebugInformation="TRUE"
 +				SubSystem="1"
 +				OptimizeReferences="2"
@@ -4273,14 +4438,6 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +			</File>
 +		</Filter>
 +		<Filter
-+			Name="Head files"
-+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-+			<File
-+				RelativePath=".\resource.h">
-+			</File>
-+		</Filter>
-+		<Filter
 +			Name="Resource files"
 +			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
 +			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
@@ -4295,23 +4452,3 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +	<Globals>
 +	</Globals>
 +</VisualStudioProject>
-diff -Nur MuTerm/src/win32/resource.h MuTerm_working/src/win32/resource.h
---- MuTerm/src/win32/resource.h	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/win32/resource.h	Sat May 12 06:34:08 2007
-@@ -0,0 +1,16 @@
-+//{{NO_DEPENDENCIES}}
-+// Microsoft Visual C++ generated include file.
-+// Used by MuTerminal.rc
-+//
-+#define IDI_ICON1                       101
-+
-+// Next default values for new objects
-+// 
-+#ifdef APSTUDIO_INVOKED
-+#ifndef APSTUDIO_READONLY_SYMBOLS
-+#define _APS_NEXT_RESOURCE_VALUE        102
-+#define _APS_NEXT_COMMAND_VALUE         40001
-+#define _APS_NEXT_CONTROL_VALUE         1000
-+#define _APS_NEXT_SYMED_VALUE           101
-+#endif
-+#endif
