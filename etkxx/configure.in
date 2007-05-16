@@ -11,7 +11,7 @@ AC_PREREQ(2.54)
 m4_define([etk_major_version], [0])
 m4_define([etk_minor_version], [3])
 m4_define([etk_micro_version], [2])
-m4_define([etk_interface_age], [2])
+m4_define([etk_interface_age], [0])
 m4_define([etk_binary_age],
           [m4_eval(100 * etk_minor_version + etk_micro_version)])
 m4_define([etk_version],
@@ -43,7 +43,7 @@ AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([no-define])
 
 # Specify a configuration file
-AM_CONFIG_HEADER([etk/config.h])
+AM_CONFIG_HEADER([etk/config.h.general])
 
 ETK_MAJOR_VERSION=etk_major_version
 ETK_MINOR_VERSION=etk_minor_version

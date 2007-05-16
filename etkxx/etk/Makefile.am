@@ -109,6 +109,7 @@ libetkxx_la_LDFLAGS = @STRIP_BEGIN@					\
 	$(export_symbols)						\
 	@STRIP_END@
 
+EXTRA_DIST =	config.h
 
 CLEANFILES =				\
 		etkxx.def		\
@@ -118,8 +119,8 @@ CLEANFILES =				\
 
 DISTCLEANFILES =			\
 		Makefile.in		\
-		config.h.in		\
-		config.h.in~		\
+		config.h.general.in	\
+		config.h.general.in~	\
 		etkxx.pc		\
 		etkxx.rc		\
 		etkxx.aps		\

@@ -1,5 +1,5 @@
 ETK++ - The Easy Toolkit for C++ programing
-Copyright (C) 2004-2006 李东升(Anthony Lee), All rights reserved.
+Copyright (C) 2004-2007 李东升(Anthony Lee), All rights reserved.
 
  * Most idea of it just from the great BeOS API.
  * ETK++ library is a freeware; it may be used and distributed according to
@@ -21,11 +21,10 @@ How to compile ETK++ from source
 	  MT-SAFE on Darwin --- recompile gcc to enable posix-thread support.
 
  * Windows MSVC .NET:
-	1. run "./configure CC=cl CXX=cl LD=link" within MinGW to generate the files
-	2. replace "etk/config.h" with "etk/config.h.msvc.win32"
-	3. open "build/win32/etkxx.sln" in MSVC .NET
-	4. compile the project named "etkxx"
-	5. the "build/win32/example.sln" just for compiling examples
+	1. run "./configure" within MinGW or CygWin to generate the files
+	2. open "build/win32/etkxx.sln" in MSVC .NET
+	3. compile the project named "etkxx"
+	4. the "build/win32/example.sln" just for compiling examples
 
  * BeOS
 	1. run the "./configue" to generate the config files for compiling.
