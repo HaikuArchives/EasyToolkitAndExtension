@@ -168,6 +168,8 @@ private:
 
 	EList fCommonFilters;
 	void _FilterAndDispatchMessage(EMessage *msg, EHandler *target);
+
+	virtual bool	IsDependsOnOthersWhenQuitRequested() const;
 };
 
 #endif /* __cplusplus */

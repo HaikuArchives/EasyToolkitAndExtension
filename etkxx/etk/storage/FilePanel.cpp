@@ -254,6 +254,7 @@ private:
 	bool fShowHidden;
 
 	static bool	RefreshCallback(const char *path, void *data);
+	virtual bool	IsDependsOnOthersWhenQuitRequested() const;
 };
 
 
@@ -1290,6 +1291,13 @@ EFilePanelWindow::RefreshCallback(const char *path, void *data)
 	listView->AddItem(new EFilePanelListItem(path, self->fPanelView));
 
 	return false;
+}
+
+
+bool
+EFilePanelWindow::IsDependsOnOthersWhenQuitRequested() const
+{
+	return true;
 }
 
 

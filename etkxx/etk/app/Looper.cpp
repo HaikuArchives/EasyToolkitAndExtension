@@ -1187,3 +1187,10 @@ ELooper::SetCommonFilterList(const EList *filterList)
 	return true;
 }
 
+
+bool
+ELooper::IsDependsOnOthersWhenQuitRequested() const
+{
+	return false;
+}
+

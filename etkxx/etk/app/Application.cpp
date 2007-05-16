@@ -473,6 +473,14 @@ EApplication::etk_quit_all_loopers(bool force)
 			break;
 		}
 
+		if(looper->IsDependsOnOthersWhenQuitRequested())
+		{
+			ELooper::sLooperList.SwapItems(index, ELooper::sLooperList.CountItems() - 1);
+			hLocker->Unlock();
+			ETK_DEBUG("[APP]: %s --- Looper depends on others, retry again...", __PRETTY_FUNCTION__);
+			continue;
+		}
+
 		if(looper->Lock() == false)
 		{
 			ELooper::sLooperList.SwapItems(index, ELooper::sLooperList.CountItems() - 1);
