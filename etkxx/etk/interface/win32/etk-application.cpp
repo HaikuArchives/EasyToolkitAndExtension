@@ -1171,13 +1171,13 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 
 					eint32 button = 0;
 					if(winMsg->message == WM_LBUTTONDOWN) button = 1;
-					else if(winMsg->message == WM_RBUTTONDOWN) button = 2;
-					else if(winMsg->message == WM_MBUTTONDOWN) button = 3;
+					else if(winMsg->message == WM_MBUTTONDOWN) button = 2;
+					else if(winMsg->message == WM_RBUTTONDOWN) button = 3;
 
 					eint32 buttons = 0;
 					if(winMsg->wParam & MK_LBUTTON) buttons += 1;
-					if(winMsg->wParam & MK_RBUTTON) buttons += 2;
-					if(winMsg->wParam & MK_MBUTTON) buttons += 3;
+					if(winMsg->wParam & MK_MBUTTON) buttons += 2;
+					if(winMsg->wParam & MK_RBUTTON) buttons += 3;
 
 					message.what = E_MOUSE_DOWN;
 					message.AddInt32("button", button);
@@ -1208,13 +1208,13 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 
 					eint32 button = 0;
 					if(winMsg->message == WM_LBUTTONUP) button = 1;
-					else if(winMsg->message == WM_RBUTTONUP) button = 2;
-					else if(winMsg->message == WM_MBUTTONUP) button = 3;
+					else if(winMsg->message == WM_MBUTTONUP) button = 2;
+					else if(winMsg->message == WM_RBUTTONUP) button = 3;
 
 					eint32 buttons = 0;
 					if(winMsg->wParam & MK_LBUTTON) buttons += 1;
-					if(winMsg->wParam & MK_RBUTTON) buttons += 2;
-					if(winMsg->wParam & MK_MBUTTON) buttons += 3;
+					if(winMsg->wParam & MK_MBUTTON) buttons += 2;
+					if(winMsg->wParam & MK_RBUTTON) buttons += 3;
 
 					message.what = E_MOUSE_UP;
 					message.AddInt32("button", button);
