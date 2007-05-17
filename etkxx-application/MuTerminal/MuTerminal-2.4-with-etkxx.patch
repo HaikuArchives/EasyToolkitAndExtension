@@ -2196,7 +2196,7 @@ diff -Nur MuTerm/src/TermParse.h MuTerm_working/src/TermParse.h
    static int32 EscParse (void *);
 diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
 --- MuTerm/src/TermView.cpp	Sun Jul  1 15:37:51 2001
-+++ MuTerm_working/src/TermView.cpp	Wed May 16 00:58:44 2007
++++ MuTerm_working/src/TermView.cpp	Thu May 17 17:24:54 2007
 @@ -17,6 +17,7 @@
  
  ***************************************************************************/
@@ -2379,7 +2379,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      fViewThread = spawn_thread (ViewThread,
  				"DrawEngine",
  				B_DISPLAY_PRIORITY,
-@@ -972,21 +1074,29 @@
+@@ -972,21 +1074,27 @@
    fDrawRectSem = create_sem (0, "draw_engine_sem");
    resume_thread (fViewThread);
  
@@ -2388,7 +2388,6 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    /*
     * spwan Mouse Tracking thread.
     */
-+#ifndef USE_ETKXX
    if (fMouseThread < 0) {
 +#else
 +  if (fMouseThread == NULL) {
@@ -2398,7 +2397,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  				 B_NORMAL_PRIORITY,
  				 this);
 +#ifdef USE_ETKXX
-+    fMouseThreadPort = etk_create_port(1, NULL);
++    fMouseThreadPort = etk_create_port(100, NULL);
 +#endif
    }
    else {
@@ -2406,12 +2405,11 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    }
    resume_thread (fMouseThread);
 -  
-+#endif // !USE_ETKXX
 +
    return (fViewThread);
  }
  
-@@ -1018,7 +1128,7 @@
+@@ -1018,7 +1126,7 @@
    while (theObj->fQuitting) {
  
      // Wait semaphore
@@ -2420,7 +2418,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
      pos = theObj->fDrawRectBuffer[inDrawRect_p];
      inDrawRect_p++;
-@@ -1083,7 +1193,11 @@
+@@ -1083,7 +1191,11 @@
  TermView::MouseTracking (void *data)
  {
    int32 code, selected = false;
@@ -2432,7 +2430,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    thread_id sender;
    CurPos stpos, edpos;
    BPoint stpoint, edpoint;
-@@ -1128,7 +1242,11 @@
+@@ -1128,22 +1240,38 @@
      }
      else {
  #endif
@@ -2444,7 +2442,43 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      }
      
      if (code != MOUSE_THR_CODE) continue;
-@@ -1290,9 +1408,13 @@
+ 
++restart:
+     selected = theObj->fSelected;
+     edpoint.Set (-1, -1);
+ 
+     stpos = theObj->BPointToCurPos (stpoint);
+     
+     do {
++#ifndef USE_ETKXX
+       snooze (40 * 1000);
+       if (theObj->LockLooper()) {
+ 	theObj->GetMouse (&edpoint, &button);
+ 	theObj->UnlockLooper();
+       }
++#else
++      if (etk_read_port(theObj->fMouseThreadPort, &code, (void *)&edpoint, sizeof(BPoint)) != E_OK) break;
++      if (code == MOUSE_THR_CODE)
++      {
++        stpoint = edpoint;
++	goto restart;
++      }
++      if (code < MOUSE_THR_CODE + 2) break;
++      button = 1;
++#endif
+ 
+       edpos = theObj->BPointToCurPos (edpoint);
+ 
+@@ -1175,7 +1303,7 @@
+ 	  /*
+ 	   * Scroll check
+ 	   */
+-	  if (theObj->LockLooper()) {
++	  if (theObj->LockLooperWithTimeout(1000) == B_OK) {
+ 
+ 	    /* Get now scroll point */
+ 	    theObj->fScrollBar->GetRange (&scr_start, &scr_end);
+@@ -1290,9 +1418,13 @@
    if (IS_BOLD (attr)) {
      inView->MovePenTo (x1 + 1, y1 + fFontAscent);
  	  
@@ -2458,7 +2492,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    }
  	
    /*
-@@ -1379,18 +1501,21 @@
+@@ -1379,18 +1511,21 @@
  void
  TermView::UpdateSIGWINCH()
  {
@@ -2482,7 +2516,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
      fFrameResized = 0;
      if (fScrRegionSet == 0) {
-@@ -1410,16 +1535,16 @@
+@@ -1410,16 +1545,16 @@
  TermView::DeviceStatusReport(int n)
  {
    char sbuf[16] ;
@@ -2504,7 +2538,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      break ;
    default:
      return;
-@@ -1489,8 +1614,10 @@
+@@ -1489,8 +1624,10 @@
  
    y1 = (int)updateRect.top / fFontHeight;
    y2 = (int)updateRect.bottom / fFontHeight;
@@ -2516,7 +2550,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    
    for (j = y1; j <= y2; j++) {
      /*
-@@ -1535,8 +1662,10 @@
+@@ -1535,8 +1672,10 @@
    if (fCursorStatus == CURON) {
      DrawCursor();
    }
@@ -2528,7 +2562,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
    return;
  }
-@@ -1614,7 +1743,13 @@
+@@ -1614,7 +1753,13 @@
  TermView::KeyDown (const char *bytes, int32 numBytes)
  {
    char c;
@@ -2542,22 +2576,27 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    int32 key, mod;
  
    uchar dstbuf[1024];
-@@ -1623,7 +1758,13 @@
+@@ -1623,7 +1768,18 @@
  
    if (fIMflag)
      return;
 -  
 +
 +#ifdef USE_ETKXX
-+  char tmp = 0x03; // CTRL+C
-+  if((mod & E_CONTROL_KEY) && (*bytes == 'c' || *bytes == 'C') && numBytes == 1) bytes = &tmp;
++  char tmp;
++  if((mod & E_CONTROL_KEY) && numBytes == 1 &&
++     ((*bytes >= 'a' && *bytes <= 'z') || (*bytes >= 'A' && *bytes <= 'Z')))
++  {
++	  tmp = (*bytes <= 'Z' ? (*bytes - 'A') : (*bytes - 'a')) + 1;
++	  bytes = &tmp;
++  }
 +#endif
 +
 +#ifndef _WIN32
    /*
     * If bytes[0] equal intr charactor,
     * send signal to shell process group.
-@@ -1634,6 +1775,13 @@
+@@ -1634,6 +1790,13 @@
        kill (-sh_pid, SIGINT);
      }
    }
@@ -2571,7 +2610,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  
    /*
     * MuTerminal changes RET, ENTER, F1...F12, and ARROW key code.
-@@ -1643,7 +1791,7 @@
+@@ -1643,7 +1806,7 @@
      if (mod & B_OPTION_KEY) {
        c = *bytes;
        c  |= 0x80;
@@ -2580,7 +2619,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        return;
      }
      
-@@ -1651,29 +1799,42 @@
+@@ -1651,29 +1814,42 @@
      case B_RETURN:
        c = 0x0d;
        if (key == RETURN_KEY || key == ENTER_KEY) {
@@ -2627,7 +2666,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          if (Bounds().top <= 0)
            return;
-@@ -1683,12 +1844,15 @@
+@@ -1683,12 +1859,15 @@
        }
        
        if (key == UP_ARROW_KEY) {
@@ -2644,7 +2683,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          ScrollBy (0, fFontHeight);
          Window()->UpdateIfNeeded();
-@@ -1696,24 +1860,33 @@
+@@ -1696,24 +1875,33 @@
        }
        
        if (key == DOWN_ARROW_KEY) {
@@ -2681,7 +2720,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          if (Bounds().top <= 0)
            return;
-@@ -1723,11 +1896,14 @@
+@@ -1723,11 +1911,14 @@
        }
        
        if (key == PAGE_UP_KEY) {
@@ -2697,7 +2736,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
        if (mod & B_SHIFT_KEY) {
          ScrollBy (0, fFontHeight * fTermRows);
          Window()->UpdateIfNeeded();
-@@ -1735,13 +1911,16 @@
+@@ -1735,13 +1926,16 @@
        }
        
        if (key == PAGE_DOWN_KEY) {
@@ -2716,7 +2755,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
          return;
        }
        
-@@ -1749,7 +1928,7 @@
+@@ -1749,7 +1943,7 @@
      case B_FUNCTION_KEY:
        for (c = 0; c < 12; c++) {
          if (key == function_keycode_table[c]) {
@@ -2725,7 +2764,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
            return;
          }
        }
-@@ -1764,13 +1943,12 @@
+@@ -1764,13 +1958,12 @@
      
      if (gNowCoding != M_UTF8) {
        int cnum = fCodeConv->ConvertFromInternal((uchar *)bytes, dstbuf);
@@ -2741,7 +2780,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  }
  
  /////////////////////////////////////////////////////////////////////////////
-@@ -1809,11 +1987,13 @@
+@@ -1809,11 +2002,13 @@
  void 
  TermView::MessageReceived(BMessage *msg)
  {
@@ -2756,7 +2795,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    case B_SIMPLE_DATA:
      if (msg->FindRef("refs", &ref) == B_OK ){
        this->DoFileDrop(ref);
-@@ -1841,7 +2021,7 @@
+@@ -1841,7 +2036,7 @@
        
      }
      break;
@@ -2765,7 +2804,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
      
    case B_COPY:
      this->DoCopy();
-@@ -1859,13 +2039,14 @@
+@@ -1859,13 +2054,14 @@
      
    case MENU_CLEAR_ALL:
      this->DoClearAll();
@@ -2781,7 +2820,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    case B_INPUT_METHOD_EVENT:
      {
        int32 op;
-@@ -1888,12 +2069,14 @@
+@@ -1888,12 +2084,14 @@
  	break;
        }
      }
@@ -2796,7 +2835,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoFileDrop
  //	Gets dropped file full path and display it at cursor position.
-@@ -1913,6 +2096,7 @@
+@@ -1913,6 +2111,7 @@
    return;
    
  }
@@ -2804,7 +2843,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  ////////////////////////////////////////////////////////////////////////////
  // DoCopy()
  //	Copy selection text to Clipboard.
-@@ -2068,10 +2252,10 @@
+@@ -2068,10 +2267,10 @@
    if (gNowCoding != M_UTF8) {
      uchar *dstbuf = (uchar *)malloc (num_bytes * 4);
      num_bytes = fCodeConv->ConvertFromInternal(text, dstbuf);
@@ -2817,7 +2856,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
    }
  
  }
-@@ -2169,7 +2353,11 @@
+@@ -2169,7 +2368,11 @@
  	if (mod & B_CONTROL_KEY || gTermPref->getInt32 (PREF_DRAGN_COPY)) {
  	  
  	  BPoint p;
@@ -2829,7 +2868,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  	  
  	  do {
  	    GetMouse (&p, &bt);
-@@ -2205,8 +2393,10 @@
+@@ -2205,8 +2408,10 @@
  		   fTermColumns * fFontWidth, ed.y + fFontHeight - fTop);
  	  }
  	  r = r & Bounds();
@@ -2841,7 +2880,7 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  	  return;
  	}
        }
-@@ -2231,10 +2421,17 @@
+@@ -2231,10 +2436,18 @@
      switch (clicks){
      case 1:
        fMouseTracking = true;
@@ -2855,13 +2894,45 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
 +		     MOUSE_THR_CODE,
 +		     (void *)&where,
 +		     sizeof (BPoint));
++      SetPrivateEventMask(E_POINTER_EVENTS, E_LOCK_WINDOW_FOCUS);
 +#endif
        break;
    
      case 2:
+@@ -2269,9 +2482,12 @@
+ //
+ ////////////////////////////////////////////////////////////////////////////
+ void
+-TermView::MouseMoved (BPoint /*point*/, uint32 transit,
+-		      const BMessage */*message*/)
++TermView::MouseMoved (BPoint where, uint32 transit, const BMessage *message)
+ {
++#ifdef USE_ETKXX
++  etk_write_port(fMouseThreadPort, MOUSE_THR_CODE + 2, (void *)&where, sizeof(BPoint));
++#endif
++
+   if (fMouseImage && Window()->IsActive ()) {
+     if (transit == B_ENTERED_VIEW)
+       be_app->SetCursor (B_I_BEAM_CURSOR);
+@@ -2280,6 +2496,15 @@
+   }
+   return;
+   
++}
++
++
++void
++TermView::MouseUp (BPoint where)
++{
++#ifdef USE_ETKXX
++  etk_write_port(fMouseThreadPort, MOUSE_THR_CODE + 1, (void *)&where, sizeof(BPoint));
++#endif
+ }
+ 
+ 
 diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
 --- MuTerm/src/TermView.h	Mon May 21 23:21:34 2001
-+++ MuTerm_working/src/TermView.h	Tue May 15 23:59:53 2007
++++ MuTerm_working/src/TermView.h	Thu May 17 16:59:01 2007
 @@ -19,9 +19,14 @@
  #ifndef TERMVIEW_H
  #define TERMVIEW_H
@@ -2895,7 +2966,15 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    /*
     *	PRIVATE MEMBER.
     */
-@@ -208,8 +217,10 @@
+@@ -192,6 +201,7 @@
+   void	WindowActivated (bool active);
+   void	KeyDown (const char*, int32);
+   void	MouseDown (BPoint where);
++  void	MouseUp (BPoint where);
+   void  MouseMoved (BPoint, uint32, const BMessage *);
+   
+   void	FrameResized(float width, float height);
+@@ -208,8 +218,10 @@
    void DoPrint(BRect updateRect);
  
    void ResizeScrBarRange (void);
@@ -2907,7 +2986,7 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    
    // edit menu function.
    void DoCopy (void);
-@@ -267,7 +278,9 @@
+@@ -267,7 +279,9 @@
    int fFontHeight;
  
    int fFontAscent;
@@ -2917,7 +2996,7 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    
    //
    // Flags.
-@@ -377,6 +390,9 @@
+@@ -377,6 +391,9 @@
    // thread ID / flags.
    thread_id fViewThread;
    thread_id fMouseThread;
@@ -3563,7 +3642,7 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
 +
 diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified Chinese
 --- MuTerm/src/menu/Simplified Chinese	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/menu/Simplified Chinese	Wed May 16 00:26:51 2007
++++ MuTerm_working/src/menu/Simplified Chinese	Thu May 17 14:45:16 2007
 @@ -0,0 +1,99 @@
 +######### -*- coding:utf-8-unix -*- ###################
 +# Simplified Chinese menu
@@ -3628,8 +3707,8 @@ diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified 
 +
 +"Disable",		"关闭"
 +"Button 1",		"左键"
-+"Button 2",		"右键"
-+"Button 3",		"中键"
++"Button 2",		"中键"
++"Button 3",		"右键"
 +"Red",			"红"
 +"Green",		"绿"
 +"Blue",			"蓝"
@@ -3687,7 +3766,7 @@ diff -Nur MuTerm/src/menu/Traditional Chinese MuTerm_working/src/menu/Traditiona
 +# end
 diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 --- MuTerm/src/spawn.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/spawn.cpp	Wed May 16 16:15:02 2007
++++ MuTerm_working/src/spawn.cpp	Thu May 17 16:43:28 2007
 @@ -16,21 +16,37 @@
  
  */
@@ -3762,7 +3841,24 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
  
  /*
   * reapchild. Child process is out there, let's catch its terminaltion.
-@@ -110,6 +134,40 @@
+@@ -97,12 +121,16 @@
+   char msg[256];	/* error message */
+   int row;		/* terminal rows */
+   int col;		/* Terminal columns */
++#ifdef _WIN32
++  DWORD id;
++#endif
+ } handshake_t;
+ 
+ /* status of handshake */
+ #define PTY_OK	0	/* pty open and set termios OK */
+ #define PTY_NG	1	/* pty open or set termios NG */
+ #define PTY_WS	2	/* pty need WINSIZE (row and col ) */
++#define PTY_ID	3
+ 
+ /* global varriables */
+ 
+@@ -110,6 +138,40 @@
  char tty_name[16];
  int pfd_num = 0;
  
@@ -3803,7 +3899,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
  int
  spawn_shell (int row, int col, const char *command, const char *coding)
  {
-@@ -118,7 +176,12 @@
+@@ -118,7 +180,12 @@
    pid_t pgrp;
    
    int master, slave;
@@ -3816,7 +3912,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
    struct winsize ws;
    
    handshake_t handshake;
-@@ -126,17 +189,12 @@
+@@ -126,17 +193,12 @@
    char pty_name[16];
  
    int i = 0;
@@ -3834,7 +3930,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
  
    signal (SIGTTOU, SIG_IGN);
  
-@@ -393,31 +451,7 @@
+@@ -393,31 +455,7 @@
  
     Setenv ("SHELL=", *args);
    
@@ -3867,7 +3963,7 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
     
     execve (*args, args, environ);
  
-@@ -470,4 +504,258 @@
+@@ -470,4 +508,277 @@
    
    return (done > 0) ? master : -1;
  }
@@ -3921,8 +4017,6 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +}
 +
 +
-+HANDLE hStdPipe[2] = {NULL, NULL};
-+
 +BOOL WINAPI ConsoleHandle(DWORD event)
 +{
 +	HANDLE hProcess;
@@ -3943,6 +4037,9 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +
 +	return TRUE;
 +}
++
++
++HANDLE hStdPipe[2] = {NULL, NULL};
 +
 +
 +int
@@ -4092,6 +4189,15 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +
 +		sh_pid = sh_process_info.dwProcessId;
 +
++		while(true)
++		{
++			handshake.status = PTY_ID;
++			handshake.id = (DWORD)-1;
++			etk_write_port(port, 0, &handshake, sizeof(handshake));
++			e_snooze(1000);
++			if(etk_read_port(port, &code, &handshake, sizeof(handshake)) == E_OK && handshake.id != (DWORD)-1) break;
++		}
++
 +		handshake.status = PTY_OK;
 +		etk_write_port(port, 0, &handshake, sizeof(handshake));
 +		etk_delete_port(port);
@@ -4099,6 +4205,10 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +		WaitForSingleObject(sh_process_info.hProcess, INFINITE);
 +		CloseHandle(sh_process_info.hProcess);
 +		CloseHandle(sh_process_info.hThread);
++
++		HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, handshake.id);
++		TerminateProcess(hProcess, 0);
++		CloseHandle(hProcess);
 +
 +		exit(1);
 +	}
@@ -4109,6 +4219,11 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +		if(etk_read_port(port, &code, &handshake, sizeof(handshake)) != E_OK) break;
 +		switch(handshake.status)
 +		{
++			case PTY_ID:
++				handshake.id = GetCurrentProcessId();
++				etk_write_port(port, 0, &handshake, sizeof(handshake));
++				break;
++
 +			case PTY_OK:
 +				done = 1;
 +				break;
