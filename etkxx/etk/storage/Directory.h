@@ -53,6 +53,8 @@ public:
 	void		DoForEach(bool (*func)(const char *path, void *user_data), void *user_data);
 
 private:
+	friend class EEntry;
+
 	void *fDir;
 	char *fName;
 };

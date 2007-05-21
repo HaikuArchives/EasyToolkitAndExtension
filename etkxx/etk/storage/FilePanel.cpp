@@ -315,7 +315,7 @@ EFilePanelListItem::EFilePanelListItem(const char *path, EFilePanelView *panel_v
 #endif
 
 		if(fFlags == 0) aEntry.GetSize(&fSize);
-		aEntry.GetModifiedTime(&fModifiedTime);
+		aEntry.GetModificationTime(&fModifiedTime);
 	}
 }
 

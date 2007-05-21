@@ -43,6 +43,7 @@
 #include <etk/support/String.h>
 
 #include "Entry.h"
+#include "Directory.h"
 
 // implement in "Path.cpp"
 extern e_status_t etk_path_expound(EString &path, const char *dir, const char *leaf, bool *normalize);
@@ -55,10 +56,31 @@ EEntry::EEntry()
 }
 
 
+EEntry::EEntry(const char *dir, const char *leaf, bool traverse)
+	: fName(NULL)
+{
+	SetTo(dir, leaf, traverse);
+}
+
+
+EEntry::EEntry(const EDirectory *dir, const char *leaf, bool traverse)
+	: fName(NULL)
+{
+	SetTo(dir, leaf, traverse);
+}
+
+
 EEntry::EEntry(const char *path, bool traverse)
 	: fName(NULL)
 {
 	SetTo(path, traverse);
+}
+
+
+EEntry::EEntry(const EEntry &entry)
+	: fName(NULL)
+{
+	EEntry::operator=(entry);
 }
 
 
@@ -71,10 +93,17 @@ EEntry::~EEntry()
 e_status_t
 EEntry::SetTo(const char *path, bool traverse)
 {
-	if(path == NULL) return E_BAD_VALUE;
+	return SetTo(path, NULL, traverse);
+}
+
+
+e_status_t
+EEntry::SetTo(const char *dir, const char *leaf, bool traverse)
+{
+	if(dir == NULL) return E_BAD_VALUE;
 
 	EString str;
-	if(etk_path_expound(str, path, NULL, NULL) != E_OK) return E_BAD_VALUE;
+	if(etk_path_expound(str, dir, leaf, NULL) != E_OK) return E_BAD_VALUE;
 
 	EString parent;
 	e_status_t status = etk_path_get_parent(parent, str.String());
@@ -102,6 +131,14 @@ EEntry::SetTo(const char *path, bool traverse)
 	fName = name;
 
 	return E_OK;
+}
+
+
+e_status_t
+EEntry::SetTo(const EDirectory *dir, const char *leaf, bool traverse)
+{
+	if(dir == NULL || dir->InitCheck() != E_OK) return E_BAD_VALUE;
+	return SetTo(dir->fName, leaf, traverse);
 }
 
 
@@ -163,6 +200,29 @@ EEntry::IsHidden() const
 
 
 bool
+EEntry::IsFile() const
+{
+	if(fName == NULL) return false;
+
+	const char *filename = (const char*)fName;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+	filename = str.String();
+
+	struct _stat st;
+	if(_stat(filename, &st) != 0) return false;
+	return((st.st_mode & _S_IFREG) ? true : false);
+#else
+	struct stat st;
+	if(stat(filename, &st) != 0) return false;
+	return S_ISREG(st.st_mode);
+#endif
+}
+
+
+bool
 EEntry::IsDirectory() const
 {
 	if(fName == NULL) return false;
@@ -181,6 +241,19 @@ EEntry::IsDirectory() const
 	struct stat st;
 	if(stat(filename, &st) != 0) return false;
 	return S_ISDIR(st.st_mode);
+#endif
+}
+
+
+bool
+EEntry::IsSymLink() const
+{
+#ifdef S_ISLNK
+	struct stat st;
+	if(fName == NULL || lstat(fName, &st) != 0) return false;
+	return S_ISLNK(st.st_mode);
+#else
+	return false;
 #endif
 }
 
@@ -215,7 +288,7 @@ EEntry::GetSize(eint64 *file_size) const
 
 
 e_status_t
-EEntry::GetModifiedTime(e_bigtime_t *time) const
+EEntry::GetModificationTime(e_bigtime_t *time) const
 {
 	if(fName == NULL || time == NULL) return E_ERROR;
 
@@ -240,12 +313,174 @@ EEntry::GetModifiedTime(e_bigtime_t *time) const
 
 
 e_status_t
+EEntry::GetCreationTime(e_bigtime_t *time) const
+{
+	if(fName == NULL || time == NULL) return E_ERROR;
+
+	const char *filename = (const char*)fName;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+	filename = str.String();
+
+	struct _stat stat;
+	if(_stat(filename, &stat) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)stat.st_ctime;
+#else
+	struct stat st;
+	if(stat(filename, &st) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)st.st_ctime;
+#endif
+
+	return E_OK;
+}
+
+
+e_status_t
+EEntry::GetAccessTime(e_bigtime_t *time) const
+{
+	if(fName == NULL || time == NULL) return E_ERROR;
+
+	const char *filename = (const char*)fName;
+
+#ifdef _WIN32
+	EString str(fName);
+	str.ReplaceAll("/", "\\");
+	filename = str.String();
+
+	struct _stat stat;
+	if(_stat(filename, &stat) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)stat.st_atime;
+#else
+	struct stat st;
+	if(stat(filename, &st) != 0) return E_ERROR;
+	*time = E_INT64_CONSTANT(1000000) * (e_bigtime_t)st.st_atime;
+#endif
+
+	return E_OK;
+}
+
+
+const char*
+EEntry::Name() const
+{
+	if(fName == NULL) return NULL;
+
+	size_t nameLen = strlen(fName);
+
+#ifdef _WIN32
+	if(nameLen <= 3) return NULL;
+#else
+	if(nameLen == 1 && *fName == '/') return NULL;
+#endif
+
+	const char *tmp = fName + nameLen - 1;
+	for(; nameLen > 0; nameLen--, tmp--)
+	{
+		if(*tmp == '/') return(tmp + 1);
+	}
+
+	return NULL;
+}
+
+
+e_status_t
+EEntry::GetName(char *buffer, size_t bufferSize) const
+{
+	const char *name = Name();
+	if(name == NULL) return E_ERROR;
+
+	if(buffer == NULL && bufferSize == 0) return E_BAD_VALUE;
+	if(bufferSize < strlen(name) + 1) return E_NAME_TOO_LONG;
+	memcpy(buffer, name, strlen(name) + 1);
+	return E_OK;
+}
+
+
+const char*
+EEntry::Path() const
+{
+	return fName;
+}
+
+
+e_status_t
 EEntry::GetPath(EPath *path) const
 {
 	if(path == NULL) return E_BAD_VALUE;
 	if(fName == NULL) {path->Unset(); return E_NO_INIT;}
 
-	path->SetTo(fName, NULL, false);
-	return E_OK;
+	return path->SetTo(fName, NULL, false);
+}
+
+
+e_status_t
+EEntry::GetParent(EEntry *entry) const
+{
+	if(entry == NULL) return E_BAD_VALUE;
+	if(fName == NULL) return E_NO_INIT;
+
+	EString str;
+	e_status_t status = etk_path_get_parent(str, fName);
+	if(status != E_OK) return status;
+
+	return entry->SetTo(str.String(), false);
+}
+
+
+e_status_t
+EEntry::GetParent(EPath *path) const
+{
+	if(path == NULL) return E_BAD_VALUE;
+	if(fName == NULL) return E_NO_INIT;
+
+	EString str;
+	e_status_t status = etk_path_get_parent(str, fName);
+	if(status != E_OK) return status;
+
+	return path->SetTo(str.String(), NULL, false);
+}
+
+
+e_status_t
+EEntry::GetParent(EDirectory *dir) const
+{
+	if(dir == NULL) return E_BAD_VALUE;
+	if(fName == NULL) return E_NO_INIT;
+
+	EString str;
+	e_status_t status = etk_path_get_parent(str, fName);
+	if(status != E_OK) return status;
+
+	return dir->SetTo(str.String());
+}
+
+
+bool
+EEntry::operator==(const EEntry &entry) const
+{
+	if(fName == NULL && entry.fName == NULL) return true;
+	if(fName == NULL || entry.fName == NULL) return false;
+	return(!(strlen(fName) != strlen(entry.fName) || strcmp(fName, entry.fName) != 0));
+}
+
+
+bool
+EEntry::operator!=(const EEntry &entry) const
+{
+	if(fName == NULL && entry.fName == NULL) return false;
+	if(fName == NULL || entry.fName == NULL) return true;
+	if(strlen(fName) != strlen(entry.fName)) return true;
+	return(strcmp(fName, entry.fName) != 0);
+}
+
+
+EEntry&
+EEntry::operator=(const EEntry &entry)
+{
+	if(fName != NULL) delete[] fName;
+	fName = EStrdup(entry.fName);
+	return *this;
 }
 

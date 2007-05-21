@@ -39,22 +39,44 @@ class EDirectory;
 class _IMPEXP_ETK EEntry {
 public:
 	EEntry();
+	EEntry(const char *dir, const char *leaf, bool traverse = false);
+	EEntry(const EDirectory *dir, const char *leaf, bool traverse = false);
 	EEntry(const char *path, bool traverse = false);
+	EEntry(const EEntry &entry);
 	virtual ~EEntry();
 
+	e_status_t	SetTo(const char *dir, const char *leaf, bool traverse = false);
+	e_status_t	SetTo(const EDirectory *dir, const char *leaf, bool traverse = false);
 	e_status_t	SetTo(const char *path, bool traverse = false);
 	void		Unset();
 
 	e_status_t	InitCheck() const;
 
 	bool		Exists() const;
-
 	bool		IsHidden() const;
-	bool		IsDirectory() const;
-	e_status_t	GetSize(eint64 *file_size) const;
-	e_status_t	GetModifiedTime(e_bigtime_t *time) const;
 
+	bool		IsFile() const;
+	bool		IsDirectory() const;
+	bool		IsSymLink() const;
+
+	e_status_t	GetSize(eint64 *file_size) const;
+	e_status_t	GetModificationTime(e_bigtime_t *time) const;
+	e_status_t	GetCreationTime(e_bigtime_t *time) const;
+	e_status_t	GetAccessTime(e_bigtime_t *time) const;
+
+	const char	*Name() const;
+	e_status_t	GetName(char *buffer, size_t bufferSize) const;
+
+	const char	*Path() const;
 	e_status_t	GetPath(EPath *path) const;
+
+	e_status_t	GetParent(EEntry *entry) const;
+	e_status_t	GetParent(EPath *path) const;
+	e_status_t	GetParent(EDirectory *dir) const;
+
+	bool		operator==(const EEntry &entry) const;
+	bool		operator!=(const EEntry &entry) const;
+	EEntry&		operator=(const EEntry &entry);
 
 private:
 	friend class EDirectory;
