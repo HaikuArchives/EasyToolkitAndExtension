@@ -21,7 +21,7 @@ How to compile ETK++ from source
 	  MT-SAFE on Darwin --- recompile gcc to enable posix-thread support.
 
  * Windows MSVC .NET:
-	1. run "./configure" within MinGW or CygWin to generate the files
+	1. run "./configure --with-built-in-graphics=win32" within MinGW to generate the files
 	2. open "build/win32/etkxx.sln" in MSVC .NET
 	3. compile the project named "etkxx"
 	4. the "build/win32/example.sln" just for compiling examples
