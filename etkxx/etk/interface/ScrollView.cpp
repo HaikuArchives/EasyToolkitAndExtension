@@ -164,12 +164,14 @@ EScrollView::SetTarget(EView *newTarget)
 		{
 			if(!fAlwaysShowHorizontal) fHSB->Hide();
 			fHSB->SetRange(0, 0);
+			fHSB->SetEnabled(false);
 		}
 
 		if(fVSB != NULL)
 		{
 			if(!fAlwaysShowVertical) fVSB->Hide();
 			fVSB->SetRange(0, 0);
+			fVSB->SetEnabled(false);
 		}
 
 		return E_OK;
@@ -249,6 +251,7 @@ EScrollView::FrameResized(float new_width, float new_height)
 	{
 		if(!fAlwaysShowHorizontal && TargetValidFrame(true).Width() >= targetFrame.Width())
 		{
+			fHSB->SetValue(0);
 			fHSB->Hide();
 		}
 		else
@@ -263,6 +266,7 @@ EScrollView::FrameResized(float new_width, float new_height)
 	{
 		if(!fAlwaysShowVertical && TargetValidFrame(true).Height() >= targetFrame.Height())
 		{
+			fVSB->SetValue(0);
 			fVSB->Hide();
 		}
 		else
