@@ -30,6 +30,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <time.h>
+#include <errno.h>
 
 #include <mach/mach.h>
 #include <mach/semaphore.h>
