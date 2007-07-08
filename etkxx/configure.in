@@ -633,6 +633,9 @@ case $etk_native_os_extra in
 		etk_system_libs=
 		etk_extra_libs="-ldl -lcygwin"
 	;;
+	darwin)
+		etk_extra_libs="-ldl"
+	;;
 	*)
 		etk_system_libs=
 		etk_extra_libs=
@@ -1048,25 +1051,27 @@ if test "x$have_threads" != xno; then
 		ETK_THREAD_CFLAGS="-D_REENTRANT"
 		ETK_THREAD_LIBS="-lpthread"
 	else
-		# First we test for posix, whether -pthread or -pthreads do the trick as 
-		# both CPPFLAG and LIBS. 
-		# One of them does for most gcc versions and some other platforms/compilers
-		# too and could be considered as the canonical way to go. 
-		for flag in pthread pthreads; do
-			etk_save_CFLAGS="$CFLAGS"
-			CFLAGS="$CFLAGS -$flag"
-			AC_TRY_RUN(etk_thread_test(0),
-				   etk_flag_works=yes,
-				   etk_flag_works=no,
-				   [AC_LINK_IFELSE(etk_thread_test(0),
-						   etk_flag_works=yes,
-						   etk_flag_works=no)])
-			CFLAGS="$etk_save_CFLAGS"
-			if test $etk_flag_works = yes ; then
-				ETK_THREAD_CFLAGS="-$flag"
-				ETK_THREAD_LIBS="-$flag"
-			fi
-		done
+		if test "$etk_native_os_extra" != "darwin"; then
+			# First we test for posix, whether -pthread or -pthreads do the trick as 
+			# both CPPFLAG and LIBS. 
+			# One of them does for most gcc versions and some other platforms/compilers
+			# too and could be considered as the canonical way to go. 
+			for flag in pthread pthreads; do
+				etk_save_CFLAGS="$CFLAGS"
+				CFLAGS="$CFLAGS -$flag"
+				AC_TRY_RUN(etk_thread_test(0),
+					   etk_flag_works=yes,
+					   etk_flag_works=no,
+					   [AC_LINK_IFELSE(etk_thread_test(0),
+							   etk_flag_works=yes,
+							   etk_flag_works=no)])
+				CFLAGS="$etk_save_CFLAGS"
+				if test $etk_flag_works = yes ; then
+					ETK_THREAD_CFLAGS="-$flag"
+					ETK_THREAD_LIBS="-$flag"
+				fi
+			done
+		fi
 	fi
   fi
 

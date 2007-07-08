@@ -18,7 +18,6 @@ How to compile ETK++ from source
 	5. special:
 	  IPC on Linux --- 2.6.x kernel
 	  IPC on FreeBSD 6.x --- Add "options P1003_1B_SEMAPHORES" to kernel config and recompile kernel
-	  MT-SAFE on Darwin --- recompile gcc to enable posix-thread support.
 
  * Windows MSVC .NET:
 	1. run "./configure --with-built-in-graphics=win32" within MinGW to generate the files
