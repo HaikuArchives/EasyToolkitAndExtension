@@ -106,7 +106,9 @@ libetk_interface_la_SOURCES =		\
 		TextView.cpp		\
 		TextView.h		\
 		Bitmap.cpp		\
-		Bitmap.h
+		Bitmap.h		\
+		LimitedView.cpp		\
+		LimitedView.h
 
 libetk_interface_la_LIBADD = $(graphics_la)
 libetk_interface_la_DEPENDENCIES = $(graphics_la)
@@ -146,7 +148,8 @@ etk_interfaceinclude_HEADERS =		\
 		OutlineListView.h	\
 		TabView.h		\
 		TextView.h		\
-		Bitmap.h
+		Bitmap.h		\
+		LimitedView.h
 
 DISTCLEANFILES = Makefile.in
 

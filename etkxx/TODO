@@ -1,3 +1,6 @@
+Kernel Kit and Interface Kit:
+	*** Cleaning and Improving !!!
+
 POSIX-Thread:
 WIN32-Thread:
 	*** etk-thread.cpp : needed to improve "etk_set_thread_priority"
