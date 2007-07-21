@@ -183,6 +183,9 @@ extern _IMPEXP_ETK const euint16 etk_binary_age;
 #ifdef __cplusplus
 
 #ifdef ETK_OS_WIN32
+	#ifdef _WIN32
+		#include <windows.h>
+	#endif
 	#ifdef PostMessage
 		#undef PostMessage
 	#endif /* PostMessage */
@@ -204,4 +207,5 @@ extern _IMPEXP_ETK const euint16 etk_binary_age;
 #endif
 
 #endif /* __ETK_SUPPORT_DEFS_H__ */
+
 

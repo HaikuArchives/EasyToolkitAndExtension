@@ -19,12 +19,7 @@ addonsdir = $(libdir)/add-ons/etkxx/graphics
 noinst_LTLIBRARIES = libgraphics-carbon.la
 
 libgraphics_carbon_la_SOURCES =			\
-	etk-carbon.h				\
-	etk-application.cpp			\
-	etk-window.cpp				\
-	etk-pixmap.cpp				\
-	etk-drawing.cpp				\
-	etk-font.cpp
+	etk-carbon.h
 
 if ETK_GRAPHICS_CARBON_BUILT_IN
 else
@@ -52,4 +47,5 @@ install-data-local: libgraphics-carbon.la
 uninstall-local:
 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(addonsdir)/libgraphics-carbon.la
 endif
+
 

@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = foreign 1.7 dist-bzip2
 DISTCHECK_CONFIGURE_FLAGS = "--enable-debug=medium --enable-mem-trace=yes --enable-freetype=yes"
 EFENCE = 
 
-SUBDIRS = build etk tools manual example
+SUBDIRS = build etk tools manual example builder
 
 if ETK_COMPILE_TEST
 SUBDIRS += tests
@@ -43,6 +43,13 @@ if ETK_GRAPHICS_LINUXFB
 if ETK_GRAPHICS_LINUXFB_BUILT_IN
 else
 ADDONSDIRS += $(EFENCE) $(top_builddir)/etk/interface/linuxfb
+endif
+endif
+
+if ETK_GRAPHICS_CARBON
+if ETK_GRAPHICS_CARBON_BUILT_IN
+else
+ADDONSDIRS += $(EFENCE) $(top_builddir)/etk/interface/carbon
 endif
 endif
 
@@ -104,4 +111,5 @@ clean-local:
 	-for f in $(ADDONSDIRS) .none; do \
 		(test $$f = .none || (cd $$f && $(MAKE) clean)) \
 	done
+
 

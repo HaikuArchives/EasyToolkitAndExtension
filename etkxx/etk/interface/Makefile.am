@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = 1.7
 
-SUBDIRS = icons wm
+SUBDIRS = layout icons wm
 EFENCE = 
-graphics_la =
+graphics_la = layout/libetk-interface-layout.la
 
 if ETK_GRAPHICS_X11_BUILT_IN
 SUBDIRS += $(EFENCE) x11
@@ -27,6 +27,11 @@ endif
 if ETK_GRAPHICS_LINUXFB_BUILT_IN
 SUBDIRS += $(EFENCE) linuxfb
 graphics_la += $(EFENCE) wm/libetk-interface-wm.la linuxfb/libgraphics-linuxfb.la
+endif
+
+if ETK_GRAPHICS_CARBON_BUILT_IN
+SUBDIRS += $(EFENCE) carbon
+graphics_la += $(EFENCE) carbon/libgraphics-carbon.la
 endif
 
 DEFAULT_INCLUDES = -I$(top_builddir)
@@ -152,4 +157,5 @@ etk_interfaceinclude_HEADERS =		\
 		LimitedView.h
 
 DISTCLEANFILES = Makefile.in
+
 

@@ -3160,7 +3160,7 @@ EView::GetPreferredSize(float *width, float *height)
 		float cW = 0, cH = 0;
 		euint32 cMode = child->ResizingMode();
 
-		if(child->IsHidden()) continue;
+		if(child->fHidden) continue;
 		child->GetPreferredSize(&cW, &cH);
 
 		if((cMode & E_FOLLOW_LEFT) || cMode == E_FOLLOW_NONE) cW += child->fFrame.left;
@@ -3572,4 +3572,5 @@ EView::DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect)
 
 	MovePenTo(destRect.LeftTop());
 }
+
 

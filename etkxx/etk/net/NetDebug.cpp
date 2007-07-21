@@ -98,7 +98,7 @@ ENetDebug::Dump(const char *data, size_t len, const char *title)
 	EAutolock <ESimpleLocker> autolock(_e_net_locker);
 	if(!autolock.IsLocked() || !_e_net_enabled) return;
 
-	fprintf(stderr, "[NET]: -------- %s(START) --------\n", title ? title : "No title");
+	fprintf(stderr, "[NET]: -------- %s (START) --------\n", title ? title : "No title");
 
 	while(len > 0)
 	{
@@ -110,6 +110,7 @@ ENetDebug::Dump(const char *data, size_t len, const char *title)
 		fputs("\n", stderr);
 	}
 
-	fprintf(stderr, "[NET]: --------- %s(END) ---------\n", title ? title : "No title");
+	fprintf(stderr, "[NET]: --------- %s (END) ---------\n", title ? title : "No title");
 }
+
 

@@ -722,7 +722,7 @@ AC_ARG_WITH(graphics,
 	   [want_graphics=yes])
 
 AC_ARG_WITH(built-in-graphics,
-           [AC_HELP_STRING([--with-built-in-graphics=@<:@x11/beos/win32/directfb/linuxfb/auto/none@:>@],
+           [AC_HELP_STRING([--with-built-in-graphics=@<:@x11/beos/win32/directfb/linuxfb/carbon/auto/none@:>@],
                            [specify a graphics implementation to built-in @<:@default=none@:>@])],
            [if test x$with_built_in_graphics = x; then
 		want_built_in_graphics=auto
@@ -742,6 +742,7 @@ etk_graphics_beos=no
 etk_graphics_win32=no
 etk_graphics_directfb=no
 etk_graphics_linuxfb=no
+etk_graphics_carbon=no
 
 if test "x$want_graphics" = "xyes"; then
 
@@ -755,6 +756,41 @@ if test "x$etk_native_os" = xbeos; then
 		ETK_EXTRA_LIBS="$ETK_EXTRA_LIBS $etk_graphics_beos_libs"
 	fi
 fi
+
+
+# Test program for Carbon
+m4_define([etk_carbon_test],[
+#include <Carbon/Carbon.h>
+int main()
+{
+	/* TODO */
+	exit(0);
+}])
+
+AC_MSG_CHECKING(for Carbon)
+AC_TRY_RUN(etk_carbon_test(0),
+	   have_carbon=yes,
+	   have_carbon=no,
+	   [AC_LINK_IFELSE(etk_carbon_test(0),
+	   have_carbon=yes,
+	   have_carbon=no)])
+if test "x$have_carbon" = xyes; then
+	etk_graphics_carbon=yes
+	etk_graphics_carbon_cflags=
+	etk_graphics_carbon_libs=
+	if test "x$etk_native_os_extra" = xdarwin && test "x$want_built_in_graphics" = xauto; then
+		etk_built_in_graphics=carbon
+	fi
+	if test "x$want_built_in_graphics" = xcarbon; then
+		etk_built_in_graphics=carbon
+	fi
+	if test "x$etk_built_in_graphics" = xcarbon; then
+		ETK_GRAPHICS_BUILT_IN="ETK_GRAPHICS_CARBON_BUILT_IN"
+		ETK_EXTRA_LIBS="$ETK_EXTRA_LIBS $etk_graphics_carbon_libs"
+	fi
+fi
+AC_MSG_RESULT($have_carbon)
+
 
 case $etk_native_os_extra in
 	mingw|cygwin)
@@ -884,11 +920,13 @@ AM_CONDITIONAL(ETK_GRAPHICS_BEOS, [test "$etk_graphics_beos" = "yes"])
 AM_CONDITIONAL(ETK_GRAPHICS_WIN32, [test "$etk_graphics_win32" = "yes"])
 AM_CONDITIONAL(ETK_GRAPHICS_DIRECTFB, [test "$etk_graphics_directfb" = "yes"])
 AM_CONDITIONAL(ETK_GRAPHICS_LINUXFB, [test "$etk_graphics_linuxfb" = "yes"])
+AM_CONDITIONAL(ETK_GRAPHICS_CARBON, [test "$etk_graphics_carbon" = "yes"])
 AM_CONDITIONAL(ETK_GRAPHICS_X11_BUILT_IN, [test "$etk_built_in_graphics" = "x11"])
 AM_CONDITIONAL(ETK_GRAPHICS_BEOS_BUILT_IN, [test "$etk_built_in_graphics" = "beos"])
 AM_CONDITIONAL(ETK_GRAPHICS_WIN32_BUILT_IN, [test "$etk_built_in_graphics" = "win32"])
 AM_CONDITIONAL(ETK_GRAPHICS_DIRECTFB_BUILT_IN, [test "$etk_built_in_graphics" = "directfb"])
 AM_CONDITIONAL(ETK_GRAPHICS_LINUXFB_BUILT_IN, [test "$etk_built_in_graphics" = "linuxfb"])
+AM_CONDITIONAL(ETK_GRAPHICS_CARBON_BUILT_IN, [test "$etk_built_in_graphics" = "carbon"])
 
 etk_graphics=
 if test "x$etk_graphics_x11" = xyes; then
@@ -929,6 +967,14 @@ if test "x$etk_graphics_linuxfb" = xyes; then
 	AC_SUBST(ETK_GRAPHICS_LINUXFB_CFLAGS)
 	AC_SUBST(ETK_GRAPHICS_LINUXFB_LIBS)
 	etk_graphics="$etk_graphics linuxfb"
+fi
+
+if test "x$etk_graphics_carbon" = xyes; then
+	ETK_GRAPHICS_CARBON_CFLAGS="$etk_graphics_carbon_cflags"
+	ETK_GRAPHICS_CARBON_LIBS="$etk_graphics_carbon_libs"
+	AC_SUBST(ETK_GRAPHICS_CARBON_CFLAGS)
+	AC_SUBST(ETK_GRAPHICS_CARBON_LIBS)
+	etk_graphics="$etk_graphics carbon"
 fi
 
 AC_MSG_CHECKING(for graphics implementation)
@@ -1738,6 +1784,7 @@ etk/xml/Makefile
 etk/app/Makefile
 etk/render/Makefile
 etk/interface/Makefile
+etk/interface/layout/Makefile
 etk/interface/icons/Makefile
 etk/interface/x11/Makefile
 etk/interface/win32/Makefile
@@ -1745,6 +1792,7 @@ etk/interface/beos/Makefile
 etk/interface/directfb/Makefile
 etk/interface/wm/Makefile
 etk/interface/linuxfb/Makefile
+etk/interface/carbon/Makefile
 etk/net/Makefile
 etk/add-ons/Makefile
 etk/add-ons/font/Makefile
@@ -1756,6 +1804,7 @@ tools/etkxx-config
 manual/Makefile
 example/Makefile
 tests/Makefile
+builder/Makefile
 ])
 
 AC_OUTPUT

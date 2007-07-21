@@ -67,6 +67,9 @@ static void client(const char *address)
 		if(buf[pos - 1] == '\n' && buf[pos - 2] == '\r') break;
 	}
 
+	ENetDebug::Enable(true);
+	ENetDebug::Dump(buf, pos, "Received");
+
 	ETK_OUTPUT("Received: %s", buf);
 }
 
@@ -82,4 +85,5 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
 

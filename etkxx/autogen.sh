@@ -1,13 +1,12 @@
 #!/bin/sh
-if test -f Makefile; then
 
-if test "X$1" = X--clean; then
+# clean
+if test -f Makefile && test "X$1" = X--clean; then
 	make distclean
 	exit 0
 fi
 
-else
-
+# config
 if test ! -f configure && test "X$1" = X--config; then
 	if test "X$OSTYPE" = Xmsys; then
 		${ACLOCAL-aclocal} -I ${ACDIR-/MinGW/share/aclocal}
@@ -27,9 +26,7 @@ if test ! -f configure && test "X$1" = X--config; then
 	exit 0
 fi
 
-fi
-
-
+# failed
 if test "X$1" = X--clean; then
 	echo "***********************************************************"
 	echo "\"Makefile\" don't exist, you should run \"./configure\" first."
@@ -42,10 +39,11 @@ elif test "X$1" = X--config; then
 	exit 0
 fi
 
-
+# show usage
 echo "Usage: ./autogen.sh [option]"
 echo ""
 echo "Option:"
 echo "    --config        generate the configure script"
 echo "    --clean         clean the script files"
+
 
