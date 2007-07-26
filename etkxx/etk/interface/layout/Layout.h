@@ -30,7 +30,9 @@
 #ifndef __ETK_LAYOUT_H__
 #define __ETK_LAYOUT_H__
 
-#include <etk/interface/View.h>
+#include <etk/support/List.h>
+#include <etk/interface/InterfaceDefs.h>
+#include <etk/interface/Region.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
@@ -42,15 +44,22 @@ public:
 	ELayoutContainer();
 	virtual ~ELayoutContainer();
 
-	virtual bool	AddItem(ELayoutItem *item, eint32 index = -1);
-	virtual bool	RemoveItem(ELayoutItem *item);
+	virtual bool		AddItem(ELayoutItem *item, eint32 index = -1);
+	virtual bool		RemoveItem(ELayoutItem *item);
+	ELayoutItem		*RemoveItem(eint32 index);
 
-	ELayoutItem	*ItemAt(eint32 index) const;
-	eint32		IndexOf(ELayoutItem *item) const;
-	eint32		CountItems() const;
+	ELayoutItem		*ItemAt(eint32 index) const;
+	eint32			IndexOf(const ELayoutItem *item) const;
+	eint32			CountItems() const;
+
+	float			UnitsPerPixel() const;
+	void			SetUnitsPerPixel(float value, bool deep = true);
 
 private:
-	void *fItems;
+	friend class ELayoutItem;
+
+	float fUnitsPerPixel;
+	EList fItems;
 };
 
 
@@ -59,40 +68,53 @@ public:
 	ELayoutItem(ERect frame, euint32 resizingMode);
 	virtual ~ELayoutItem();
 
-	virtual bool	AddItem(ELayoutItem *item, eint32 index = -1);
-	virtual bool	RemoveItem(ELayoutItem *item);
-	bool		RemoveSelf();
+	ELayoutContainer	*Container() const;
+	ELayoutContainer	*Ancestor() const;
 
-	virtual void	SetResizingMode(euint32 mode);
-	euint32		ResizingMode() const;
+	bool			RemoveSelf();
 
-	virtual void	Show();
-	virtual void	Hide();
-	bool		IsHidden() const;
+	ELayoutItem		*PrevSibling() const;
+	ELayoutItem		*NextSibling() const;
 
-	virtual void	SendBehind(ELayoutItem *item);
-	virtual void	MoveTo(EPoint where);
-	virtual void	ScrollTo(EPoint where);
-	virtual void	ResizeTo(float width, float height);
+	virtual void		SetResizingMode(euint32 mode);
+	euint32			ResizingMode() const;
 
-	virtual void	GetPreferredSize(float *width, float *height);
-	virtual void	ResizeToPreferred();
+	virtual void		Show();
+	virtual void		Hide();
+	bool			IsHidden() const;
 
-	ERect		Bounds() const;
-	ERect		Frame() const;
-	ERegion		VisibleRegion() const;
+	virtual void		SendBehind(ELayoutItem *item);
+	virtual void		MoveTo(EPoint where);
+	virtual void		ScrollTo(EPoint where);
+	virtual void		ResizeTo(float width, float height);
 
-	void		ConvertToParent(EPoint *pt) const;
-	EPoint		ConvertToParent(EPoint pt) const;
-	void		ConvertFromParent(EPoint *pt) const;
-	EPoint		ConvertFromParent(EPoint pt) const;
+	virtual void		GetPreferredSize(float *width, float *height);
+	virtual void		ResizeToPreferred();
+
+	ERect			Bounds() const;
+	ERect			Frame() const;
+	ERegion			VisibleRegion() const;
+
+	void			ConvertToContainer(EPoint *pt) const;
+	EPoint			ConvertToContainer(EPoint pt) const;
+	void			ConvertFromContainer(EPoint *pt) const;
+	EPoint			ConvertFromContainer(EPoint pt) const;
 
 private:
+	friend class ELayoutContainer;
+
 	ELayoutContainer *fContainer;
+	eint32 fIndex;
+
 	EPoint fLocalOrigin;
+	ERegion fVisibleRegion;
+
 	ERect fFrame;
 	euint32 fResizingMode;
 	bool fHidden;
+	bool fUpdating;
+
+	void UpdateVisibleRegion();
 };
 
 
@@ -101,22 +123,26 @@ public:
 	ELayoutForm(ERect frame, euint32 resizingMode);
 	virtual ~ELayoutForm();
 
-	virtual bool	AddItem(ELayoutItem *item,
-				eint32 row_index = -1,
-				eint32 column_index = -1,
-				float row_ratio = -1,
-				float column_ratio = -1);
-	virtual bool	RemoveItem(ELayoutItem *item);
+	virtual bool		AddItem(ELayoutItem *item,
+					eint32 row_index = -1,
+					eint32 column_index = -1,
+					float row_ratio = -1,
+					float column_ratio = -1);
 
-	virtual void	SetItemRatio(ELayoutItem *item, float row_ratio, float column_ratio);
-	void		GetItemRatio(ELayoutItem *item, float *row_ratio, float *column_ratio) const;
+	virtual void		SetItemRatio(ELayoutItem *item,
+					     float row_ratio,
+					     float column_ratio);
+	void			GetItemRatio(ELayoutItem *item,
+					     float *row_ratio,
+					     float *column_ratio) const;
 
-	virtual void	MoveTo(EPoint where);
-	virtual void	ScrollTo(EPoint where);
-	virtual void	ResizeTo(float width, float height);
-
-	virtual void	GetPreferredSize(float *width, float *height);
-	virtual void	ResizeToPreferred();
+	virtual bool		AddItem(ELayoutItem *item, eint32 index = -1);
+	virtual bool		RemoveItem(ELayoutItem *item);
+	virtual void		MoveTo(EPoint where);
+	virtual void		ScrollTo(EPoint where);
+	virtual void		ResizeTo(float width, float height);
+	virtual void		GetPreferredSize(float *width, float *height);
+	virtual void		ResizeToPreferred();
 
 private:
 	eint32 fRows;
@@ -126,4 +152,5 @@ private:
 #endif /* __cplusplus */
 
 #endif /* __ETK_LAYOUT_H__ */
+
 

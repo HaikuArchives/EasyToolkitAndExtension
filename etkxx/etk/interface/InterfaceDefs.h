@@ -33,6 +33,21 @@
 #include <etk/interface/GraphicsDefs.h>
 
 enum {
+	E_FOLLOW_NONE			= 0,
+	E_FOLLOW_LEFT			= 1,
+	E_FOLLOW_RIGHT			= 1 << 1,
+	E_FOLLOW_TOP			= 1 << 2,
+	E_FOLLOW_BOTTOM			= 1 << 3,
+	E_FOLLOW_H_CENTER		= 1 << 4,
+	E_FOLLOW_V_CENTER		= 1 << 5,
+	E_FOLLOW_ALL			= 0xffff
+};
+
+#define E_FOLLOW_LEFT_RIGHT	(E_FOLLOW_LEFT | E_FOLLOW_RIGHT)
+#define E_FOLLOW_TOP_BOTTOM	(E_FOLLOW_TOP | E_FOLLOW_BOTTOM)
+#define E_FOLLOW_ALL_SIDES	E_FOLLOW_ALL
+
+enum {
 	E_BACKSPACE	= 0x08,
 	E_RETURN	= 0x0a,
 	E_ENTER		= 0x0a,
@@ -191,4 +206,5 @@ _IMPEXP_ETK float e_ui_get_scrollbar_vertical_width();
 #endif
 
 #endif /* __ETK_INTERFACE_DEFS_H__ */
+
 

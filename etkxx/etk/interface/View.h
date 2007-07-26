@@ -57,21 +57,6 @@ enum {
 };
 
 enum {
-	E_FOLLOW_NONE			= 0,
-	E_FOLLOW_LEFT			= 1,
-	E_FOLLOW_RIGHT			= 1 << 1,
-	E_FOLLOW_TOP			= 1 << 2,
-	E_FOLLOW_BOTTOM			= 1 << 3,
-	E_FOLLOW_H_CENTER		= 1 << 4,
-	E_FOLLOW_V_CENTER		= 1 << 5,
-	E_FOLLOW_ALL			= 0xffff
-};
-
-#define E_FOLLOW_LEFT_RIGHT	(E_FOLLOW_LEFT | E_FOLLOW_RIGHT)
-#define E_FOLLOW_TOP_BOTTOM	(E_FOLLOW_TOP | E_FOLLOW_BOTTOM)
-#define E_FOLLOW_ALL_SIDES	E_FOLLOW_ALL
-
-enum {
 	E_WILL_DRAW			= 1,
 	E_PULSE_NEEDED			= 1 << 1,
 	E_NAVIGABLE_JUMP		= 1 << 2,
@@ -411,4 +396,5 @@ private:
 #endif /* __cplusplus */
 
 #endif /* __ETK_VIEW_H__ */
+
 
