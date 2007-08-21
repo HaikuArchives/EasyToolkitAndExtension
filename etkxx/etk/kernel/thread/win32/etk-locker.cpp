@@ -458,19 +458,19 @@ static LONG __etk_win32_memory_tracing_locker_inuse = 0;
 
 void etk_win32_memory_tracing_locker_clean()
 {
-	while(InterlockedExchange(&__etk_win32_memory_tracing_locker_inuse, 1) == 1) {Sleep(0);}
+	while(InterlockedExchange(&__etk_win32_memory_tracing_locker_inuse, 1) == 1) Sleep(0);
 	if(__etk_win32_memory_tracing_locker != NULL)
 	{
 		HeapFree(GetProcessHeap(), 0, __etk_win32_memory_tracing_locker);
 		__etk_win32_memory_tracing_locker = NULL;
 	}
-	InterlockedExchange((LONG*)&__etk_win32_memory_tracing_locker_inuse, FALSE);
+	InterlockedExchange(&__etk_win32_memory_tracing_locker_inuse, 0);
 }
 
 
 _IMPEXP_ETK bool etk_memory_tracing_lock(void)
 {
-	while(InterlockedExchange(&__etk_win32_memory_tracing_locker_inuse, 1) == 1) {Sleep(0);}
+	while(InterlockedExchange(&__etk_win32_memory_tracing_locker_inuse, 1) == 1) Sleep(0);
 	if(__etk_win32_memory_tracing_locker == NULL)
 	{
 		__etk_win32_memory_tracing_locker = (CRITICAL_SECTION*)HeapAlloc(GetProcessHeap(), 0, sizeof(CRITICAL_SECTION));

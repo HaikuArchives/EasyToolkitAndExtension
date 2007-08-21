@@ -249,6 +249,9 @@
 					RelativePath="..\..\..\etk\interface\GraphicsDefs.cpp">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\LimitedView.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\ListItem.cpp">
 				</File>
 				<File
@@ -323,6 +326,19 @@
 				<File
 					RelativePath="..\..\..\etk\interface\Window.cpp">
 				</File>
+				<Filter
+					Name="layout"
+					Filter="">
+					<File
+						RelativePath="..\..\..\etk\interface\layout\LayoutContainer.cpp">
+					</File>
+					<File
+						RelativePath="..\..\..\etk\interface\layout\LayoutForm.cpp">
+					</File>
+					<File
+						RelativePath="..\..\..\etk\interface\layout\LayoutItem.cpp">
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="app"
@@ -468,6 +484,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\etk\KernelKit.h">
+			</File>
+			<File
+				RelativePath="..\..\..\etk\interface\LimitedView.h">
 			</File>
 			<File
 				RelativePath="..\..\..\etk\NetKit.h">
@@ -642,6 +661,13 @@
 				<File
 					RelativePath="..\..\..\etk\interface\Window.h">
 				</File>
+				<Filter
+					Name="layout"
+					Filter="">
+					<File
+						RelativePath="..\..\..\etk\interface\layout\Layout.h">
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="app"

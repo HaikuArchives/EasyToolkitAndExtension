@@ -27,11 +27,6 @@
  *
  * --------------------------------------------------------------------------*/
 
-#define STRICT
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
-#endif
-
 #include <windows.h>
 
 #ifdef __CYGWIN__
@@ -41,28 +36,6 @@
 #include <etk/kernel/Kernel.h>
 #include <etk/storage/Path.h>
 #include <etk/support/String.h>
-
-typedef struct etk_win32_image_t {
-	etk_win32_image_t()
-		: image(NULL), created(false)
-	{
-		bzero(name, E_MAXPATH + 1);
-	}
-
-	~etk_win32_image_t()
-	{
-		if(created)
-		{
-			created = false;
-			etk_unload_addon((void*)this);
-		}
-	}
-
-	char		name[E_MAXPATH + 1];
-	HMODULE		image;
-
-	bool		created;
-} etk_win32_image_t;
 
 
 _IMPEXP_ETK void*
@@ -77,42 +50,18 @@ etk_load_addon(const char* path)
 	cygwin_conv_to_full_win32_path(filename.String(), buf);
 	filename.SetTo(buf);
 #endif
-
 	filename.ReplaceAll("/", "\\");
-
 	if(filename.Length() <= 0 || filename.Length() > E_MAXPATH) return NULL;
 
-	etk_win32_image_t *image = new etk_win32_image_t();
-	if(!image) return NULL;
-
-	memcpy(image->name, aPath.Path(), (size_t)strlen(aPath.Path()));
-
-	if((image->image = LoadLibrary(filename.String())) == NULL)
-	{
-		delete image;
-		return NULL;
-	}
-
-	image->created = true;
-
-	return (void*)image;
+	return((void*)LoadLibrary(filename.String()));
 }
 
 
 _IMPEXP_ETK e_status_t
 etk_unload_addon(void *data)
 {
-	etk_win32_image_t *image = (etk_win32_image_t*)data;
-	if(!image) return E_ERROR;
-
-	if(FreeLibrary(image->image) == 0) return E_ERROR;
-
-	if(image->created)
-	{
-		image->created = false;
-		delete image;
-	}
-
+	if(data == NULL) return E_ERROR;
+	if(FreeLibrary((HMODULE)data) == 0) return E_ERROR;
 	return E_OK;
 }
 
@@ -120,11 +69,9 @@ etk_unload_addon(void *data)
 _IMPEXP_ETK e_status_t
 etk_get_image_symbol(void *data, const char *name, void **ptr)
 {
-	etk_win32_image_t *image = (etk_win32_image_t*)data;
-	if(!image || !name || *name == 0 || !ptr) return E_BAD_VALUE;
+	if(data == NULL || name == NULL || *name == 0 || ptr == NULL) return E_BAD_VALUE;
 
-	FARPROC aProc = GetProcAddress(image->image, name);
-
+	FARPROC aProc = GetProcAddress((HMODULE)data, name);
 	if(aProc == NULL) return E_ERROR;
 
 	*ptr = (void*)aProc;

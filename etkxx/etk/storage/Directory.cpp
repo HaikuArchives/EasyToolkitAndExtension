@@ -259,7 +259,7 @@ EDirectory::GetNextEntry(EEntry *entry, bool traverse)
 #else
 	#warning "fixme: NO S_ISLNK"
 #endif // S_ISLNK
-		if(aPath.Path() == NULL) break;
+		if(aPath.Path() == NULL) continue;
 
 		char *name = EStrdup(aPath.Path());
 		if(name == NULL) {retVal = E_NO_MEMORY; break;}
@@ -290,7 +290,7 @@ EDirectory::GetNextEntry(EEntry *entry, bool traverse)
 		if(filename[0] == '.' && (filename[1] == 0 || (filename[1] == '.' && filename[2] == 0))) continue;
 
 		EPath aPath(fName, filename, true);
-		if(aPath.Path() == NULL) break;
+		if(aPath.Path() == NULL) continue;
 
 		char *name = EStrdup(aPath.Path());
 		if(name == NULL) {retVal = E_NO_MEMORY; break;}

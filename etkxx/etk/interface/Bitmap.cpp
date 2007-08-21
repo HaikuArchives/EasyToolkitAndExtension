@@ -147,6 +147,7 @@ EBitmap::IsValid() const
 ERect
 EBitmap::Bounds() const
 {
-	return ERect(0.f, 0.f, (float)fColumns - 1.f, (float)fRows - 1.f);
+	if(fPixmap == NULL) return ERect();
+	return ERect(0, 0, (float)(fColumns - 1), (float)(fRows - 1));
 }
 

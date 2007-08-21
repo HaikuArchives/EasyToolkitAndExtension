@@ -20,4 +20,3 @@ libetk_interface_layout_la_DEPENDENCIES =
 
 DISTCLEANFILES = Makefile.in
 
-

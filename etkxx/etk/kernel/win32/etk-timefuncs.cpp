@@ -27,11 +27,6 @@
  *
  * --------------------------------------------------------------------------*/
 
-#define STRICT
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
-#endif
-
 #include <windows.h>
 
 #include <etk/kernel/Kernel.h>
@@ -52,7 +47,7 @@ _IMPEXP_ETK e_bigtime_t etk_real_time_clock_usecs(void)
 	GetSystemTimeAsFileTime(&CurrentTime);
 
 	// get the full win32 value, in 100-nanoseconds
-	eint64 t = ((eint64)CurrentTime.dwHighDateTime << 32) + (eint64)CurrentTime.dwLowDateTime;
+	eint64 t = ((eint64)CurrentTime.dwHighDateTime << 32) | ((eint64)CurrentTime.dwLowDateTime);
 	t -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
 	t /= E_INT64_CONSTANT(10);
 
@@ -63,19 +58,19 @@ _IMPEXP_ETK e_bigtime_t etk_real_time_clock_usecs(void)
 // return the number of seconds elapsed since 00:00 01 January 1970 UTC (Unix epoch)
 _IMPEXP_ETK euint32 etk_real_time_clock(void)
 {
-	eint64 t = e_real_time_clock_usecs() / SECS_TO_US;
-	return (euint32)t;
+	return((euint32)(etk_real_time_clock_usecs() / SECS_TO_US));
 }
 
 
 static e_bigtime_t etk_windows_boot_time = E_INT64_CONSTANT(-1);
-static ESimpleLocker etk_windows_boot_time_locker(true);
+static LONG etk_windows_boot_time_locker = 0;
+
 
 _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 {
 	e_bigtime_t retValue = E_INT64_CONSTANT(-1);
 
-	etk_windows_boot_time_locker.Lock();
+	while(InterlockedExchange(&etk_windows_boot_time_locker, 1) == 1) Sleep(0);
 
 	if(etk_windows_boot_time >= E_INT64_CONSTANT(0))
 	{
@@ -89,7 +84,7 @@ _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 		retValue = etk_windows_boot_time = CurrentTime - ElapsedTime * E_INT64_CONSTANT(1000);
 	}
 
-	etk_windows_boot_time_locker.Unlock();
+	InterlockedExchange(&etk_windows_boot_time_locker, 0);
 
 	return retValue;
 }

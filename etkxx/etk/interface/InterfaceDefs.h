@@ -207,4 +207,3 @@ _IMPEXP_ETK float e_ui_get_scrollbar_vertical_width();
 
 #endif /* __ETK_INTERFACE_DEFS_H__ */
 
-

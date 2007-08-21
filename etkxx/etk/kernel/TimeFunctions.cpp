@@ -29,6 +29,7 @@
 
 #include <etk/kernel/Kernel.h>
 
+
 _IMPEXP_ETK e_status_t e_snooze(e_bigtime_t microseconds)
 {
 	return etk_snooze(microseconds);

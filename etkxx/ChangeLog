@@ -1,3 +1,9 @@
+2007-08-17  anthonylee
+	Fixed EDirectory::GetNextEntry() on Win32.
+	Fixed header problems when use Win32API.
+	Fixed EPixmap::DrawXPM().
+	Minor clean up KernelKit and InterfaceKit, but lots have to do yet.
+
 2007-05-14  anthonylee
 	Fixed ELooper::Quit()
 	Fixed some bugs when compiled by MSVC.

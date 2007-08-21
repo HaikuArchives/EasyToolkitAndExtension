@@ -420,6 +420,7 @@ ENetEndpoint::Error() const
 const char*
 ENetEndpoint::ErrorStr() const
 {
+	// FIXME: wrong on Win32
 	return strerror(Error());
 }
 

@@ -37,6 +37,7 @@
 #ifdef __cplusplus /* Just for C++ */
 
 class ELayoutItem;
+class ELayoutForm;
 
 
 class _IMPEXP_ETK ELayoutContainer {
@@ -95,6 +96,10 @@ public:
 	ERect			Frame() const;
 	ERegion			VisibleRegion() const;
 
+	EPoint			LeftTop() const;
+	float			Width() const;
+	float			Height() const;
+
 	void			ConvertToContainer(EPoint *pt) const;
 	EPoint			ConvertToContainer(EPoint pt) const;
 	void			ConvertFromContainer(EPoint *pt) const;
@@ -102,6 +107,7 @@ public:
 
 private:
 	friend class ELayoutContainer;
+	friend class ELayoutForm;
 
 	ELayoutContainer *fContainer;
 	eint32 fIndex;
@@ -120,37 +126,14 @@ private:
 
 class _IMPEXP_ETK ELayoutForm : public ELayoutItem {
 public:
-	ELayoutForm(ERect frame, euint32 resizingMode);
+	ELayoutForm(ERect frame, euint32 resizingMode, eint32 rows, eint32 columns);
 	virtual ~ELayoutForm();
 
-	virtual bool		AddItem(ELayoutItem *item,
-					eint32 row_index = -1,
-					eint32 column_index = -1,
-					float row_ratio = -1,
-					float column_ratio = -1);
-
-	virtual void		SetItemRatio(ELayoutItem *item,
-					     float row_ratio,
-					     float column_ratio);
-	void			GetItemRatio(ELayoutItem *item,
-					     float *row_ratio,
-					     float *column_ratio) const;
-
-	virtual bool		AddItem(ELayoutItem *item, eint32 index = -1);
-	virtual bool		RemoveItem(ELayoutItem *item);
-	virtual void		MoveTo(EPoint where);
-	virtual void		ScrollTo(EPoint where);
-	virtual void		ResizeTo(float width, float height);
-	virtual void		GetPreferredSize(float *width, float *height);
-	virtual void		ResizeToPreferred();
-
 private:
-	eint32 fRows;
-	eint32 fColumns;
+	void *fData;
 };
 
 #endif /* __cplusplus */
 
 #endif /* __ETK_LAYOUT_H__ */
-
 

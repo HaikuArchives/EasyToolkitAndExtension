@@ -42,6 +42,8 @@
 #include "ScrollBar.h"
 #include "Window.h"
 #include "Screen.h"
+#include "layout/Layout.h"
+
 
 #ifndef HAVE_ROUND
 inline double etk_round(double value)
@@ -59,56 +61,17 @@ inline double etk_round(double value)
 #endif // HAVE_ROUND
 
 
-EWindow::EWindow(ERect frame, const char *title,
-		 e_window_type type,
-		 euint32 flags, euint32 workspace)
-	: ELooper(NULL, E_DISPLAY_PRIORITY), fWindow(NULL), fPixmap(NULL), fDC(NULL), fWindowTitle(NULL), fFocus(NULL), fUpdateHolderThreadId(E_INT64_CONSTANT(0)), fUpdateHolderCount(E_INT64_CONSTANT(-1)), fInUpdate(false), fHidden(true), fMinimized(false), fActivated(false), fActivatedTimemap(E_INT64_CONSTANT(0)), fPositionChangedTimemap(E_INT64_CONSTANT(0)), fSizeChangedTimemap(E_INT64_CONSTANT(0)), fMouseGrabCount(0), fKeyboardGrabCount(0), fBrokeOnExpose(false), fPulseRate(E_INT64_CONSTANT(500000)), fPulseRunner(NULL)
+void
+EWindow::InitSelf(ERect frame, const char *title, e_window_look look, e_window_feel feel, euint32 flags, euint32 workspace)
 {
+	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
+		ETK_ERROR("[INTERFACE]: Window must created within a application which has graphics-engine!");
+
 	EString winLooperName;
 	winLooperName << "Window " << etk_get_handler_token(this);
 	SetName(winLooperName.String());
 
-	fBackgroundColor.set_to(e_ui_color(E_PANEL_BACKGROUND_COLOR));
-
-	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
-		ETK_ERROR("[INTERFACE]: %s --- Window must created within a application which has graphics-engine!", __PRETTY_FUNCTION__);
-
-	switch(type)
-	{
-		case E_TITLED_WINDOW:
-			fWindowLook = E_TITLED_WINDOW_LOOK;
-			fWindowFeel = E_NORMAL_WINDOW_FEEL;
-			break;
-
-		case E_MODAL_WINDOW:
-			fWindowLook = E_MODAL_WINDOW_LOOK;
-			fWindowFeel = E_MODAL_APP_WINDOW_FEEL;
-			break;
-
-		case E_DOCUMENT_WINDOW:
-			fWindowLook = E_DOCUMENT_WINDOW_LOOK;
-			fWindowFeel = E_NORMAL_WINDOW_FEEL;
-			break;
-
-		case E_BORDERED_WINDOW:
-			fWindowLook = E_BORDERED_WINDOW_LOOK;
-			fWindowFeel = E_NORMAL_WINDOW_FEEL;
-			break;
-
-		case E_FLOATING_WINDOW:
-			fWindowLook = E_FLOATING_WINDOW_LOOK;
-			fWindowFeel = E_FLOATING_APP_WINDOW_FEEL;
-			break;
-
-		default:
-			fWindowLook = E_TITLED_WINDOW_LOOK;
-			fWindowFeel = E_NORMAL_WINDOW_FEEL;
-	}
-
 	fFrame = frame;
-	fWindowFlags = flags;
-
-	EMessenger msgrSelf(this);
 	frame.Floor();
 	if((fWindow = etk_app->fGraphicsEngine->CreateWindow((eint32)frame.left, (eint32)frame.top,
 							     (euint32)max_c(frame.Width(), 0),
@@ -120,84 +83,100 @@ EWindow::EWindow(ERect frame, const char *title,
 	else if((fDC = etk_app->fGraphicsEngine->CreateContext()) == NULL)
 		ETK_ERROR("[INTERFACE]: %s --- Unable to create graphics context!", __PRETTY_FUNCTION__);
 
+	fLayout = new ELayoutItem(frame, E_FOLLOW_NONE);
+
+	fBackgroundColor.set_to(e_ui_color(E_PANEL_BACKGROUND_COLOR));
 	fDC->SetClipping(ERegion(frame.OffsetToCopy(E_ORIGIN)));
 	fDC->SetDrawingMode(E_OP_COPY);
 	fDC->SetPattern(E_SOLID_HIGH);
 	fDC->SetHighColor(fBackgroundColor);
 	fDC->SetPenSize(0);
 
-	if(title) fWindowTitle = EStrdup(title);
-	fWindowWorkspaces = 0;
-
+	fWindowFlags = flags;
+	fWindowLook = look;
+	fWindowFeel = feel;
+	fWindowTitle = (title ? EStrdup(title) : NULL);
 	fWindow->SetFlags(fWindowFlags);
 	fWindow->SetLook(fWindowLook);
 	fWindow->SetFeel(fWindowFeel);
 	fWindow->SetBackgroundColor(fBackgroundColor);
 	fWindow->SetTitle(fWindowTitle);
-	fWindow->ContactTo(&msgrSelf);
 
-	SetWorkspaces(workspace);
-
-	EMessenger msgr(this);
+	EMessenger msgrSelf(this);
 	EMessage pulseMsg(E_PULSE);
-	fPulseRunner = new EMessageRunner(msgr, &pulseMsg, fPulseRate, 0);
-	if(!(fPulseRunner == NULL || fPulseRunner->IsValid())) {delete fPulseRunner; fPulseRunner = NULL;}
+	fPulseRate = 500000;
+	fPulseRunner = new EMessageRunner(msgrSelf, &pulseMsg, fPulseRate, 0);
+
+	fFocus = NULL;
+	fUpdateHolderThreadId = 0;
+	fUpdateHolderCount = E_INT64_CONSTANT(-1);
+	fInUpdate = false;
+	fHidden = true;
+	fMinimized = false;
+	fActivated = false;
+	fActivatedTimemap = 0;
+	fPositionChangedTimemap = 0;
+	fSizeChangedTimemap = 0;
+	fMouseGrabCount = 0;
+	fKeyboardGrabCount = 0;
+	fBrokeOnExpose = false;
+	fWindowWorkspaces = 0;
+
+	fWindow->ContactTo(&msgrSelf);
+	SetWorkspaces(workspace);
+}
+
+
+EWindow::EWindow(ERect frame, const char *title,
+		 e_window_type type,
+		 euint32 flags, euint32 workspace)
+	: ELooper(NULL, E_DISPLAY_PRIORITY)
+{
+	e_window_look look;
+	e_window_feel feel;
+
+	switch(type)
+	{
+		case E_TITLED_WINDOW:
+			look = E_TITLED_WINDOW_LOOK;
+			feel = E_NORMAL_WINDOW_FEEL;
+			break;
+
+		case E_MODAL_WINDOW:
+			look = E_MODAL_WINDOW_LOOK;
+			feel = E_MODAL_APP_WINDOW_FEEL;
+			break;
+
+		case E_DOCUMENT_WINDOW:
+			look = E_DOCUMENT_WINDOW_LOOK;
+			feel = E_NORMAL_WINDOW_FEEL;
+			break;
+
+		case E_BORDERED_WINDOW:
+			look = E_BORDERED_WINDOW_LOOK;
+			feel = E_NORMAL_WINDOW_FEEL;
+			break;
+
+		case E_FLOATING_WINDOW:
+			look = E_FLOATING_WINDOW_LOOK;
+			feel = E_FLOATING_APP_WINDOW_FEEL;
+			break;
+
+		default:
+			look = E_TITLED_WINDOW_LOOK;
+			feel = E_NORMAL_WINDOW_FEEL;
+	}
+
+	InitSelf(frame, title, look, feel, flags, workspace);
 }
 
 
 EWindow::EWindow(ERect frame, const char *title,
 		 e_window_look look, e_window_feel feel,
 		 euint32 flags, euint32 workspace)
-	: ELooper(NULL, E_DISPLAY_PRIORITY), fWindow(NULL), fPixmap(NULL), fDC(NULL), fWindowTitle(NULL), fFocus(NULL), fUpdateHolderThreadId(E_INT64_CONSTANT(0)), fUpdateHolderCount(E_INT64_CONSTANT(-1)), fInUpdate(false), fHidden(true), fMinimized(false), fActivated(false), fActivatedTimemap(E_INT64_CONSTANT(0)), fPositionChangedTimemap(E_INT64_CONSTANT(0)), fSizeChangedTimemap(E_INT64_CONSTANT(0)), fMouseGrabCount(0), fKeyboardGrabCount(0), fBrokeOnExpose(false), fPulseRate(E_INT64_CONSTANT(500000)), fPulseRunner(NULL)
+	: ELooper(NULL, E_DISPLAY_PRIORITY)
 {
-	EString winLooperName;
-	winLooperName << "Window " << etk_get_handler_token(this);
-	SetName(winLooperName.String());
-
-	fBackgroundColor.set_to(e_ui_color(E_PANEL_BACKGROUND_COLOR));
-
-	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
-		ETK_ERROR("[INTERFACE]: %s --- Window must created within a application which has graphics-engine!", __PRETTY_FUNCTION__);
-
-	fFrame = frame;
-	fWindowLook = look;
-	fWindowFlags = flags;
-
-	EMessenger msgrSelf(this);
-	frame.Floor();
-	if((fWindow = etk_app->fGraphicsEngine->CreateWindow((eint32)frame.left, (eint32)frame.top,
-							     (euint32)max_c(frame.Width(), 0),
-							     (euint32)max_c(frame.Height(), 0))) == NULL)
-		ETK_ERROR("[INTERFACE]: %s --- Unable to create window!", __PRETTY_FUNCTION__);
-	else if((fPixmap = etk_app->fGraphicsEngine->CreatePixmap((euint32)max_c(frame.Width(), 0),
-								  (euint32)max_c(frame.Height(), 0))) == NULL)
-		ETK_ERROR("[INTERFACE]: %s --- Unable to create pixmap!", __PRETTY_FUNCTION__);
-	else if((fDC = etk_app->fGraphicsEngine->CreateContext()) == NULL)
-		ETK_ERROR("[INTERFACE]: %s --- Unable to create graphics context!", __PRETTY_FUNCTION__);
-
-	fDC->SetClipping(ERegion(frame.OffsetToCopy(E_ORIGIN)));
-	fDC->SetDrawingMode(E_OP_COPY);
-	fDC->SetPattern(E_SOLID_HIGH);
-	fDC->SetHighColor(fBackgroundColor);
-	fDC->SetPenSize(0);
-
-	if(title) fWindowTitle = EStrdup(title);
-	fWindowWorkspaces = 0;
-	fWindowFeel = feel;
-
-	fWindow->SetFlags(fWindowFlags);
-	fWindow->SetLook(fWindowLook);
-	fWindow->SetFeel(fWindowFeel);
-	fWindow->SetBackgroundColor(fBackgroundColor);
-	fWindow->SetTitle(fWindowTitle);
-	fWindow->ContactTo(&msgrSelf);
-
-	SetWorkspaces(workspace);
-
-	EMessenger msgr(this);
-	EMessage pulseMsg(E_PULSE);
-	fPulseRunner = new EMessageRunner(msgr, &pulseMsg, fPulseRate, 0);
-	if(!(fPulseRunner == NULL || fPulseRunner->IsValid())) {delete fPulseRunner; fPulseRunner = NULL;}
+	InitSelf(frame, title, look, feel, flags, workspace);
 }
 
 
@@ -212,28 +191,20 @@ EWindow::~EWindow()
 		delete child;
 	}
 
-	if(fWindow) delete fWindow;
-
-	if(fPixmap) delete fPixmap;
-	if(fDC) delete fDC;
+	delete fWindow;
+	delete fPixmap;
+	delete fDC;
+	delete fLayout;
+	delete fPulseRunner;
 	if(fWindowTitle) delete[] fWindowTitle;
-	if(fPulseRunner) delete fPulseRunner;
 }
 
 
 EWindow::EWindow(EMessage *from)
-	: ELooper(NULL, E_DISPLAY_PRIORITY), fWindow(NULL), fPixmap(NULL), fDC(NULL), fWindowTitle(NULL), fFocus(NULL), fUpdateHolderThreadId(E_INT64_CONSTANT(0)), fUpdateHolderCount(E_INT64_CONSTANT(-1)), fInUpdate(false), fHidden(true), fMinimized(false), fActivated(false), fActivatedTimemap(E_INT64_CONSTANT(0)), fPositionChangedTimemap(E_INT64_CONSTANT(0)), fSizeChangedTimemap(E_INT64_CONSTANT(0)), fMouseGrabCount(0), fKeyboardGrabCount(0), fBrokeOnExpose(false), fPulseRate(E_INT64_CONSTANT(500000)), fPulseRunner(NULL)
+	: ELooper(NULL, E_DISPLAY_PRIORITY)
 {
-	EString winLooperName;
-	winLooperName << "Window " << etk_get_handler_token(this);
-	SetName(winLooperName.String());
-
 	// TODO
-
-	EMessenger msgr(this);
-	EMessage pulseMsg(E_PULSE);
-	fPulseRunner = new EMessageRunner(msgr, &pulseMsg, fPulseRate, 0);
-	if(!(fPulseRunner == NULL || fPulseRunner->IsValid())) {delete fPulseRunner; fPulseRunner = NULL;}
+	InitSelf(ERect(0, 0, 1, 1), NULL, E_TITLED_WINDOW_LOOK, E_NORMAL_WINDOW_FEEL, 0, E_CURRENT_WORKSPACE);
 }
 
 
@@ -1958,22 +1929,6 @@ EWindow::SendBehind(const EWindow *win)
 }
 
 
-#if 0
-e_status_t
-EWindow::SendFront(const EWindow *win)
-{
-	if(fWindow == NULL) return E_ERROR;
-	if(win)
-	{
-		if(win->fWindow == NULL) return E_ERROR;
-		return win->fWindow->Lower(fWindow);
-	}
-
-	return fWindow->Lower(NULL);
-}
-#endif
-
-
 bool
 EWindow::_GrabMouse()
 {
@@ -2085,12 +2040,6 @@ EWindow::IsKeyboardGrabbed() const
 void
 EWindow::SetPulseRate(e_bigtime_t rate)
 {
-	if(fPulseRunner == NULL)
-	{
-		ETK_DEBUG("[INTERFACE]: %s --- No message runner.", __PRETTY_FUNCTION__);
-		return;
-	}
-
 	if(fPulseRunner->SetInterval(rate) == E_OK)
 	{
 		fPulseRate = rate;
@@ -2106,7 +2055,6 @@ EWindow::SetPulseRate(e_bigtime_t rate)
 e_bigtime_t
 EWindow::PulseRate() const
 {
-	if(fPulseRunner == NULL) return E_INT64_CONSTANT(-1);
 	return fPulseRate;
 }
 
@@ -2122,12 +2070,10 @@ void
 EWindow::SetTitle(const char *title)
 {
 	EString str(title);
-
 	if(str != fWindowTitle)
 	{
 		if(fWindowTitle) delete[] fWindowTitle;
-		fWindowTitle = (str.String() == NULL ? NULL : EStrdup(str.String()));
-
+		fWindowTitle = EStrdup(str.String());
 		fWindow->SetTitle(fWindowTitle);
 	}
 }

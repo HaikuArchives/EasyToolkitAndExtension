@@ -94,6 +94,7 @@ class EView;
 class EGraphicsContext;
 class EGraphicsDrawable;
 class EGraphicsWindow;
+class ELayoutItem;
 
 class _IMPEXP_ETK EWindow : public ELooper {
 public:
@@ -220,6 +221,7 @@ private:
 	EGraphicsWindow *fWindow;
 	EGraphicsDrawable *fPixmap;
 	EGraphicsContext *fDC;
+	ELayoutItem *fLayout;
 
 	ERect fFrame;
 	char *fWindowTitle;
@@ -273,6 +275,8 @@ private:
 	e_bigtime_t fPulseRate;
 	EMessageRunner *fPulseRunner;
 	EList fNeededToPulseViews;
+
+	void InitSelf(ERect, const char*, e_window_look, e_window_feel, euint32, euint32);
 };
 
 #endif /* __cplusplus */

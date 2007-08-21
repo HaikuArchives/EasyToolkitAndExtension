@@ -457,7 +457,7 @@ EPixmap::DrawXPM(const char **xpm_data, eint32 destX, eint32 destY, eint32 srcX,
 		offset = 0;
 		str.SetTo(*xpm_data);
 
-		for(eint32 i = 0; i < xpmWidth && offset < str.Length() - bytesColor; i++, offset += bytesColor)
+		for(eint32 i = 0; i < xpmWidth && offset <= str.Length() - bytesColor; i++, offset += bytesColor)
 		{
 			eint32 X = destX + (i - srcX);
 

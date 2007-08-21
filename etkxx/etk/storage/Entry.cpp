@@ -116,9 +116,11 @@ EEntry::SetTo(const char *dir, const char *leaf, bool traverse)
 
 	bool parentExists;
 #ifndef _WIN32
-	parentExists = (access(parent.String(), F_OK) == 0);
+	struct stat st;
+	parentExists = (stat(parent.String(), &st) == 0);
 #else
-	parentExists = (_access(parent.String(), 0) == 0);
+	struct _stat st;
+	parentExists = (_stat(parent.String(), &st) == 0);
 #endif
 	if(!parentExists) return E_ENTRY_NOT_FOUND;
 
@@ -172,9 +174,11 @@ EEntry::Exists() const
 #endif
 
 #ifndef _WIN32
-	return(access(filename, F_OK) == 0);
+	struct stat st;
+	return(stat(filename, &st) == 0);
 #else
-	return(_access(filename, 0) == 0);
+	struct _stat st;
+	return(_stat(filename, &st) == 0);
 #endif
 }
 

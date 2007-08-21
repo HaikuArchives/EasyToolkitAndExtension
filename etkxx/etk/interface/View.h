@@ -397,4 +397,3 @@ private:
 
 #endif /* __ETK_VIEW_H__ */
 
-

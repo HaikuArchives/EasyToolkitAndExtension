@@ -35,6 +35,9 @@
 #include <unistd.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <etk/support/String.h>
 
 #include "Path.h"
@@ -233,9 +236,12 @@ EPath::SetTo(const char *dir, const char *leaf, bool normalize)
 		EString filename(str);
 #ifdef _WIN32
 		filename.ReplaceAll("/", "\\");
-		if(_access(filename.String(), 0) != 0) str.MakeEmpty();
+
+		struct _stat st;
+		if(_stat(filename.String(), &st) != 0) str.MakeEmpty();
 #else
-		if(access(filename.String(), F_OK) != 0) str.MakeEmpty();
+		struct stat st;
+		if(stat(filename.String(), &st) != 0) str.MakeEmpty();
 #endif
 	}
 

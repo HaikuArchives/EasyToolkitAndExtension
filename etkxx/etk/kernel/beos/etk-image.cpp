@@ -32,28 +32,6 @@
 #include <etk/kernel/Kernel.h>
 #include <etk/storage/Path.h>
 
-typedef struct etk_beos_image_t {
-	etk_beos_image_t()
-		: image(-1), created(false)
-	{
-		bzero(name, E_MAXPATH + 1);
-	}
-
-	~etk_beos_image_t()
-	{
-		if(created)
-		{
-			created = false;
-			etk_unload_addon((void*)this);
-		}
-	}
-
-	char		name[E_MAXPATH + 1];
-	image_id	image;
-
-	bool		created;
-} etk_beos_image_t;
-
 
 _IMPEXP_ETK void*
 etk_load_addon(const char* path)
@@ -61,37 +39,25 @@ etk_load_addon(const char* path)
 	EPath aPath(path, NULL, true);
 	if(aPath.Path() == NULL || strlen(aPath.Path()) > E_MAXPATH) return NULL;
 
-	etk_beos_image_t *image = new etk_beos_image_t();
-	if(!image) return NULL;
+	image_id *image = (image_id*)malloc(sizeof(image_id));
+	if(image == NULL) return NULL;
 
-	memcpy(image->name, aPath.Path(), (size_t)strlen(aPath.Path()));
-
-	if((image->image = load_add_on(aPath.Path())) < 0)
+	if((*image = load_add_on(aPath.Path())) < 0)
 	{
-		delete image;
+		free(image);
 		return NULL;
 	}
 
-	image->created = true;
-
-	return (void*)image;
+	return((void*)image);
 }
 
 
 _IMPEXP_ETK e_status_t
 etk_unload_addon(void *data)
 {
-	etk_beos_image_t *image = (etk_beos_image_t*)data;
-	if(!image) return E_ERROR;
-
-	if(unload_add_on(image->image) != B_OK) return E_ERROR;
-
-	if(image->created)
-	{
-		image->created = false;
-		delete image;
-	}
-
+	if(data == NULL) return E_ERROR;
+	if(unload_add_on(*((image_id*)data)) != B_OK) return E_ERROR;
+	free(data);
 	return E_OK;
 }
 
@@ -99,12 +65,10 @@ etk_unload_addon(void *data)
 _IMPEXP_ETK e_status_t
 etk_get_image_symbol(void *data, const char *name, void **ptr)
 {
-	etk_beos_image_t *image = (etk_beos_image_t*)data;
-	if(!image || !name || *name == 0 || !ptr) return E_BAD_VALUE;
+	if(data == NULL || name == NULL || *name == 0 || ptr == NULL) return E_BAD_VALUE;
 
 	void *aPtr = NULL;
-	if(get_image_symbol(image->image, name, B_SYMBOL_TYPE_ANY, &aPtr) != B_OK) return E_ERROR;
-
+	if(get_image_symbol(*((image_id*)data), name, B_SYMBOL_TYPE_ANY, &aPtr) != B_OK) return E_ERROR;
 	if(aPtr == NULL) return E_ERROR;
 
 	*ptr = aPtr;

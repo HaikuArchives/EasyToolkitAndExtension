@@ -27,11 +27,6 @@
  *
  * --------------------------------------------------------------------------*/
 
-#define STRICT
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
-#endif
-
 #include <signal.h>
 #include <windows.h>
 
@@ -40,43 +35,6 @@
 #include <etk/app/Application.h>
 
 HINSTANCE etk_dll_hinstance = NULL;
-
-#if 0
-void (__cdecl *signal_int_old_func)(int) = NULL;
-void (__cdecl *signal_term_old_func)(int) = NULL;
-extern ELocker* etk_get_handler_operator_locker();
-
-
-void __cdecl etk_signal_func(int signumber)
-{
-	ELocker *hLocker = etk_get_handler_operator_locker();
-
-	hLocker->Lock();
-	if(etk_app != NULL) etk_app->PostMessage(signumber == SIGINT ? E_QUIT_REQUESTED : _QUIT_);
-	hLocker->Unlock();
-
-	void (__cdecl *old_func)(int) = NULL;
-	switch(signumber)
-	{
-		case SIGINT: old_func = signal_int_old_func; break;
-		case SIGTERM: old_func = signal_term_old_func; break;
-		default: break;
-	}
-
-//	ETK_WARNING("[KERNEL]: Signal(%s) done.", (signumber == SIGINT ? "SIGINT" : (
-//						   signumber == SIGTERM ? "SIGTERM" : "UNKNOWN")));
-
-	while(signumber != SIGINT && etk_app != NULL) e_snooze(1000);
-
-	if(old_func != NULL)
-	{
-//		ETK_WARNING("[KERNEL]: Calling old signal functions...");
-		(*old_func)(signumber);
-	}
-
-	return;
-}
-#endif
 
 
 extern "C" {
@@ -95,12 +53,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 		{
 			WSADATA wsaData;
 			WSAStartup(0x202, &wsaData);
-
-#if 0
 			etk_system_boot_time();
-			signal_int_old_func = signal(SIGINT, etk_signal_func);
-			signal_term_old_func = signal(SIGTERM, etk_signal_func);
-#endif
 			break;
 		}
 
@@ -113,10 +66,6 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 		case DLL_PROCESS_DETACH:
 		/* The DLL unmapped from process's address space. Do necessary cleanup */
 		{
-#if 0
-			signal(SIGINT, signal_int_old_func);
-			signal(SIGTERM, signal_term_old_func);
-#endif
 			WSACleanup();
 			break;
 		}
@@ -137,12 +86,10 @@ char* etk_win32_convert_active_to_utf8(const char *str, eint32 length)
 	if(str == NULL || *str == 0 || length == 0) return NULL;
 
 	eint32 nChars = (eint32)strlen(str);
-
 	if(length < 0 || length > nChars) length = nChars;
 
 	WCHAR *wStr = (WCHAR*)malloc(sizeof(WCHAR) * (size_t)(length + 1));
 	if(wStr == NULL) return NULL;
-
 	bzero(wStr, sizeof(WCHAR) * (size_t)(length + 1));
 	MultiByteToWideChar(CP_ACP, 0, str, length, wStr, length);
 
@@ -156,15 +103,18 @@ char* etk_win32_convert_active_to_utf8(const char *str, eint32 length)
 char* etk_win32_convert_utf8_to_active(const char *str, eint32 length)
 {
 	eunichar *wStr = e_utf8_convert_to_unicode(str, length);
-	eint32 len = e_unicode_strlen(wStr);
-
 	if(wStr == NULL) return NULL;
 
-	char *aStr = (char*)malloc((size_t)len * 2 + 1);
-	if(aStr == NULL) {free(wStr); return NULL;}
+	eint32 len = e_unicode_strlen(wStr);
+	char *aStr = (char*)malloc((size_t)len * 3 + 1);
+	if(aStr == NULL)
+	{
+		free(wStr);
+		return NULL;
+	}
 
-	bzero(aStr, (size_t)len * 2 + 1);
-	WideCharToMultiByte(CP_ACP, 0, (WCHAR*)wStr, -1, aStr, len * 2, NULL, NULL);
+	bzero(aStr, (size_t)len * 3 + 1);
+	WideCharToMultiByte(CP_ACP, 0, (WCHAR*)wStr, -1, aStr, len * 3, NULL, NULL);
 
 	free(wStr);
 
