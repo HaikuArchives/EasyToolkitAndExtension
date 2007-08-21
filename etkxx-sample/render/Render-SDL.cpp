@@ -33,7 +33,7 @@
 
 #define VIDEO_XRES			640
 #define VIDEO_YRES			480
-#define VIDEO_DEPTH			8
+#define VIDEO_DEPTH			32
 
 #define REFRESH_INTERVAL		5000
 
@@ -194,29 +194,27 @@ TRender::GetPixel(eint32 x, eint32 y, e_rgb_color &color) const
 	if(fScreen == NULL || SDL_LockSurface(fScreen) < 0) return;
 
 	Uint32 sdlColor = 0;
+	Uint8 *p = (Uint8*)fScreen->pixels + y * fScreen->pitch + x * fScreen->format->BytesPerPixel;
+
 	switch(fScreen->format->BytesPerPixel)
 	{
 		case 1: // 8-bpp
-			sdlColor = (Uint32)(*((Uint8*)fScreen->pixels + y * fScreen->pitch + x));
+			sdlColor = *p;
 			break;
 
 		case 2: // 15-bpp or 16-bpp
-			sdlColor = (Uint32)(*((Uint16*)fScreen->pixels + y * fScreen->pitch / 2 + x));
+			sdlColor = *((Uint16*)p);
 			break;
 
 		case 3: // 24-bpp
-			{
-				Uint8 *bufp;
-				bufp = (Uint8*)fScreen->pixels + y * fScreen->pitch + x * 3;
-				color.red = *(bufp + fScreen->format->Rshift / 8);
-				color.green = *(bufp + fScreen->format->Gshift / 8);
-				color.blue = *(bufp + fScreen->format->Bshift / 8);
-			}
-			SDL_UnlockSurface(fScreen);
-			return;
+			if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+				sdlColor = (p[0] << 16) | (p[1] << 8) | p[2];
+			else
+				sdlColor = p[0] | (p[1] << 8) | (p[2] << 16);
+			break;
 
 		case 4: // 32-bpp
-			sdlColor = *((Uint32*)fScreen->pixels + y * fScreen->pitch / 4 + x);
+			sdlColor = *((Uint32*)p);
 			break;
 
 		default: break;
@@ -234,40 +232,35 @@ TRender::PutPixel(eint32 x, eint32 y, e_rgb_color color)
 	if(fScreen == NULL || SDL_LockSurface(fScreen) < 0) return;
 
 	Uint32 sdlColor = SDL_MapRGB(fScreen->format, color.red, color.green, color.blue);
+	Uint8 *p = (Uint8*)fScreen->pixels + y * fScreen->pitch + x * fScreen->format->BytesPerPixel;
+
 	switch(fScreen->format->BytesPerPixel)
 	{
 		case 1: // 8-bpp
-			{
-				Uint8 *bufp;
-				bufp = (Uint8*)fScreen->pixels + y * fScreen->pitch + x;
-				*bufp = sdlColor;
-			}
+			*p = sdlColor;
 			break;
 
 		case 2: // 15-bpp or 16-bpp
-			{
-				Uint16 *bufp;
-				bufp = (Uint16*)fScreen->pixels + y * fScreen->pitch / 2 + x;
-				*bufp = sdlColor;
-			}
+			*((Uint16*)p) = sdlColor;
 			break;
 
 		case 3: // 24-bpp
+			if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
 			{
-				Uint8 *bufp;
-				bufp = (Uint8*)fScreen->pixels + y * fScreen->pitch + x * 3;
-				*(bufp + fScreen->format->Rshift / 8) = color.red;
-				*(bufp + fScreen->format->Gshift / 8) = color.green;
-				*(bufp + fScreen->format->Bshift / 8) = color.blue;
+				p[0] = (sdlColor >> 16) & 0xff;
+				p[1] = (sdlColor >> 8) & 0xff;
+				p[2] = sdlColor & 0xff;
+			}
+			else
+			{
+				p[0] = sdlColor & 0xff;
+				p[1] = (sdlColor >> 8) & 0xff;
+				p[2] = (sdlColor >> 16) & 0xff;
 			}
 			break;
 
 		case 4: // 32-bpp
-			{
-				Uint32 *bufp;
-				bufp = (Uint32*)fScreen->pixels + y * fScreen->pitch / 4 + x;
-				*bufp = sdlColor;
-			}
+			*((Uint32*)p) = sdlColor;
 			break;
 
 		default: break;
