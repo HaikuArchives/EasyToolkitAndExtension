@@ -247,17 +247,17 @@ LRESULT _etk_resize_pixmap(EWin32GraphicsEngine *win32Engine, etk_win32_gdi_call
 
 
 e_status_t
-EWin32GraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
+EWin32GraphicsDrawable::CopyTo(EGraphicsContext *dc,
+			       EGraphicsDrawable *dstDrawable,
 			       eint32 x, eint32 y, euint32 w, euint32 h,
-			       eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH,
-			       euint8 alpha, const ERegion *clipping)
+			       eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH)
 {
-	if(fRequestAsyncWin == NULL || dstDrawable == NULL) return E_ERROR;
+	if(fRequestAsyncWin == NULL || dc == NULL || dstDrawable == NULL) return E_ERROR;
 
-	if(alpha != 255)
+	if(dc->DrawingMode() != E_OP_COPY)
 	{
 		// TODO
-		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: (alpha != 255).", __PRETTY_FUNCTION__);
+		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: unsupported drawing mode.", __PRETTY_FUNCTION__);
 		return E_ERROR;
 	}
 
@@ -270,6 +270,7 @@ EWin32GraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
 	etk_win32_gdi_callback_t callback;
 	callback.command = WM_ETK_MESSAGE_DRAW_PIXMAP;
 	callback.pixmap = this;
+	callback.dc = dc;
 	callback.dstDrawable = dstDrawable;
 	callback.x = x;
 	callback.y = y;
@@ -280,8 +281,6 @@ EWin32GraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
 	callback.wy = dstY;
 	callback.ww = dstW;
 	callback.wh = dstH;
-
-	callback.data = (const void*)clipping;
 
 	bool successed = (SendMessageA(fRequestAsyncWin, WM_ETK_MESSAGE,
 				       WM_ETK_MESSAGE_PIXMAP, (LPARAM)&callback) == (LRESULT)TRUE);
@@ -294,7 +293,7 @@ LRESULT _etk_draw_pixmap(EWin32GraphicsEngine *win32Engine, etk_win32_gdi_callba
 	if(win32Engine == NULL || callback == NULL ||
 	   callback->command != WM_ETK_MESSAGE_DRAW_PIXMAP || callback->pixmap == NULL ||
 	   callback->pixmap->win32Pixmap == NULL || callback->pixmap->win32HDC == NULL ||
-	   callback->dstDrawable == NULL) return FALSE;
+	   callback->dc == NULL || callback->dstDrawable == NULL) return FALSE;
 
 	EAutolock <EWin32GraphicsEngine> autolock(win32Engine);
 	if(autolock.IsLocked() == false || win32Engine->InitCheck() != E_OK) return FALSE;
@@ -320,9 +319,8 @@ LRESULT _etk_draw_pixmap(EWin32GraphicsEngine *win32Engine, etk_win32_gdi_callba
 
 		HDC hdcWin = GetDC(win->win32Window);
 
-		HRGN hrgn = win32Engine->ConvertRegion((const ERegion*)callback->data);
+		HRGN hrgn = win32Engine->ConvertRegion(callback->dc->Clipping());
 		SelectClipRgn(hdcWin, hrgn);
-		SetStretchBltMode(hdcWin, COLORONCOLOR);
 
 		if(callback->w == callback->ww && callback->h == callback->wh)
 		{
@@ -331,6 +329,7 @@ LRESULT _etk_draw_pixmap(EWin32GraphicsEngine *win32Engine, etk_win32_gdi_callba
 		}
 		else
 		{
+			SetStretchBltMode(hdcWin, COLORONCOLOR);
 			StretchBlt(hdcWin, callback->wx, callback->wy, (int)callback->ww + 1, (int)callback->wh + 1,
 				   callback->pixmap->win32HDC,
 				   callback->x, callback->y, (int)callback->w + 1, (int)callback->h + 1, SRCCOPY);
@@ -352,9 +351,8 @@ LRESULT _etk_draw_pixmap(EWin32GraphicsEngine *win32Engine, etk_win32_gdi_callba
 	{
 		if(pix->win32HDC == NULL) return FALSE;
 
-		HRGN hrgn = win32Engine->ConvertRegion((const ERegion*)callback->data);
+		HRGN hrgn = win32Engine->ConvertRegion(callback->dc->Clipping());
 		SelectClipRgn(pix->win32HDC, hrgn);
-		SetStretchBltMode(pix->win32HDC, COLORONCOLOR);
 
 		if(callback->w == callback->ww && callback->h == callback->wh)
 		{
@@ -363,6 +361,7 @@ LRESULT _etk_draw_pixmap(EWin32GraphicsEngine *win32Engine, etk_win32_gdi_callba
 		}
 		else
 		{
+			SetStretchBltMode(pix->win32HDC, COLORONCOLOR);
 			StretchBlt(pix->win32HDC, callback->wx, callback->wy, (int)callback->ww + 1, (int)callback->wh + 1,
 				   callback->pixmap->win32HDC,
 				   callback->x, callback->y, (int)callback->w + 1, (int)callback->h + 1, SRCCOPY);

@@ -60,6 +60,7 @@ libetk_interface_la_SOURCES =		\
 		Theme.cpp		\
 		Screen.cpp		\
 		Screen.h		\
+		ViewPrivate.h		\
 		Window.cpp		\
 		Window.h		\
 		View.cpp		\

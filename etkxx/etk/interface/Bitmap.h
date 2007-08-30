@@ -51,6 +51,15 @@ public:
 
 	ERect		Bounds() const;
 
+	virtual	void	AddChild(EView *view);
+	virtual	bool	RemoveChild(EView *view);
+	eint32		CountChildren() const;
+	EView		*ChildAt(eint32 index) const;
+	EView		*FindView(const char *name) const;
+	EView		*FindView(EPoint where) const;
+	bool		Lock();
+	void		Unlock();
+
 private:
 	friend class EView;
 
@@ -58,6 +67,9 @@ private:
 	euint32 fColumns;
 
 	EGraphicsDrawable *fPixmap;
+	EWindow *fWindow;
+
+	void InitSelf(ERect, bool);
 };
 
 #endif /* __cplusplus */

@@ -40,8 +40,8 @@ EScrollView::TargetValidFrame(bool ignore_scrollbar) const
 
 	if(!ignore_scrollbar)
 	{
-		if(!(fVSB == NULL || fVSB->IsHidden())) r.right -= (E_V_SCROLL_BAR_WIDTH + UnitsPerPixel());
-		if(!(fHSB == NULL || fHSB->IsHidden())) r.bottom -= (E_H_SCROLL_BAR_HEIGHT + UnitsPerPixel());
+		if(!(fVSB == NULL || fVSB->IsHidden())) r.right -= E_V_SCROLL_BAR_WIDTH + UnitsPerPixel();
+		if(!(fHSB == NULL || fHSB->IsHidden())) r.bottom -= E_H_SCROLL_BAR_HEIGHT + UnitsPerPixel();
 	}
 
 	return r;
@@ -350,12 +350,10 @@ EScrollView::ChildRemoving(EView *child)
 	if(fHSB == child)
 	{
 		fHSB = NULL;
-		if(fTarget) fTarget->_UpdateOriginAndVisibleRegion(true);
 	}
 	else if(fVSB == child)
 	{
 		fVSB = NULL;
-		fTarget->_UpdateOriginAndVisibleRegion(true);
 	}
 	else if(fTarget == child)
 	{

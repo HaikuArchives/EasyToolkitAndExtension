@@ -56,11 +56,17 @@ public:
 	float			UnitsPerPixel() const;
 	void			SetUnitsPerPixel(float value, bool deep = true);
 
+	virtual void		Invalidate(ERect rect);
+
+	void			SetPrivateData(void *data, void (*destroy_func)(void*) = NULL);
+	void			*PrivateData() const;
+
 private:
 	friend class ELayoutItem;
 
 	float fUnitsPerPixel;
 	EList fItems;
+	void *fPrivate[2];
 };
 
 
@@ -74,7 +80,7 @@ public:
 
 	bool			RemoveSelf();
 
-	ELayoutItem		*PrevSibling() const;
+	ELayoutItem		*PreviousSibling() const;
 	ELayoutItem		*NextSibling() const;
 
 	virtual void		SetResizingMode(euint32 mode);
@@ -82,19 +88,20 @@ public:
 
 	virtual void		Show();
 	virtual void		Hide();
-	bool			IsHidden() const;
+	bool			IsHidden(bool check_containers = true) const;
 
 	virtual void		SendBehind(ELayoutItem *item);
 	virtual void		MoveTo(EPoint where);
 	virtual void		ScrollTo(EPoint where);
 	virtual void		ResizeTo(float width, float height);
+	void			MoveAndResizeTo(EPoint where, float width, float height);
 
 	virtual void		GetPreferredSize(float *width, float *height);
 	virtual void		ResizeToPreferred();
 
-	ERect			Bounds() const;
-	ERect			Frame() const;
-	ERegion			VisibleRegion() const;
+	ERect			Bounds() const; // in it's coordinate system
+	ERect			Frame() const; // in container's coordinate system
+	const ERegion		*VisibleRegion() const; // in it's coordinate system
 
 	EPoint			LeftTop() const;
 	float			Width() const;
@@ -104,6 +111,11 @@ public:
 	EPoint			ConvertToContainer(EPoint pt) const;
 	void			ConvertFromContainer(EPoint *pt) const;
 	EPoint			ConvertFromContainer(EPoint pt) const;
+
+	virtual void		UpdateVisibleRegion();
+
+protected:
+	void			GetVisibleRegion(ERegion **region);
 
 private:
 	friend class ELayoutContainer;
@@ -119,8 +131,6 @@ private:
 	euint32 fResizingMode;
 	bool fHidden;
 	bool fUpdating;
-
-	void UpdateVisibleRegion();
 };
 
 

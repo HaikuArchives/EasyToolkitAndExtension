@@ -630,25 +630,24 @@ EDFBGraphicsWindow::QueryMouse(eint32 *x, eint32 *y, eint32 *buttons)
 
 
 e_status_t
-EDFBGraphicsWindow::CopyTo(EGraphicsDrawable *dstDrawable,
+EDFBGraphicsWindow::CopyTo(EGraphicsContext *dc,
+		           EGraphicsDrawable *dstDrawable,
 			   eint32 x, eint32 y, euint32 w, euint32 h,
-			   eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH,
-			   euint8 alpha, const ERegion *clipping)
+			   eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH)
 {
-	if(alpha != 255)
-	{
-		// TODO
-		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: (alpha != 255).", __PRETTY_FUNCTION__);
-		return E_ERROR;
-	}
-
 	if(w >= E_MAXINT32 || h >= E_MAXINT32 || dstW >= E_MAXINT32 || dstH >= E_MAXINT32)
 	{
 		ETK_DEBUG("[GRAPHICS]: %s --- Either width or height is so large.", __PRETTY_FUNCTION__);
 		return E_ERROR;
 	}
 
-	if(fEngine == NULL || dstDrawable == NULL) return E_ERROR;
+	if(fEngine == NULL || dc == NULL || dstDrawable == NULL) return E_ERROR;
+
+	if(dc->DrawingMode() != E_OP_COPY)
+	{
+		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: unsupported drawing mode.", __PRETTY_FUNCTION__);
+		return E_ERROR;
+	}
 
 	EAutolock <EDFBGraphicsEngine> autolock(fEngine);
 	if(autolock.IsLocked() == false || fEngine->InitCheck() != E_OK) return E_ERROR;
@@ -666,7 +665,7 @@ EDFBGraphicsWindow::CopyTo(EGraphicsDrawable *dstDrawable,
 	DFBRegion *dfbRegions = NULL;
 	int nRegions = 0;
 
-	if(fEngine->ConvertRegion(clipping, &dfbRegions, &nRegions) == false) return E_ERROR;
+	if(fEngine->ConvertRegion(dc->Clipping(), &dfbRegions, &nRegions) == false) return E_ERROR;
 
 	for(int i = 0; i < nRegions; i++)
 	{

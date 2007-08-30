@@ -39,121 +39,127 @@
 
 #include "GraphicsDefs.h"
 #include "Window.h"
-#include "View.h"
 #include "ScrollView.h"
 #include "Box.h"
 #include "Bitmap.h"
+#include "ViewPrivate.h"
 
-#ifndef HAVE_ROUND
-inline double etk_round(double value)
-{
-	double iValue = 0;
-	double fValue = modf(value, &iValue);
-
-	if(fValue >= 0.5) iValue += 1;
-	else if(fValue <= -0.5) iValue -= 1;
-
-	return iValue;
-}
-#else
-#define etk_round(a) round(a)
-#endif // HAVE_ROUND
-
-typedef struct _EViewState_ {
+_LOCAL class EViewState {
+public:
 	e_drawing_mode		DrawingMode;
 	EPoint			PenLocation;
 	float			PenSize;
 	e_rgb_color		HighColor;
 	e_rgb_color		LowColor;
-	bool			CustomHighColor;
-	bool			CustomLowColor;
 	EFont			Font;
-	ERegion			Clipping;
-	bool			HasClipping;
+	ERegion			*Clipping;
 	bool			SquarePointStyle;
+	EViewState		*PreviousState;
 
-	struct _EViewState_	*prev;
-} _EViewState_;
+	inline EViewState(EViewState *prev)
+	{
+		Clipping = NULL;
+		PreviousState = prev;
+
+		if(prev != NULL)
+		{
+			DrawingMode = prev->DrawingMode;
+			PenLocation = prev->PenLocation;
+			PenSize = prev->PenSize;
+			HighColor = prev->HighColor;
+			LowColor = prev->LowColor;
+			Font = prev->Font;
+			if(prev->Clipping != NULL) Clipping = new ERegion(*(prev->Clipping));
+			SquarePointStyle = prev->SquarePointStyle;
+		}
+	};
+
+	inline ~EViewState()
+	{
+		if(Clipping != NULL) delete Clipping;
+	}
+};
 
 
-EView::EView(ERect frame, const char *name, euint32 resizingMode, euint32 flags)
-	: EHandler(name), fDC(NULL), fOrigin(0, 0), fLocalOrigin(0, 0),
-	  fParent(NULL), fNextSibling(NULL), fPrevSibling(NULL), fHidden(false), fEnabled(true),
-	  fPen(0, 0), fPenSize(0), fDrawingMode(E_OP_COPY),
-	  fIsCustomViewColor(false), fIsCustomHighColor(false), fIsCustomLowColor(false),
-	  fForceFontAliasing(false), fSquarePointStyle(false),
-	  fMouseGrabbed(false), fKeyboardGrabbed(false),
-	  fEventStored(false), fEventMaskStored(0), fEventOptionsStored(0), fEventMask(0), fEventOptions(0), fMouseInside(false),
-	  fHasClipping(false), fStatesList(NULL), fScrollTimestamp(E_INT64_CONSTANT(0))
+void
+EView::InitSelf(ERect frame, euint32 resizingMode, euint32 flags)
 {
-	fFrame = frame;
-	fViewResizingMode = resizingMode;
-	fViewFlags = flags;
-
 	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
 		ETK_ERROR("[INTERFACE]: %s --- View must created within a application which has graphics-engine!", __PRETTY_FUNCTION__);
 
 	if((fDC = etk_app->fGraphicsEngine->CreateContext()) == NULL)
-	{
 		ETK_ERROR("[INTERFACE]: %s --- Unable to create draw context!", __PRETTY_FUNCTION__);
-		return;
-	}
 
-	fDC->SetDrawingMode(E_OP_COPY);
-	fDC->SetPenSize(0);
+	EViewState *viewState = new EViewState(NULL);
 
-	fFont = *etk_plain_font;
+	viewState->DrawingMode = E_OP_COPY;
+	viewState->PenLocation.Set(0, 0);
+	viewState->PenSize = 0;
+	viewState->HighColor.set_to(0, 0, 0);
+	viewState->LowColor.set_to(255, 255, 255);
+	viewState->Font = *etk_plain_font;
+	viewState->Clipping = NULL;
+	viewState->SquarePointStyle = false;
+
+	fStates = (void*)viewState;
+
+	fViewFlags = flags;
+	fViewColor = e_ui_color(E_PANEL_BACKGROUND_COLOR);
+	fForceFontAliasing = false;
+	fMouseInside = false;
+	fScrollTimeStamp = 0;
+
+	fMouseGrabbed = false;
+	fKeyboardGrabbed = false;
+	fEventStored = false;
+	fEventMaskStored = 0;
+	fEventOptionsStored = 0;
+	fEventMask = 0;
+	fEventOptions = 0;
+
+	fLayout = new EViewLayout(this, frame, resizingMode);
+}
+
+
+EView::EView(ERect frame, const char *name, euint32 resizingMode, euint32 flags)
+	: EHandler(name)
+{
+	InitSelf(frame, resizingMode, flags);
 }
 
 
 EView::~EView()
 {
-	EWindow *win = Window();
-	if(fParent || win)
+	if(Parent() != NULL || Window() != NULL)
 	{
 		ETK_WARNING("[INTERFACE]: %s --- It's recommended that remove self from parent before delete.", __PRETTY_FUNCTION__);
-		if(win)
-		{
-			win->Lock();
-			win->RemoveChild(this);
-			win->Unlock();
-		}
-		else
-		{
-			fParent->RemoveChild(this);
-		}
+		RemoveSelf();
 	}
 
-	EView *child = NULL;
-	while((child = (EView*)fViewsList.LastItem()) != NULL)
+	for(EView *child = ChildAt(0); child != NULL; child = ChildAt(0))
 	{
 		RemoveChild(child);
 		delete child;
 	}
 
-	if(fDC) delete fDC;
+	delete fDC;
+	delete fLayout;
 
-	_EViewState_ *statesList = (_EViewState_*)fStatesList;
-	while(statesList != NULL)
+	EViewState *states = ((EViewState*)fStates);
+	while(states != NULL)
 	{
-		_EViewState_ *attr = statesList;
-		statesList = attr->prev;
-		delete attr;
+		EViewState *viewState = states;
+		states = viewState->PreviousState;
+		delete viewState;
 	}
 }
 
 
 EView::EView(EMessage *from)
-	: EHandler(from), fDC(NULL), fOrigin(0, 0), fLocalOrigin(0, 0),
-	  fViewResizingMode(0), fViewFlags(0), fParent(NULL), fNextSibling(NULL), fPrevSibling(NULL), fHidden(false), fEnabled(true),
-	  fPen(0, 0), fPenSize(0), fDrawingMode(E_OP_COPY),
-	  fIsCustomViewColor(false), fIsCustomHighColor(false), fIsCustomLowColor(false),
-	  fForceFontAliasing(false), fSquarePointStyle(false),
-	  fMouseGrabbed(false), fKeyboardGrabbed(false),
-	  fEventStored(false), fEventMaskStored(0), fEventOptionsStored(0), fEventMask(0), fEventOptions(0), fMouseInside(false),
-	  fHasClipping(false), fStatesList(NULL), fScrollTimestamp(E_INT64_CONSTANT(0))
+	: EHandler(from)
 {
 	// TODO
+	ETK_ERROR("[INTERFACE]: %s --- Unsupported yet.", __PRETTY_FUNCTION__);
 }
 
 
@@ -211,12 +217,25 @@ EView::MessageReceived(EMessage *msg)
 		case E_MOUSE_MOVED:
 			{
 				EWindow *win = Window();
-				if(!win) break;
+				if(win == NULL) break;
 
 				EPoint where;
 				if(msg->FindPoint("where", &where) == false) break;
 
-				bool IsCurrentMessage = (win->CurrentMessage() == msg ? true : false);
+				for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
+				{
+					EPoint pt = child->fLayout->ConvertFromContainer(where);
+
+					if(child->fLayout->VisibleRegion()->Contains(pt) == false) continue;
+					if(!(child->EventMask() & E_POINTER_EVENTS))
+					{
+						EMessage aMsg(*msg);
+						aMsg.ReplacePoint("where", pt);
+						win->PostMessage(&aMsg, child);
+					}
+
+					return; // just one child can receive the message
+				}
 
 				if(msg->what == E_MOUSE_DOWN)
 				{
@@ -250,7 +269,7 @@ EView::MessageReceived(EMessage *msg)
 				}
 				else // E_MOUSE_MOVED
 				{
-					bool insided = fVisibleRegion.Contains(ConvertToParent(where));
+					bool insided = fLayout->VisibleRegion()->Contains(where);
 					euint32 transit = (insided ? E_INSIDE_VIEW : E_OUTSIDE_VIEW);
 					if(fMouseInside != insided)
 					{
@@ -267,46 +286,8 @@ EView::MessageReceived(EMessage *msg)
 							win->fMouseInsideViews.AddItem(this);
 						}
 					}
-					else if(!(fEventOptions & E_NO_POINTER_HISTORY) && IsCurrentMessage)
-					{
-						win->MessageQueue()->Lock();
-						EMessage *aMsg = win->MessageQueue()->FindMessage((eint32)0);
-						if(!(aMsg == NULL || aMsg->what != E_MOUSE_MOVED)) do
-						{
-							// TODO: check target
-							EPoint aWhere;
-							if(aMsg->FindPoint("where", &aWhere) == false) break;
-							ConvertFromWindow(&aWhere);
-							ConvertToParent(&aWhere);
-							if(fVisibleRegion.Contains(aWhere) == false) break;
-							aMsg = win->DetachCurrentMessage();
-							if(aMsg) delete aMsg;
-							ETK_DEBUG("[INTERFACE]: Ignore E_MOUSE_EVENT.");
-						} while(false);
-						win->MessageQueue()->Unlock();
-					}
-
-					// TODO: drag info
-					if(!IsCurrentMessage || win->CurrentMessage()) MouseMoved(where, transit, NULL);
-				}
-				if(IsCurrentMessage && win->CurrentMessage() == NULL) break;
-
-				EView *view;
-				EMessage aMsg(*msg);
-
-				for(eint32 i = 0; i < fViewsList.CountItems(); i++)
-				{
-					if((view = (EView*)fViewsList.ItemAt(i)) == NULL) continue;
-					if(view->VisibleFrameRegion().Contains(where) == false) continue;
-
-					if(!(view->EventMask() & E_POINTER_EVENTS))
-					{
-						EPoint pt = view->ConvertFromParent(where);
-						aMsg.ReplacePoint("where", pt);
-						view->MessageReceived(&aMsg);
-					}
-
-					break; // just one child can receive the message
+					// TODO: E_NO_POINTER_HISTORY, drag info
+					MouseMoved(where, transit, NULL);
 				}
 			}
 			break;
@@ -317,7 +298,7 @@ EView::MessageReceived(EMessage *msg)
 		case E_KEY_UP:
 			{
 				EWindow *win = Window();
-				if(!win) break;
+				if(win == NULL) break;
 
 				if(msg->what == E_UNMAPPED_KEY_UP || msg->what == E_KEY_UP)
 				{
@@ -369,6 +350,15 @@ EView::MessageReceived(EMessage *msg)
 			}
 			break;
 
+		case E_WINDOW_ACTIVATED:
+			if(Window() == NULL) break;
+			WindowActivated(Window()->IsActivate());
+			for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
+			{
+				Looper()->PostMessage(msg, child);
+			}
+			break;
+
 		default:
 			EHandler::MessageReceived(msg);
 	}
@@ -378,84 +368,44 @@ EView::MessageReceived(EMessage *msg)
 void
 EView::Show()
 {
-	if(!fHidden) return;
+	if(fLayout->IsHidden(false) == false) return;
 
-	fHidden = false;
-
-	EWindow *win = Window();
-	if(win)
-	{
-		_UpdateOriginAndVisibleRegion(true);
-		EView *nextSibling = fNextSibling;
-		while(nextSibling != NULL)
-		{
-			if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-			nextSibling = nextSibling->fNextSibling;
-		}
-		Invalidate();
-
-		win->fNeededToPulseViews.AddItem(this);
-		if(win->fPulseRunner)
-			win->fPulseRunner->SetCount((win->fPulseRate > E_INT64_CONSTANT(0) &&
-						     win->fNeededToPulseViews.CountItems() > 0 &&
-						     win->IsHidden() == false) ? -1 : 0);
-	}
+	fLayout->Show();
 
 	if(!e_is_kind_of(this, EScrollBar) ||
-	   !e_is_kind_of(fParent, EScrollView) ||
-	   e_cast_as(fParent, EScrollView)->fTarget == NULL) return;
+	   !e_is_kind_of(Parent(), EScrollView) ||
+	   e_cast_as(Parent(), EScrollView)->fTarget == NULL) return;
 
-	if(e_cast_as(fParent, EScrollView)->fHSB == this ||
-	   e_cast_as(fParent, EScrollView)->fVSB == this)
-		e_cast_as(fParent, EScrollView)->fTarget->_UpdateOriginAndVisibleRegion(true);
+	if(e_cast_as(Parent(), EScrollView)->fHSB == this ||
+	   e_cast_as(Parent(), EScrollView)->fVSB == this)
+		e_cast_as(Parent(), EScrollView)->fTarget->fLayout->UpdateVisibleRegion();
 }
 
 
 void
 EView::Hide()
 {
-	if(fHidden) return;
+	if(fLayout->IsHidden(false)) return;
 
 	EView::MakeFocus(false);
-	Invalidate();
 
-	fHidden = true;
-
-	EWindow *win = Window();
-	if(win)
-	{
-		_UpdateOriginAndVisibleRegion(true);
-		EView *nextSibling = fNextSibling;
-		while(nextSibling != NULL)
-		{
-			if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-			nextSibling = nextSibling->fNextSibling;
-		}
-
-		win->fNeededToPulseViews.RemoveItem(this);
-		if(win->fPulseRunner)
-			win->fPulseRunner->SetCount((win->fPulseRate > E_INT64_CONSTANT(0) &&
-						     win->fNeededToPulseViews.CountItems() > 0 &&
-						     win->IsHidden() == false) ? -1 : 0);
-	}
+	fLayout->Hide();
 
 	if(!e_is_kind_of(this, EScrollBar) ||
-	   !e_is_kind_of(fParent, EScrollView) ||
-	   e_cast_as(fParent, EScrollView)->fTarget == NULL) return;
+	   !e_is_kind_of(Parent(), EScrollView) ||
+	   e_cast_as(Parent(), EScrollView)->fTarget == NULL) return;
 
-	if(e_cast_as(fParent, EScrollView)->fHSB == this ||
-	   e_cast_as(fParent, EScrollView)->fVSB == this)
-		e_cast_as(fParent, EScrollView)->fTarget->_UpdateOriginAndVisibleRegion(true);
+	if(e_cast_as(Parent(), EScrollView)->fHSB == this ||
+	   e_cast_as(Parent(), EScrollView)->fVSB == this)
+		e_cast_as(Parent(), EScrollView)->fTarget->fLayout->UpdateVisibleRegion();
 }
 
 
 bool
 EView::IsHidden() const
 {
-	if(fHidden || Window() == NULL) return true;
-	if(fParent) return fParent->IsHidden();
-
-	return false;
+	if(Window() == NULL) return true;
+	return fLayout->IsHidden();
 }
 
 
@@ -492,34 +442,26 @@ EView::ChildRemoving(EView *child)
 void
 EView::AddChild(EView *child, EView *nextSibling)
 {
-	eint32 indexNext = -1;
-
 	if(child == NULL || child->Looper() != NULL || child->Parent() != NULL ||
-	   (nextSibling == NULL ? false : (nextSibling->Parent() != this || (indexNext = fViewsList.IndexOf(nextSibling)) < 0)))
+	   (nextSibling == NULL ? false : nextSibling->Parent() != this))
 	{
 		ETK_WARNING("[INTERFACE]: %s --- Unable to add child.", __PRETTY_FUNCTION__);
 		return;
 	}
 
-	EView *prevSibling = (indexNext >= 0 ? nextSibling->fPrevSibling : (EView*)fViewsList.LastItem());
-	if((indexNext >= 0 ? fViewsList.AddItem(child, indexNext) : fViewsList.AddItem(child)) == false)
+	EWindow *win = Window();
+	if(win != NULL) win->AddHandler(child);
+
+	if(fLayout->AddItem(child->fLayout, nextSibling == NULL ? -1 : fLayout->IndexOf(nextSibling->fLayout)) == false)
 	{
-		ETK_WARNING("[INTERFACE]: %s --- Unable to add child to views list.", __PRETTY_FUNCTION__);
+		if(win != NULL) win->RemoveHandler(child);
+		ETK_WARNING("[INTERFACE]: %s --- Unable to add child.", __PRETTY_FUNCTION__);
 		return;
 	}
 
-	if(prevSibling != NULL) prevSibling->fNextSibling = child;
-	if(nextSibling != NULL) nextSibling->fPrevSibling = child;
-
-	child->fParent = this;
-	child->fPrevSibling = prevSibling;
-	child->fNextSibling = nextSibling;
-
-	EWindow *win = Window();
-	if(win)
+	if(win != NULL)
 	{
-		win->AddHandler(child);
-		if(child->Looper() == win)
+		if(child->Window() == win)
 		{
 			child->AttachToWindow();
 			child->AttachedToWindow();
@@ -532,14 +474,6 @@ EView::AddChild(EView *child, EView *nextSibling)
 			ETK_OUTPUT("Warning: [INTERFACE]: %s --- Unable to attch child to window, but child added.\n", __PRETTY_FUNCTION__);
 		}
 	}
-
-	if(child->IsHidden()) return;
-
-	while(nextSibling != NULL)
-	{
-		if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-		nextSibling = nextSibling->fNextSibling;
-	}
 }
 
 
@@ -547,23 +481,15 @@ bool
 EView::IsSibling(const EView *sibling) const
 {
 	if(sibling == NULL || sibling == this) return false;
-
-	if(fParent != sibling->fParent) return false;
-	if(fParent != NULL) return true;
-
-	if(Window() != sibling->Window()) return false;
-	if(Window() == NULL) return false;
-
-	return(Window()->fViewsList.IndexOf((void*)this) >= 0 && Window()->fViewsList.IndexOf((void*)sibling) >= 0);
+	if(fLayout->Container() != sibling->fLayout->Container()) return false;
+	return(fLayout->Container() != NULL);
 }
 
 
 bool
 EView::RemoveChild(EView *child)
 {
-	if(!child || child->Parent() != this) return false;
-
-	bool childIsHidden = child->IsHidden();
+	if(child == NULL || child->Parent() != this) return false;
 
 	if(child->fScrollBar.IsEmpty() == false)
 	{
@@ -585,10 +511,10 @@ EView::RemoveChild(EView *child)
 		}
 	}
 
-	if(child->Parent()) child->Parent()->ChildRemoving(child);
+	ChildRemoving(child);
 
 	EWindow *win = Window();
-	if(win)
+	if(win != NULL)
 	{
 		win->RemoveViewChildrenFromHandlersList(win, child);
 		child->AllDetached();
@@ -599,21 +525,7 @@ EView::RemoveChild(EView *child)
 		win->RemoveHandler(child);
 	}
 
-	fViewsList.RemoveItem(child);
-
-	EView *nextSibling = child->fNextSibling;
-
-	child->fParent = NULL;
-	if(child->fPrevSibling != NULL) child->fPrevSibling->fNextSibling = child->fNextSibling;
-	if(child->fNextSibling != NULL) child->fNextSibling->fPrevSibling = child->fPrevSibling;
-	child->fPrevSibling = NULL;
-	child->fNextSibling = NULL;
-
-	while(childIsHidden == false && nextSibling != NULL)
-	{
-		if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-		nextSibling = nextSibling->fNextSibling;
-	}
+	fLayout->RemoveItem(child->fLayout);
 
 	return true;
 }
@@ -622,41 +534,37 @@ EView::RemoveChild(EView *child)
 bool
 EView::RemoveSelf()
 {
-	if(fParent == NULL)
-	{
-		if(Window() == NULL) return false;
-		return Window()->RemoveChild(this);
-	}
-
-	return fParent->RemoveChild(this);
+	if(Parent() != NULL) return Parent()->RemoveChild(this);
+	if(Window() != NULL) return Window()->RemoveChild(this);
+	return false;
 }
 
 
 eint32
 EView::CountChildren() const
 {
-	return fViewsList.CountItems();
+	return fLayout->CountItems();
 }
 
 
 EView*
 EView::ChildAt(eint32 index) const
 {
-	return((EView*)fViewsList.ItemAt(index));
+	return(fLayout->ItemAt(index) != NULL ? (EView*)fLayout->ItemAt(index)->PrivateData() : NULL);
 }
 
 
 EView*
 EView::NextSibling() const
 {
-	return fNextSibling;
+	return(fLayout->NextSibling() != NULL ? (EView*)fLayout->NextSibling()->PrivateData() : NULL);
 }
 
 
 EView*
 EView::PreviousSibling() const
 {
-	return fPrevSibling;
+	return(fLayout->PreviousSibling() != NULL ? (EView*)fLayout->PreviousSibling()->PrivateData() : NULL);
 }
 
 
@@ -670,17 +578,17 @@ EView::Window() const
 EView*
 EView::Parent() const
 {
-	return fParent;
+	return(e_is_kind_of(fLayout->Container(), EViewLayout) ? (EView*)fLayout->Container()->PrivateData() : NULL);
 }
 
 
 EView*
 EView::Ancestor() const
 {
-	if(fParent == NULL) return (EView*)this;
+	if(Parent() == NULL) return (EView*)this;
 
-	EView *ancestor = fParent;
-	while(ancestor->fParent != NULL) ancestor = ancestor->fParent;
+	EView *ancestor = Parent();
+	while(ancestor->Parent() != NULL) ancestor = ancestor->Parent();
 
 	return ancestor;
 }
@@ -689,61 +597,59 @@ EView::Ancestor() const
 ERect
 EView::Bounds() const
 {
-	return ConvertFromParent(fFrame);
+	return fLayout->Bounds();
 }
 
 
 EPoint
 EView::LeftTop() const
 {
-	return Bounds().LeftTop();
+	return fLayout->LeftTop();
 }
 
 
 ERect
 EView::Frame() const
 {
-	return fFrame;
+	return fLayout->Frame();
 }
 
 
 ERect
 EView::VisibleBounds() const
 {
-	if(IsHidden()) return ERect();
-	return ConvertFromParent(fVisibleRegion.Frame());
+	return fLayout->VisibleRegion()->Frame();
 }
 
 
 ERect
 EView::VisibleFrame() const
 {
-	if(IsHidden()) return ERect();
-	return fVisibleRegion.Frame();
+	return ConvertToParent(fLayout->VisibleRegion()->Frame());
 }
 
 
 ERegion
 EView::VisibleBoundsRegion() const
 {
-	if(IsHidden()) return ERegion();
-	return ConvertFromParent(fVisibleRegion);
+	ERegion region(*(fLayout->VisibleRegion()));
+	return region;
 }
 
 
 ERegion
 EView::VisibleFrameRegion() const
 {
-	if(IsHidden()) return ERegion();
-	return fVisibleRegion;
+	ERegion region(*(fLayout->VisibleRegion()));
+	ConvertToParent(&region);
+	return region;
 }
 
 
 bool
 EView::IsVisible() const
 {
-	if(IsHidden()) return false;
-	return(fVisibleRegion.CountRects() > 0);
+	return(fLayout->VisibleRegion()->CountRects() > 0);
 }
 
 
@@ -766,21 +672,6 @@ EView::MouseMoved(EPoint where, euint32 code, const EMessage *a_message)
 
 
 void
-EView::_WindowActivated(bool state)
-{
-	WindowActivated(state);
-
-	EView *view;
-	EList viewsList(fViewsList);
-	for(eint32 i = 0; i < viewsList.CountItems(); i++)
-	{
-		if((view = (EView*)viewsList.ItemAt(i)) == NULL || view->Parent() != this) continue;
-		view->_WindowActivated(state);
-	}
-}
-
-
-void
 EView::WindowActivated(bool state)
 {
 }
@@ -791,17 +682,14 @@ EView::FindView(const char *name) const
 {
 	EString srcStr(name);
 
-	EView *view;
-	for(eint32 i = 0; i < fViewsList.CountItems(); i++)
+	for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
 	{
-		if((view = (EView*)fViewsList.ItemAt(i)) == NULL) continue;
+		EString destStr(child->Name());
 
-		EString destStr(view->Name());
+		if(srcStr == destStr) return child;
 
-		if(srcStr == destStr) return view;
-
-		EView *cView = view->FindView(name);
-		if(cView) return cView;
+		EView *view = child->FindView(name);
+		if(view != NULL) return view;
 	}
 
 	return NULL;
@@ -862,11 +750,9 @@ EView::ConvertToScreen(EPoint* pt) const
 	if(!pt) return;
 
 	EWindow *win = Window();
-	if(!win) return;
+	if(win == NULL) return;
 
-	*pt -= fLocalOrigin;
-	*pt += fOrigin;
-
+	ConvertToWindow(pt);
 	win->ConvertToScreen(pt);
 }
 
@@ -883,15 +769,8 @@ EView::ConvertToScreen(EPoint pt) const
 void
 EView::ConvertFromScreen(EPoint* pt) const
 {
-	if(!pt) return;
-
-	EWindow *win = Window();
-	if(!win) return;
-
-	*pt -= fOrigin;
-	*pt += fLocalOrigin;
-
-	win->ConvertFromScreen(pt);
+	if(pt == NULL || Window() == NULL) return;
+	*pt -= ConvertToScreen(E_ORIGIN);
 }
 
 
@@ -907,9 +786,8 @@ EView::ConvertFromScreen(EPoint pt) const
 void
 EView::ConvertToScreen(ERect *r) const
 {
-	if(!r) return;
-	EPoint pt = ConvertToScreen(r->LeftTop());
-	r->OffsetTo(pt);
+	if(r == NULL) return;
+	r->OffsetTo(ConvertToScreen(r->LeftTop()));
 }
 
 
@@ -925,9 +803,8 @@ EView::ConvertToScreen(ERect r) const
 void
 EView::ConvertFromScreen(ERect *r) const
 {
-	if(!r) return;
-	EPoint pt = ConvertFromScreen(E_ORIGIN);
-	r->OffsetBy(pt);
+	if(r == NULL) return;
+	r->OffsetBy(ConvertFromScreen(E_ORIGIN));
 }
 
 
@@ -943,7 +820,7 @@ EView::ConvertFromScreen(ERect r) const
 void
 EView::ConvertToScreen(ERegion *region) const
 {
-	if(!region || region->CountRects() <= 0) return;
+	if(region == NULL || region->CountRects() <= 0) return;
 	EPoint pt = ConvertToScreen(region->Frame().LeftTop());
 	region->OffsetBy(pt - region->Frame().LeftTop());
 }
@@ -961,9 +838,8 @@ EView::ConvertToScreen(const ERegion &region) const
 void
 EView::ConvertFromScreen(ERegion *region) const
 {
-	if(!region || region->CountRects() <= 0) return;
-	EPoint pt = ConvertFromScreen(E_ORIGIN);
-	region->OffsetBy(pt);
+	if(region == NULL || region->CountRects() <= 0) return;
+	region->OffsetBy(ConvertFromScreen(E_ORIGIN));
 }
 
 
@@ -979,10 +855,7 @@ EView::ConvertFromScreen(const ERegion &region) const
 void
 EView::ConvertToParent(EPoint *pt) const
 {
-	if(!pt) return;
-
-	*pt -= fLocalOrigin;
-	*pt += fFrame.LeftTop();
+	fLayout->ConvertToContainer(pt);
 }
 
 
@@ -998,10 +871,7 @@ EView::ConvertToParent(EPoint pt) const
 void
 EView::ConvertFromParent(EPoint *pt) const
 {
-	if(!pt) return;
-
-	*pt -= fFrame.LeftTop();
-	*pt += fLocalOrigin;
+	fLayout->ConvertFromContainer(pt);
 }
 
 
@@ -1017,9 +887,8 @@ EView::ConvertFromParent(EPoint pt) const
 void
 EView::ConvertToParent(ERect *r) const
 {
-	if(!r) return;
-	EPoint pt = ConvertToParent(r->LeftTop());
-	r->OffsetTo(pt);
+	if(r == NULL) return;
+	r->OffsetTo(ConvertToParent(r->LeftTop()));
 }
 
 
@@ -1035,9 +904,8 @@ EView::ConvertToParent(ERect r) const
 void
 EView::ConvertFromParent(ERect *r) const
 {
-	if(!r) return;
-	EPoint pt = ConvertFromParent(E_ORIGIN);
-	r->OffsetBy(pt);
+	if(r == NULL) return;
+	r->OffsetBy(ConvertFromParent(E_ORIGIN));
 }
 
 
@@ -1053,7 +921,7 @@ EView::ConvertFromParent(ERect r) const
 void
 EView::ConvertToParent(ERegion *region) const
 {
-	if(!region || region->CountRects() <= 0) return;
+	if(region == NULL || region->CountRects() <= 0) return;
 	EPoint pt = ConvertToParent(region->Frame().LeftTop());
 	region->OffsetBy(pt - region->Frame().LeftTop());
 }
@@ -1071,9 +939,8 @@ EView::ConvertToParent(const ERegion &region) const
 void
 EView::ConvertFromParent(ERegion *region) const
 {
-	if(!region || region->CountRects() <= 0) return;
-	EPoint pt = ConvertFromParent(E_ORIGIN);
-	region->OffsetBy(pt);
+	if(region == NULL || region->CountRects() <= 0) return;
+	region->OffsetBy(ConvertFromParent(E_ORIGIN));
 }
 
 
@@ -1089,10 +956,17 @@ EView::ConvertFromParent(const ERegion &region) const
 void
 EView::ConvertToWindow(EPoint* pt) const
 {
-	if(!pt) return;
+	if(pt == NULL) return;
 
-	*pt -= fLocalOrigin;
-	*pt += fOrigin;
+	EWindow *win = Window();
+	if(win == NULL) return;
+
+	for(ELayoutItem *container = fLayout;
+	    container->Container() != win->fLayout;
+	    container = e_cast_as(container->Container(), ELayoutItem))
+	{
+		container->ConvertToContainer(pt);
+	}
 }
 
 
@@ -1108,10 +982,8 @@ EView::ConvertToWindow(EPoint pt) const
 void
 EView::ConvertFromWindow(EPoint* pt) const
 {
-	if(!pt) return;
-
-	*pt -= fOrigin;
-	*pt += fLocalOrigin;
+	if(pt == NULL || Window() == NULL) return;
+	*pt -= ConvertToWindow(E_ORIGIN);
 }
 
 
@@ -1127,9 +999,8 @@ EView::ConvertFromWindow(EPoint pt) const
 void
 EView::ConvertToWindow(ERect *r) const
 {
-	if(!r) return;
-	EPoint pt = ConvertToWindow(r->LeftTop());
-	r->OffsetTo(pt);
+	if(r == NULL) return;
+	r->OffsetTo(ConvertToWindow(r->LeftTop()));
 }
 
 
@@ -1145,9 +1016,8 @@ EView::ConvertToWindow(ERect r) const
 void
 EView::ConvertFromWindow(ERect *r) const
 {
-	if(!r) return;
-	EPoint pt = ConvertFromWindow(E_ORIGIN);
-	r->OffsetBy(pt);
+	if(r == NULL) return;
+	r->OffsetBy(ConvertFromWindow(E_ORIGIN));
 }
 
 
@@ -1163,7 +1033,7 @@ EView::ConvertFromWindow(ERect r) const
 void
 EView::ConvertToWindow(ERegion *region) const
 {
-	if(!region || region->CountRects() <= 0) return;
+	if(region == NULL || region->CountRects() <= 0) return;
 	EPoint pt = ConvertToWindow(region->Frame().LeftTop());
 	region->OffsetBy(pt - region->Frame().LeftTop());
 }
@@ -1181,9 +1051,8 @@ EView::ConvertToWindow(const ERegion &region) const
 void
 EView::ConvertFromWindow(ERegion *region) const
 {
-	if(!region || region->CountRects() <= 0) return;
-	EPoint pt = ConvertFromWindow(E_ORIGIN);
-	region->OffsetBy(pt);
+	if(region == NULL || region->CountRects() <= 0) return;
+	region->OffsetBy(ConvertFromWindow(E_ORIGIN));
 }
 
 
@@ -1200,7 +1069,7 @@ void
 EView::SetFlags(euint32 flags)
 {
 	EWindow *win = Window();
-	if(win && !fHidden)
+	if(win != NULL)
 	{
 		euint32 oldPulseNeeded = fViewFlags & E_PULSE_NEEDED;
 		euint32 newPulseNeeded = flags & E_PULSE_NEEDED;
@@ -1233,161 +1102,33 @@ EView::Flags() const
 void
 EView::SetResizingMode(euint32 mode)
 {
-	fViewResizingMode = mode;
+	fLayout->SetResizingMode(mode);
 }
 
 
 euint32
 EView::ResizingMode() const
 {
-	return fViewResizingMode;
+	return fLayout->ResizingMode();
 }
 
 
 void
-EView::_SetFrame(ERect newFrame, bool parent_changed)
+EView::_FrameChanged(ERect oldFrame, ERect newFrame)
 {
-	bool doMoved = false, doResized = false;
+	if(oldFrame == newFrame) return;
+
 	EWindow *win = Window();
-
-	if(newFrame == fFrame)
-	{
-		if(parent_changed) _UpdateOriginAndVisibleRegion(true);
-		return;
-	}
-
-	if(fFrame.LeftTop() != newFrame.LeftTop()) doMoved = true;
-	if(fFrame.Width() != newFrame.Width() || fFrame.Height() != newFrame.Height()) doResized = true;
-
-	ERect updateRect1;
-	ERect updateRect2;
-
-	updateRect1 = fFrame;
-
-	if(doMoved)
-	{
-		fFrame.OffsetTo(newFrame.LeftTop());
-		updateRect2 = fFrame;
-	}
-
-	ERect oldFrame = fFrame;
-
-	if(doResized)
-	{
-		fFrame.right = fFrame.left + newFrame.Width();
-		fFrame.bottom = fFrame.top + newFrame.Height();
-		updateRect2 = fFrame;
-
-		_UpdateOriginAndVisibleRegion(false);
-
-		EView *view;
-		for(eint32 i = 0; (view = (EView*)fViewsList.ItemAt(i)) != NULL; i++)
-		{
-			euint32 vMode = view->ResizingMode();
-			ERect vFrame = view->fFrame;
-
-			if(vMode == E_FOLLOW_NONE || vMode == (E_FOLLOW_LEFT | E_FOLLOW_TOP))
-			{
-				view->_UpdateOriginAndVisibleRegion(true);
-				continue;
-			}
-
-			float width_offset = fFrame.Width() - oldFrame.Width();
-			float height_offset = fFrame.Height() - oldFrame.Height();
-
-			if((vMode & E_FOLLOW_H_CENTER) && !((vMode & E_FOLLOW_LEFT) && (vMode & E_FOLLOW_RIGHT)))
-			{
-				float newCenter = fFrame.Center().x - (oldFrame.Center().x - vFrame.Center().x);
-				if(vMode & E_FOLLOW_RIGHT)
-				{
-					vFrame.right += width_offset;
-					vFrame.left = vFrame.right - 2.f * (vFrame.right - newCenter);
-				}
-				else if(vMode & E_FOLLOW_LEFT)
-				{
-					vFrame.right = vFrame.left + 2.f * (newCenter - vFrame.left);
-				}
-				else
-				{
-					float vWidth = vFrame.Width();
-					vFrame.left = newCenter - vWidth / 2.f;
-					vFrame.right = newCenter + vWidth / 2.f;
-				}
-			}
-			else if(vMode & E_FOLLOW_RIGHT)
-			{
-				vFrame.right += width_offset;
-				if(!(vMode & E_FOLLOW_LEFT))
-					vFrame.left += width_offset;
-			}
-
-			if((vMode & E_FOLLOW_V_CENTER) && !((vMode & E_FOLLOW_TOP) && (vMode & E_FOLLOW_BOTTOM)))
-			{
-				float newCenter = fFrame.Center().y - (oldFrame.Center().y - vFrame.Center().y);
-				if(vMode & E_FOLLOW_TOP_BOTTOM)
-				{
-					vFrame.bottom += height_offset;
-					vFrame.top = vFrame.bottom - 2.f * (vFrame.bottom - newCenter);
-				}
-				else if(vMode & E_FOLLOW_TOP)
-				{
-					vFrame.bottom = vFrame.top + 2.f * (newCenter - vFrame.top);
-				}
-				else
-				{
-					float vHeight = vFrame.Height();
-					vFrame.top = newCenter - vHeight / 2.f;
-					vFrame.bottom = newCenter + vHeight / 2.f;
-				}
-			}
-			else if(vMode & E_FOLLOW_BOTTOM)
-			{
-				vFrame.bottom += height_offset;
-				if(!(vMode & E_FOLLOW_TOP))
-					vFrame.top += height_offset;
-			}
-
-			view->_SetFrame(vFrame, true);
-		}
-	}
-	else
-	{
-		_UpdateOriginAndVisibleRegion(true);
-	}
-
-	if(!IsHidden())
-	{
-		ConvertFromParent(&updateRect1);
-		ConvertFromParent(&updateRect2);
-		ConvertToWindow(&updateRect1);
-		ConvertToWindow(&updateRect2);
-
-		if(updateRect1.IsValid() || updateRect2.IsValid())
-		{
-			if(updateRect1.IsValid())
-				win->fExposeRect = win->fExposeRect.IsValid() ? win->fExposeRect | updateRect1 : updateRect1;
-
-			if(updateRect2.IsValid())
-				win->fExposeRect = win->fExposeRect.IsValid() ? win->fExposeRect | updateRect2 : updateRect2;
-
-			if(win->InUpdate() == false)
-			{
-				EMessage aMsg(_UPDATE_IF_NEEDED_);
-				aMsg.AddInt64("when", e_real_time_clock_usecs());
-				win->PostMessage(&aMsg, win);
-			}
-		}
-	}
 
 	if(fViewFlags & E_FRAME_EVENTS)
 	{
 		EMessage aMsg(E_VIEW_MOVED);
 		aMsg.AddInt64("when", e_real_time_clock_usecs());
-		aMsg.AddFloat("width", fFrame.Width());
-		aMsg.AddFloat("height", fFrame.Height());
-		aMsg.AddPoint("where", fFrame.LeftTop());
+		aMsg.AddFloat("width", newFrame.Width());
+		aMsg.AddFloat("height", newFrame.Height());
+		aMsg.AddPoint("where", newFrame.LeftTop());
 
-		if(doMoved)
+		if(oldFrame.LeftTop() != newFrame.LeftTop())
 		{
 			if(win)
 				win->PostMessage(&aMsg, this);
@@ -1395,7 +1136,7 @@ EView::_SetFrame(ERect newFrame, bool parent_changed)
 				MessageReceived(&aMsg);
 		}
 
-		if(doResized)
+		if(oldFrame.Width() != newFrame.Width() || oldFrame.Height() != newFrame.Height())
 		{
 			aMsg.what = E_VIEW_RESIZED;
 			if(win)
@@ -1410,25 +1151,14 @@ EView::_SetFrame(ERect newFrame, bool parent_changed)
 void
 EView::MoveBy(float dh, float dv)
 {
-	MoveTo(fFrame.LeftTop() + EPoint(dh, dv));
+	MoveTo(fLayout->Frame().LeftTop() + EPoint(dh, dv));
 }
 
 
 void
 EView::MoveTo(EPoint where)
 {
-	if(where == fFrame.LeftTop()) return;
-
-	ERect rect = fFrame.OffsetToCopy(where);
-	_SetFrame(rect, false);
-
-	if(IsHidden()) return;
-	EView *nextSibling = fNextSibling;
-	while(nextSibling != NULL)
-	{
-		if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-		nextSibling = nextSibling->fNextSibling;
-	}
+	fLayout->MoveTo(where);
 }
 
 
@@ -1442,37 +1172,21 @@ EView::MoveTo(float x, float y)
 void
 EView::ResizeBy(float dh, float dv)
 {
-	ResizeTo(fFrame.Width() + dh, fFrame.Height() + dv);
+	ResizeTo(fLayout->Width() + dh, fLayout->Height() + dv);
 }
 
 
 void
 EView::ResizeTo(float width, float height)
 {
-	if(fFrame.Width() == width && fFrame.Height() == height) return;
-
-	ERect rect = fFrame;
-	rect.right = rect.left + width;
-	rect.bottom = rect.top + height;
-	_SetFrame(rect, false);
-
-	if(IsHidden()) return;
-	EView *nextSibling = fNextSibling;
-	while(nextSibling != NULL)
-	{
-		if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-		nextSibling = nextSibling->fNextSibling;
-	}
+	fLayout->ResizeTo(width, height);
 }
 
 
 void
 EView::AttachToWindow()
 {
-	_UpdateOriginAndVisibleRegion(false);
-
 	EWindow *win = Window();
-	if(!win) return;
 
 	if(fEventMask & E_POINTER_EVENTS)
 		win->fMouseInterestedViews.AddItem(this);
@@ -1482,7 +1196,7 @@ EView::AttachToWindow()
 
 	Invalidate();
 
-	if((Flags() & E_PULSE_NEEDED) && !fHidden)
+	if(Flags() & E_PULSE_NEEDED)
 	{
 		win->fNeededToPulseViews.AddItem(this);
 		if(win->fPulseRunner)
@@ -1497,45 +1211,40 @@ void
 EView::DetachFromWindow()
 {
 	EWindow *win = Window();
-	if(win)
+
+	if(fEventStored)
 	{
-		if(fEventStored)
+		if(fMouseGrabbed)
 		{
-			if(fMouseGrabbed)
-			{
-				win->_UngrabMouse();
-				fMouseGrabbed = false;
-			}
-
-			if(fKeyboardGrabbed)
-			{
-				win->_UngrabKeyboard();
-				fKeyboardGrabbed = false;
-			}
-
-			_SetEventMask(fEventMaskStored, fEventOptionsStored);
-
-			fEventStored = false;
+			win->_UngrabMouse();
+			fMouseGrabbed = false;
 		}
 
-		if(fMouseInside)
-			win->fMouseInsideViews.RemoveItem(this);
+		if(fKeyboardGrabbed)
+		{
+			win->_UngrabKeyboard();
+			fKeyboardGrabbed = false;
+		}
 
-		if(fEventMask & E_POINTER_EVENTS)
-			win->fMouseInterestedViews.RemoveItem(this);
+		_SetEventMask(fEventMaskStored, fEventOptionsStored);
 
-		if(fEventMask & E_KEYBOARD_EVENTS)
-			win->fKeyboardInterestedViews.RemoveItem(this);
+		fEventStored = false;
 	}
+
+	if(fMouseInside)
+		win->fMouseInsideViews.RemoveItem(this);
+
+	if(fEventMask & E_POINTER_EVENTS)
+		win->fMouseInterestedViews.RemoveItem(this);
+
+	if(fEventMask & E_KEYBOARD_EVENTS)
+		win->fKeyboardInterestedViews.RemoveItem(this);
 
 	EView::MakeFocus(false);
 
 	Invalidate();
 
-	fOrigin = EPoint(0, 0);
-	fVisibleRegion.MakeEmpty();
-
-	if(win != NULL && (Flags() & E_PULSE_NEEDED) && !fHidden)
+	if(Flags() & E_PULSE_NEEDED)
 	{
 		win->fNeededToPulseViews.RemoveItem(this);
 		if(win->fPulseRunner)
@@ -1549,30 +1258,30 @@ EView::DetachFromWindow()
 void
 EView::MovePenTo(EPoint pt)
 {
-	fPen = pt;
+	((EViewState*)fStates)->PenLocation = pt;
 }
 
 
 void
 EView::MovePenTo(float x, float y)
 {
-	fPen.x = x;
-	fPen.y = y;
+	((EViewState*)fStates)->PenLocation.x = x;
+	((EViewState*)fStates)->PenLocation.y = y;
 }
 
 
 void
 EView::MovePenBy(float dx, float dy)
 {
-	fPen.x += dx;
-	fPen.y += dy;
+	((EViewState*)fStates)->PenLocation.x += dx;
+	((EViewState*)fStates)->PenLocation.y += dy;
 }
 
 
 EPoint
 EView::PenLocation() const
 {
-	return fPen;
+	return ((EViewState*)fStates)->PenLocation;
 }
 
 
@@ -1580,11 +1289,10 @@ void
 EView::SetPenSize(float size)
 {
 	if(size < 0) return;
-	if(fPenSize != size)
+	if(((EViewState*)fStates)->PenSize != size)
 	{
-		fPenSize = size;
-		if(IsPrinting()) size /= UnitsPerPixel();
-		fDC->SetPenSize((euint32)max_c(etk_round((double)size), 0));
+		((EViewState*)fStates)->PenSize = size;
+		fDC->SetPenSize((euint32)ceil((double)size));
 	}
 }
 
@@ -1592,18 +1300,16 @@ EView::SetPenSize(float size)
 float
 EView::PenSize() const
 {
-	return fPenSize;
+	return ((EViewState*)fStates)->PenSize;
 }
 
 
 void
 EView::SetViewColor(e_rgb_color c)
 {
-	fIsCustomViewColor = true;
-
 	if(fViewColor != c)
 	{
-		fViewColor.set_to(c.red, c.green, c.blue, c.alpha);
+		fViewColor = c;
 		Invalidate();
 	}
 }
@@ -1621,38 +1327,14 @@ EView::SetViewColor(euint8 r, euint8 g, euint8 b, euint8 a)
 e_rgb_color
 EView::ViewColor() const
 {
-	if(fIsCustomViewColor)
-		return fViewColor;
-	else
-	{
-		if(fParent)
-			return fParent->ViewColor();
-		else
-		{
-			EWindow *win = Window();
-			if(win)
-			{
-				return win->BackgroundColor();
-			}
-			else
-			{
-				return e_ui_color(E_PANEL_BACKGROUND_COLOR);
-			}
-		}
-	}
+	return fViewColor;
 }
 
 
 void
 EView::SetHighColor(e_rgb_color c)
 {
-	fIsCustomHighColor = true;
-
-	if(fHighColor != c)
-	{
-		// TODO
-		fHighColor.set_to(c.red, c.green, c.blue, c.alpha);
-	}
+	((EViewState*)fStates)->HighColor = c;
 }
 
 
@@ -1668,29 +1350,14 @@ EView::SetHighColor(euint8 r, euint8 g, euint8 b, euint8 a)
 e_rgb_color
 EView::HighColor() const
 {
-	if(fIsCustomHighColor)
-		return fHighColor;
-	else
-	{
-		e_rgb_color c = ViewColor();
-		c.red = 255 - c.red;
-		c.green = 255 - c.green;
-		c.blue = 255 - c.blue;
-		return c;
-	}
+	return ((EViewState*)fStates)->HighColor;
 }
 
 
 void
 EView::SetLowColor(e_rgb_color c)
 {
-	fIsCustomLowColor = true;
-
-	if(fLowColor != c)
-	{
-		// TODO
-		fLowColor.set_to(c.red, c.green, c.blue, c.alpha);
-	}
+	((EViewState*)fStates)->LowColor = c;
 }
 
 
@@ -1706,53 +1373,41 @@ EView::SetLowColor(euint8 r, euint8 g, euint8 b, euint8 a)
 e_rgb_color
 EView::LowColor() const
 {
-	if(fIsCustomLowColor)
-		return fLowColor;
-	else
-		return ViewColor();
+	return ((EViewState*)fStates)->LowColor;
 }
 
 
 void
-EView::StrokePoint(EPoint _pt, e_pattern p)
+EView::StrokePoint(EPoint pt, e_pattern p)
 {
+	MovePenTo(pt);
+
 	if(IsVisible() == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
+	ConvertToWindow(&pt);
 
-	EPoint pt = ConvertToWindow(_pt);
+	EPoint _pt_ = EPoint(PenSize() / 2.f, PenSize() / 2.f);
+	ERect updateRect(pt - _pt_, pt + _pt_);
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	EPoint _pt_ = EPoint(PenSize() / 2.f, PenSize() / 2.f);
-	ERect updateRect(pt - _pt_, pt + _pt_);
-
-	if(IsPrinting())
-	{
-		pt.x /= UnitsPerPixel();
-		pt.y /= UnitsPerPixel();
-	}
-
 	pt.Floor();
-	if(win->fPixmap->StrokePoint(fDC, (eint32)pt.x, (eint32)pt.y) == E_OK) win->_Update(updateRect, false);
-
-	MovePenTo(_pt);
+	if(Window()->fPixmap->StrokePoint(fDC, (eint32)pt.x, (eint32)pt.y) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
 EView::StrokePoints(const EPoint *_pts, eint32 count, const euint8 *alpha, e_pattern p)
 {
-	if(IsVisible() == false || _pts == NULL || count <= 0) return;
+	if(_pts == NULL || count <= 0) return;
 
-	EWindow *win = Window();
-	if(!win) return;
+	MovePenTo(_pts[count - 1]);
+
+	if(IsVisible() == false) return;
 
 	eint32 *pts = new eint32[2 * count];
-	if(!pts) return;
 	eint32 *tmp = pts;
 
 	EPoint pmin, pmax;
@@ -1771,12 +1426,6 @@ EView::StrokePoints(const EPoint *_pts, eint32 count, const euint8 *alpha, e_pat
 			pmax.y = max_c(pmax.y, pt.y);
 		}
 
-		if(IsPrinting())
-		{
-			pt.x /= UnitsPerPixel();
-			pt.y /= UnitsPerPixel();
-		}
-
 		pt.Floor();
 
 		*tmp++ = (eint32)pt.x;
@@ -1787,19 +1436,17 @@ EView::StrokePoints(const EPoint *_pts, eint32 count, const euint8 *alpha, e_pat
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	e_status_t status = E_ERROR;
-	if(alpha) status = win->fPixmap->StrokePoints_Alphas(fDC, pts, alpha, count);
-	else status = win->fPixmap->StrokePoints(fDC, pts, count);
+	e_status_t status;
+	if(alpha) status = Window()->fPixmap->StrokePoints_Alphas(fDC, pts, alpha, count);
+	else status = Window()->fPixmap->StrokePoints(fDC, pts, count);
 
 	delete[] pts;
 
 	if(status == E_OK)
 	{
 		ERect updateRect(ERect(pmin, pmax).InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
-		win->_Update(updateRect, false);
+		Window()->_Update(updateRect, false);
 	}
-
-	MovePenTo(_pts[count - 1]);
 }
 
 
@@ -1811,99 +1458,64 @@ EView::StrokeLine(EPoint pt, e_pattern p)
 
 
 void
-EView::StrokeLine(EPoint _pt0, EPoint _pt1, e_pattern p)
+EView::StrokeLine(EPoint pt0, EPoint pt1, e_pattern p)
 {
+	MovePenTo(pt1);
+
 	if(IsVisible() == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
+	ConvertToWindow(&pt0);
+	ConvertToWindow(&pt1);
 
-	EPoint start = ConvertToWindow(_pt0);
-	EPoint end = ConvertToWindow(_pt1);
+	ERect updateRect;
+	updateRect.left = min_c(pt0.x, pt1.x) - PenSize() / 2.f;
+	updateRect.top = min_c(pt0.y, pt1.y) - PenSize() / 2.f;
+	updateRect.right = max_c(pt0.x, pt1.x) + PenSize() / 2.f;
+	updateRect.bottom = max_c(pt0.y, pt1.y) + PenSize() / 2.f;
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	ERect updateRect;
-	updateRect.left = min_c(start.x, end.x) - PenSize() / 2.f;
-	updateRect.top = min_c(start.y, end.y) - PenSize() / 2.f;
-	updateRect.right = max_c(start.x, end.x) + PenSize() / 2.f;
-	updateRect.bottom = max_c(start.y, end.y) + PenSize() / 2.f;
-
-	if(IsPrinting())
-	{
-		start.x /= UnitsPerPixel();
-		start.y /= UnitsPerPixel();
-		end.x /= UnitsPerPixel();
-		end.y /= UnitsPerPixel();
-	}
-
-	start.Floor();
-	end.Floor();
-	if(win->fPixmap->StrokeLine(fDC,
-				    (eint32)start.x, (eint32)start.y,
-				    (eint32)end.x, (eint32)end.y) == E_OK) win->_Update(updateRect, false);
-
-	MovePenTo(_pt1);
+	pt0.Floor();
+	pt1.Floor();
+	if(Window()->fPixmap->StrokeLine(fDC,
+					 (eint32)pt0.x, (eint32)pt0.y,
+					 (eint32)pt1.x, (eint32)pt1.y) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
-EView::StrokeRect(ERect rect, e_pattern p)
+EView::StrokeRect(ERect r, e_pattern p)
 {
-	if(IsVisible() == false || rect.IsValid() == false) return;
+	if(r.IsValid() == false || IsVisible() == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
-
-	ERect r = ConvertToWindow(rect);
+	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-	}
-
 	r.Floor();
-	if(win->fPixmap->StrokeRect(fDC,
-				    (eint32)r.left, (eint32)r.top,
-				    (euint32)r.Width(), (euint32)r.Height()) == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->StrokeRect(fDC,
+					 (eint32)r.left, (eint32)r.top,
+					 (euint32)r.Width(), (euint32)r.Height()) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
 EView::StrokePolygon(const EPolygon *aPolygon, bool closed, e_pattern p)
 {
-	if(IsVisible() == false || !aPolygon || aPolygon->CountPoints() <= 0) return;
-
-	EWindow *win = Window();
-	if(!win) return;
+	if(aPolygon == NULL || aPolygon->CountPoints() <= 0 || IsVisible() == false) return;
 
 	eint32 *pts = new eint32[2 * aPolygon->CountPoints()];
-	if(!pts) return;
 	eint32 *tmp = pts;
 	const EPoint *polyPts = aPolygon->Points();
 
 	for(eint32 i = 0; i < aPolygon->CountPoints(); i++)
 	{
-		EPoint pt = ConvertToWindow(*polyPts++);
-
-		if(IsPrinting())
-		{
-			pt.x /= UnitsPerPixel();
-			pt.y /= UnitsPerPixel();
-		}
-
-		pt.Floor();
-
+		EPoint pt = ConvertToWindow(*polyPts++).FloorSelf();
 		*tmp++ = (eint32)pt.x;
 		*tmp++ = (eint32)pt.y;
 	}
@@ -1912,11 +1524,11 @@ EView::StrokePolygon(const EPolygon *aPolygon, bool closed, e_pattern p)
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(win->fPixmap->StrokePolygon(fDC, pts, aPolygon->CountPoints(), closed) == E_OK)
+	if(Window()->fPixmap->StrokePolygon(fDC, pts, aPolygon->CountPoints(), closed) == E_OK)
 	{
 		ERect r = ConvertToWindow(aPolygon->Frame());
 		ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
-		win->_Update(updateRect, false);
+		Window()->_Update(updateRect, false);
 	}
 
 	delete[] pts;
@@ -1935,28 +1547,15 @@ EView::StrokePolygon(const EPoint *ptArray, eint32 numPts, bool closed, e_patter
 void
 EView::FillPolygon(const EPolygon *aPolygon, e_pattern p)
 {
-	if(IsVisible() == false || !aPolygon || aPolygon->CountPoints() <= 0) return;
-
-	EWindow *win = Window();
-	if(!win) return;
+	if(aPolygon == NULL || aPolygon->CountPoints() <= 0 || IsVisible() == false) return;
 
 	eint32 *pts = new eint32[2 * aPolygon->CountPoints()];
-	if(!pts) return;
 	eint32 *tmp = pts;
 	const EPoint *polyPts = aPolygon->Points();
 
 	for(eint32 i = 0; i < aPolygon->CountPoints(); i++)
 	{
-		EPoint pt = ConvertToWindow(*polyPts++);
-
-		if(IsPrinting())
-		{
-			pt.x /= UnitsPerPixel();
-			pt.y /= UnitsPerPixel();
-		}
-
-		pt.Floor();
-
+		EPoint pt = ConvertToWindow(*polyPts++).FloorSelf();
 		*tmp++ = (eint32)pt.x;
 		*tmp++ = (eint32)pt.y;
 	}
@@ -1965,11 +1564,11 @@ EView::FillPolygon(const EPolygon *aPolygon, e_pattern p)
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(win->fPixmap->FillPolygon(fDC, pts, aPolygon->CountPoints()) == E_OK)
+	if(Window()->fPixmap->FillPolygon(fDC, pts, aPolygon->CountPoints()) == E_OK)
 	{
 		ERect r = ConvertToWindow(aPolygon->Frame());
 		ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
-		win->_Update(updateRect, false);
+		Window()->_Update(updateRect, false);
 	}
 
 	delete[] pts;
@@ -2004,13 +1603,9 @@ EView::FillTriangle(EPoint pt1, EPoint pt2, EPoint pt3, e_pattern p)
 void
 EView::StrokeRects(const ERect *rs, eint32 count, e_pattern p)
 {
-	if(IsVisible() == false || rs == NULL || count <= 0) return;
-
-	EWindow *win = Window();
-	if(!win) return;
+	if(rs == NULL || count <= 0 || IsVisible() == false) return;
 
 	eint32 *rects = new eint32[4 * count];
-	if(!rects) return;
 
 	ERect updateRect;
 	eint32 _count_ = 0;
@@ -2020,20 +1615,8 @@ EView::StrokeRects(const ERect *rs, eint32 count, e_pattern p)
 	{
 		ERect r = *rs++;
 		ConvertToWindow(&r);
-		if(!r.IsValid()) continue;
-		if(!updateRect.IsValid())
-			updateRect = r;
-		else
-			updateRect |= r;
-
-		if(IsPrinting())
-		{
-			r.left /= UnitsPerPixel();
-			r.top /= UnitsPerPixel();
-			r.right /= UnitsPerPixel();
-			r.bottom /= UnitsPerPixel();
-		}
-
+		if(r.IsValid() == false) continue;
+		updateRect |= r;
 		r.Floor();
 		*tRects++ = (eint32)r.left; *tRects++ = (eint32)r.top; *tRects++ = (eint32)r.Width(); *tRects++ = (eint32)r.Height();
 		_count_++;
@@ -2045,10 +1628,10 @@ EView::StrokeRects(const ERect *rs, eint32 count, e_pattern p)
 		fDC->SetLowColor(LowColor());
 		fDC->SetPattern(p);
 
-		if(win->fPixmap->StrokeRects(fDC, rects, _count_) == E_OK)
+		if(Window()->fPixmap->StrokeRects(fDC, rects, _count_) == E_OK)
 		{
 			updateRect.InsetBy(PenSize() / -2.f, PenSize() / -2.f);
-			win->_Update(updateRect, false);
+			Window()->_Update(updateRect, false);
 		}
 	}
 
@@ -2057,45 +1640,30 @@ EView::StrokeRects(const ERect *rs, eint32 count, e_pattern p)
 
 
 void
-EView::FillRect(ERect rect, e_pattern p)
+EView::FillRect(ERect r, e_pattern p)
 {
-	if(IsVisible() == false || rect.IsValid() == false) return;
+	if(r.IsValid() == false || IsVisible() == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
-
-	ERect r = ConvertToWindow(rect);
+	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-	}
-
 	r.Floor();
-	if(win->fPixmap->FillRect(fDC,
-				  (eint32)r.left, (eint32)r.top,
-				  (euint32)r.Width(), (euint32)r.Height()) == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->FillRect(fDC,
+				       (eint32)r.left, (eint32)r.top,
+				       (euint32)r.Width(), (euint32)r.Height()) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
 EView::FillRects(const ERect *rs, eint32 count, e_pattern p)
 {
-	if(IsVisible() == false || rs == NULL || count <= 0) return;
-
-	EWindow *win = Window();
-	if(!win) return;
+	if(rs == NULL || count <= 0 || IsVisible() == false) return;
 
 	eint32 *rects = new eint32[4 * count];
-	if(!rects) return;
 
 	ERect updateRect;
 	eint32 _count_ = 0;
@@ -2105,20 +1673,8 @@ EView::FillRects(const ERect *rs, eint32 count, e_pattern p)
 	{
 		ERect r = *rs++;
 		ConvertToWindow(&r);
-		if(!r.IsValid()) continue;
-		if(!updateRect.IsValid())
-			updateRect = r;
-		else
-			updateRect |= r;
-
-		if(IsPrinting())
-		{
-			r.left /= UnitsPerPixel();
-			r.top /= UnitsPerPixel();
-			r.right /= UnitsPerPixel();
-			r.bottom /= UnitsPerPixel();
-		}
-
+		if(r.IsValid() == false) continue;
+		updateRect |= r;
 		r.Floor();
 		*tRects++ = (eint32)r.left; *tRects++ = (eint32)r.top; *tRects++ = (eint32)r.Width(); *tRects++ = (eint32)r.Height();
 		_count_++;
@@ -2130,10 +1686,10 @@ EView::FillRects(const ERect *rs, eint32 count, e_pattern p)
 		fDC->SetLowColor(LowColor());
 		fDC->SetPattern(p);
 
-		if(win->fPixmap->FillRects(fDC, rects, _count_) == E_OK)
+		if(Window()->fPixmap->FillRects(fDC, rects, _count_) == E_OK)
 		{
 			updateRect.InsetBy(PenSize() / -2.f, PenSize() / -2.f);
-			win->_Update(updateRect, false);
+			Window()->_Update(updateRect, false);
 		}
 	}
 
@@ -2144,10 +1700,7 @@ EView::FillRects(const ERect *rs, eint32 count, e_pattern p)
 void
 EView::FillRegion(const ERegion *region, e_pattern p)
 {
-	if(IsVisible() == false || region == NULL) return;
-
-	EWindow *win = Window();
-	if(!win) return;
+	if(region == NULL || IsVisible() == false) return;
 
 	ERect updateRect = region->Frame().InsetByCopy(PenSize() / -2.f, PenSize() / -2.f);
 
@@ -2155,91 +1708,62 @@ EView::FillRegion(const ERegion *region, e_pattern p)
 	ConvertToWindow(&aRegion);
 	if(aRegion.CountRects() <= 0) return;
 
-	if(IsPrinting()) aRegion.Scale(1.f / UnitsPerPixel());
-
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	e_status_t status = win->fPixmap->FillRegion(fDC, aRegion);
-	if(status == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->FillRegion(fDC, aRegion) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
-EView::StrokeRoundRect(ERect rect, float xRadius, float yRadius, e_pattern p)
+EView::StrokeRoundRect(ERect r, float xRadius, float yRadius, e_pattern p)
 {
-	if(IsVisible() == false || rect.IsValid() == false || xRadius < 0 || yRadius < 0) return;
-	if(rect.Width() == 0 || rect.Height() == 0 || (xRadius == 0 && yRadius == 0)) return StrokeRect(rect, p);
+	if(r.IsValid() == false || xRadius < 0 || yRadius < 0 || IsVisible() == false) return;
+	if(r.Width() == 0 || r.Height() == 0 || (xRadius == 0 && yRadius == 0)) return StrokeRect(r, p);
 
-	EWindow *win = Window();
-	if(!win) return;
-
-	ERect r = ConvertToWindow(rect);
+	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-		xRadius /= UnitsPerPixel();
-		yRadius /= UnitsPerPixel();
-	}
-
 	r.Floor();
-	if(win->fPixmap->StrokeRoundRect(fDC,
-					 (eint32)r.left, (eint32)r.top,
-					 (euint32)r.Width(), (euint32)r.Height(),
-					 (euint32)etk_round((double)xRadius),
-					 (euint32)etk_round((double)yRadius)) == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->StrokeRoundRect(fDC,
+					      (eint32)r.left, (eint32)r.top,
+					      (euint32)r.Width(), (euint32)r.Height(),
+					      (euint32)ceil((double)xRadius),
+					      (euint32)ceil((double)yRadius)) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
-EView::FillRoundRect(ERect rect, float xRadius, float yRadius, e_pattern p)
+EView::FillRoundRect(ERect r, float xRadius, float yRadius, e_pattern p)
 {
-	if(IsVisible() == false || rect.IsValid() == false || xRadius < 0 || yRadius < 0) return;
-	if(rect.Width() == 0 || rect.Height() == 0 || (xRadius == 0 && yRadius == 0)) return FillRect(rect, p);
+	if(r.IsValid() == false || xRadius < 0 || yRadius < 0 || IsVisible() == false) return;
+	if(r.Width() == 0 || r.Height() == 0 || (xRadius == 0 && yRadius == 0)) return FillRect(r, p);
 
-	EWindow *win = Window();
-	if(!win) return;
-
-	ERect r = ConvertToWindow(rect);
+	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-		xRadius /= UnitsPerPixel();
-		yRadius /= UnitsPerPixel();
-	}
-
 	r.Floor();
-	if(win->fPixmap->FillRoundRect(fDC,
-				       (eint32)r.left, (eint32)r.top,
-				       (euint32)r.Width(), (euint32)r.Height(),
-				       (euint32)etk_round((double)xRadius),
-				       (euint32)etk_round((double)yRadius)) == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->FillRoundRect(fDC,
+					    (eint32)r.left, (eint32)r.top,
+					    (euint32)r.Width(), (euint32)r.Height(),
+					    (euint32)ceil((double)xRadius),
+					    (euint32)ceil((double)yRadius)) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
 EView::StrokeArc(EPoint center, float xRadius, float yRadius, float start_angle, float arc_angle, e_pattern p)
 {
-	if(IsVisible() == false || xRadius <= 0 || yRadius <= 0) return;
+	if(xRadius <= 0 || yRadius <= 0) return;
 
 	ERect r;
 	r.left = center.x - xRadius;
@@ -2252,40 +1776,29 @@ EView::StrokeArc(EPoint center, float xRadius, float yRadius, float start_angle,
 
 
 void
-EView::StrokeArc(ERect rect, float start_angle, float arc_angle, e_pattern p)
+EView::StrokeArc(ERect r, float start_angle, float arc_angle, e_pattern p)
 {
-	if(IsVisible() == false || rect.IsValid() == false) return;
+	if(r.IsValid() == false || IsVisible() == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
-
-	ERect r = ConvertToWindow(rect);
+	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-	}
-
 	r.Floor();
-	if(win->fPixmap->StrokeArc(fDC,
-				   (eint32)r.left, (eint32)r.top,
-				   (euint32)r.Width(), (euint32)r.Height(),
-				   start_angle, start_angle + arc_angle) == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->StrokeArc(fDC,
+					(eint32)r.left, (eint32)r.top,
+					(euint32)r.Width(), (euint32)r.Height(),
+					start_angle, start_angle + arc_angle) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
 void
 EView::FillArc(EPoint center, float xRadius, float yRadius, float start_angle, float arc_angle, e_pattern p)
 {
-	if(IsVisible() == false || xRadius <= 0 || yRadius <= 0) return;
+	if(xRadius <= 0 || yRadius <= 0) return;
 
 	ERect r;
 	r.left = center.x - xRadius;
@@ -2298,33 +1811,22 @@ EView::FillArc(EPoint center, float xRadius, float yRadius, float start_angle, f
 
 
 void
-EView::FillArc(ERect rect, float start_angle, float arc_angle, e_pattern p)
+EView::FillArc(ERect r, float start_angle, float arc_angle, e_pattern p)
 {
-	if(IsVisible() == false || rect.IsValid() == false) return;
+	if(r.IsValid() == false || IsVisible() == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
-
-	ERect r = ConvertToWindow(rect);
+	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(p);
 
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-	}
-
 	r.Floor();
-	if(win->fPixmap->FillArc(fDC,
-				 (eint32)r.left, (eint32)r.top,
-				 (euint32)r.Width(), (euint32)r.Height(),
-				 start_angle, start_angle + arc_angle) == E_OK) win->_Update(updateRect, false);
+	if(Window()->fPixmap->FillArc(fDC,
+				      (eint32)r.left, (eint32)r.top,
+				      (euint32)r.Width(), (euint32)r.Height(),
+				      start_angle, start_angle + arc_angle) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
@@ -2361,26 +1863,7 @@ EView::PushState()
 {
 	if(Window() == NULL)
 		ETK_ERROR("[INTERFACE]: %s --- View isn't attached to a window!", __PRETTY_FUNCTION__);
-
-	_EViewState_ *attr = new _EViewState_;
-	if(attr == NULL)
-		ETK_ERROR("[INTERFACE]: %s --- Unable to alloc memory for view state!", __PRETTY_FUNCTION__);
-
-	attr->DrawingMode = fDrawingMode;
-	attr->PenLocation = fPen;
-	attr->PenSize = fPenSize;
-	attr->HighColor = fHighColor;
-	attr->LowColor = fLowColor;
-	attr->CustomHighColor = fIsCustomHighColor;
-	attr->CustomLowColor = fIsCustomLowColor;
-	attr->Font = fFont;
-	attr->Clipping = fClipping;
-	attr->HasClipping = fHasClipping;
-	attr->SquarePointStyle = fSquarePointStyle;
-
-	_EViewState_ *prev = (_EViewState_*)fStatesList;
-	attr->prev = prev;
-	fStatesList = (void*)attr;
+	fStates = (void*)(new EViewState((EViewState*)fStates));
 }
 
 
@@ -2390,73 +1873,33 @@ EView::PopState()
 	if(Window() == NULL)
 		ETK_ERROR("[INTERFACE]: %s --- View isn't attached to a window!", __PRETTY_FUNCTION__);
 
-	_EViewState_ *attr = (_EViewState_*)fStatesList;
-	if(attr == NULL)
+	EViewState *viewStates = (EViewState*)fStates;
+	if(viewStates->PreviousState == NULL)
 	{
 		ETK_WARNING("[INTERFACE]: %s --- Maybe you don't call \"PushState\" and \"PopState\" at same times.", __PRETTY_FUNCTION__);
 		return;
 	}
-	fStatesList = (void*)(attr->prev);
+	fStates = (void*)viewStates->PreviousState;
+	delete viewStates;
 
-	// TODO
-	fDrawingMode = attr->DrawingMode;
-	fPen = attr->PenLocation;
-	fPenSize = attr->PenSize;
-	fHighColor = attr->HighColor;
-	fLowColor = attr->LowColor;
-	fIsCustomHighColor = attr->CustomHighColor;
-	fIsCustomLowColor = attr->CustomLowColor;
-	fFont = attr->Font;
-	fClipping = attr->Clipping;
-	fHasClipping = attr->HasClipping;
-	fSquarePointStyle = attr->SquarePointStyle;
+	fDC->SetDrawingMode(((EViewState*)fStates)->DrawingMode);
+	fDC->SetSquarePointStyle(((EViewState*)fStates)->SquarePointStyle);
+	fDC->SetPenSize((euint32)ceil((double)((EViewState*)fStates)->PenSize));
 
-	fDC->SetDrawingMode(fDrawingMode);
-	fDC->SetSquarePointStyle(fSquarePointStyle);
-
-	if(IsPrinting()) attr->PenSize /= UnitsPerPixel();
-	fDC->SetPenSize((euint32)max_c(etk_round((double)attr->PenSize), 0));
-
-	ERegion clipping(fVisibleRegion);
-	ConvertFromParent(&clipping);
-	if(fHasClipping) clipping &= fClipping;
+	ERegion clipping(*(fLayout->VisibleRegion()));
+	if(((EViewState*)fStates)->Clipping != NULL) clipping &= *(((EViewState*)fStates)->Clipping);
 	if(fClippingTemp.CountRects() > 0) clipping &= fClippingTemp;
 	ConvertToWindow(&clipping);
-	if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
 	fDC->SetClipping(clipping);
-
-	delete attr;
-}
-
-
-void
-EView::_Invalidate(ERect invalRect, bool redraw, e_bigtime_t when)
-{
-	if(!IsVisible()) return;
-
-	invalRect &= ConvertFromParent(fVisibleRegion.Frame());
-	ConvertToWindow(&invalRect);
-	if(invalRect.IsValid() == false) return;
-
-	EWindow *win = Window();
-	if(redraw)
-		win->fExposeRect = win->fExposeRect.IsValid() ? win->fExposeRect | invalRect : invalRect;
-	else
-		win->fUpdateRect = win->fUpdateRect.IsValid() ? win->fUpdateRect | invalRect : invalRect;
-
-	if(win->InUpdate() == false)
-	{
-		EMessage msg(_UPDATE_IF_NEEDED_);
-		msg.AddInt64("when", when);
-		win->PostMessage(&msg, win);
-	}
 }
 
 
 void
 EView::Invalidate(ERect invalRect, bool redraw)
 {
-	_Invalidate(invalRect, redraw, e_real_time_clock_usecs());
+	if(invalRect.IsValid() == false || IsVisible() == false) return;
+	if(fLayout->VisibleRegion()->Intersects(invalRect) == false) return;
+	if(Window() != NULL) Window()->Invalidate(ConvertToWindow(invalRect), redraw);
 }
 
 
@@ -2470,56 +1913,49 @@ EView::Invalidate(bool redraw)
 void
 EView::_Expose(ERegion region, e_bigtime_t when)
 {
+	if(IsVisible() == false) return;
+
 	EWindow *win = Window();
-	if(win == NULL || fFrame.IsValid() == false) return;
-	if(when < fScrollTimestamp) {win->fBrokeOnExpose = true; return;}
+
+	if(when < fScrollTimeStamp)
+	{
+		win->fBrokeOnExpose = true;
+		return;
+	}
 
 	if(!(fViewFlags & E_UPDATE_WITH_REGION)) region.Set(region.Frame());
 
-	ERegion clipping(fVisibleRegion);
-	ConvertFromParent(&clipping);
+	ERegion clipping(*(fLayout->VisibleRegion()));
 
 	region &= clipping;
 	if(region.CountRects() <= 0) return;
 
-	fDC->SetHighColor(ViewColor());
-	fDC->SetLowColor(ViewColor());
-	fDC->SetPattern(E_SOLID_HIGH);
+	if(fViewColor != E_TRANSPARENT_COLOR)
+	{
+		fDC->SetHighColor(fViewColor);
+		fDC->SetLowColor(fViewColor);
+		fDC->SetPattern(E_SOLID_HIGH);
 
-	fDC->SetPenSize(0);
-	fDC->SetDrawingMode(E_OP_COPY);
+		fDC->SetPenSize(0);
+		fDC->SetDrawingMode(E_OP_COPY);
 
-	ERegion tmpClipping(region);
-	ConvertToWindow(&tmpClipping);
-	if(IsPrinting()) tmpClipping.Scale(1.f / UnitsPerPixel());
-	if(!(fViewFlags & E_UPDATE_WITH_REGION))
-		fDC->SetClipping(tmpClipping.Frame());
-	else
+		ERegion tmpClipping(region);
+		ConvertToWindow(&tmpClipping);
 		fDC->SetClipping(tmpClipping);
 
-	ERect rect = ConvertToWindow(region.Frame());
-	if(IsPrinting())
-	{
-		rect.left /= UnitsPerPixel();
-		rect.top /= UnitsPerPixel();
-		rect.right /= UnitsPerPixel();
-		rect.bottom /= UnitsPerPixel();
+		ERect rect = ConvertToWindow(region.Frame());
+		rect.Floor();
+		win->fPixmap->FillRect(fDC, (eint32)rect.left, (eint32)rect.top, (euint32)rect.Width(), (euint32)rect.Height());
 	}
-	rect.Floor();
-	win->fPixmap->FillRect(fDC, (eint32)rect.left, (eint32)rect.top, (euint32)rect.Width(), (euint32)rect.Height());
 
-	if(fHasClipping) clipping &= fClipping;
-	if(!(fViewFlags & E_UPDATE_WITH_REGION)) fClippingTemp = region.Frame(); else fClippingTemp = region;
+	if(((EViewState*)fStates)->Clipping != NULL) clipping &= *(((EViewState*)fStates)->Clipping);
+	fClippingTemp = region;
 	clipping &= fClippingTemp;
 	ConvertToWindow(&clipping);
-	if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
 	fDC->SetClipping(clipping);
 
-	fDC->SetDrawingMode(fDrawingMode);
-
-	float penSize = fPenSize;
-	if(IsPrinting()) penSize /= UnitsPerPixel();
-	fDC->SetPenSize((euint32)max_c(etk_round((double)penSize), 0));
+	fDC->SetDrawingMode(((EViewState*)fStates)->DrawingMode);
+	fDC->SetPenSize((euint32)ceil((double)((EViewState*)fStates)->PenSize));
 
 	if(fViewFlags & E_WILL_DRAW)
 	{
@@ -2530,11 +1966,14 @@ EView::_Expose(ERegion region, e_bigtime_t when)
 	}
 
 	bool doQuit = false;
-	EView *child;
-	for(eint32 i = 0; (child = (EView*)fViewsList.ItemAt(i)) != NULL; i++)
+	for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
 	{
-		if(win->fBrokeOnExpose || win->_HasResizeMessage(true)) {doQuit = true; break;}
-		if(region.Intersects(&(child->fVisibleRegion)) == false) continue;
+		if(win->fBrokeOnExpose || win->_HasResizeMessage(true))
+		{
+			doQuit = true;
+			break;
+		}
+		if(child->VisibleFrameRegion().Intersects(&region) == false) continue;
 		child->_Expose(child->ConvertFromParent(region), when);
 	}
 
@@ -2548,11 +1987,9 @@ EView::_Expose(ERegion region, e_bigtime_t when)
 
 	fClippingTemp.MakeEmpty();
 
-	clipping = fVisibleRegion;
-	ConvertFromParent(&clipping);
-	if(fHasClipping) clipping &= fClipping;
+	clipping = *(fLayout->VisibleRegion());
+	if(((EViewState*)fStates)->Clipping != NULL) clipping &= *(((EViewState*)fStates)->Clipping);
 	ConvertToWindow(&clipping);
-	if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
 	fDC->SetClipping(clipping);
 }
 
@@ -2560,10 +1997,10 @@ EView::_Expose(ERegion region, e_bigtime_t when)
 void
 EView::SetDrawingMode(e_drawing_mode mode)
 {
-	if(fDrawingMode != mode)
+	if(((EViewState*)fStates)->DrawingMode != mode)
 	{
-		fDrawingMode = mode;
-		fDC->SetDrawingMode(fDrawingMode);
+		((EViewState*)fStates)->DrawingMode = mode;
+		fDC->SetDrawingMode(mode);
 	}
 }
 
@@ -2571,32 +2008,32 @@ EView::SetDrawingMode(e_drawing_mode mode)
 e_drawing_mode
 EView::DrawingMode() const
 {
-	return fDrawingMode;
+	return ((EViewState*)fStates)->DrawingMode;
 }
 
 
 void
 EView::SetFont(const EFont *font, euint8 mask)
 {
-	if(!font) return;
+	if(font == NULL) return;
 
 	if(mask & E_FONT_ALL)
 	{
-		fFont = *font;
+		((EViewState*)fStates)->Font = *font;
 	}
 	else
 	{
 		if(mask & E_FONT_FAMILY_AND_STYLE)
-			fFont.SetFamilyAndStyle(font->FamilyAndStyle());
+			((EViewState*)fStates)->Font.SetFamilyAndStyle(font->FamilyAndStyle());
 
 		if(mask & E_FONT_SIZE)
-			fFont.SetSize(font->Size());
+			((EViewState*)fStates)->Font.SetSize(font->Size());
 
 		if(mask & E_FONT_SHEAR)
-			fFont.SetShear(font->Shear());
+			((EViewState*)fStates)->Font.SetShear(font->Shear());
 
 		if(mask & E_FONT_SPACING)
-			fFont.SetSpacing(font->Spacing());
+			((EViewState*)fStates)->Font.SetSpacing(font->Spacing());
 	}
 }
 
@@ -2604,7 +2041,7 @@ EView::SetFont(const EFont *font, euint8 mask)
 void
 EView::SetFont(const e_font_desc *fontDesc, euint8 mask)
 {
-	if(!fontDesc) return;
+	if(fontDesc == NULL) return;
 	EFont font(*fontDesc);
 	SetFont(&font, mask);
 }
@@ -2613,8 +2050,7 @@ EView::SetFont(const e_font_desc *fontDesc, euint8 mask)
 void
 EView::GetFont(EFont *font) const
 {
-	if(!font) return;
-	*font = fFont;
+	if(font != NULL) *font = ((EViewState*)fStates)->Font;
 }
 
 
@@ -2623,7 +2059,7 @@ EView::SetFontSize(float size)
 {
 	if(size <= 0) return;
 
-	EFont font(fFont);
+	EFont font(((EViewState*)fStates)->Font);
 	font.SetSize(size);
 
 	SetFont(&font, E_FONT_SIZE);
@@ -2633,20 +2069,14 @@ EView::SetFontSize(float size)
 void
 EView::GetFontHeight(e_font_height *height) const
 {
-	if(!height) return;
-
-	fFont.GetHeight(height);
+	((EViewState*)fStates)->Font.GetHeight(height);
 }
 
 
 void
 EView::ForceFontAliasing(bool enable)
 {
-	if(fForceFontAliasing != enable)
-	{
-		fForceFontAliasing = enable;
-		// TODO
-	}
+	fForceFontAliasing = enable;
 }
 
 
@@ -2660,15 +2090,15 @@ EView::DrawString(const char *aString, eint32 length, float tabWidth)
 void
 EView::DrawString(const char *aString, EPoint location, eint32 length, float tabWidth)
 {
-	if(aString == NULL || *aString == 0 || length == 0 || Window() == NULL) return;
+	if(aString == NULL || *aString == 0 || length == 0 || IsVisible() == false) return;
 
-	EFontEngine *engine = fFont.Engine();
+	EFontEngine *engine = ((EViewState*)fStates)->Font.Engine();
 	if(engine == NULL) return;
 
-	float size = fFont.Size();
-	float spacing = fFont.Spacing();
-	float shear = fFont.Shear();
-	bool bold = fFont.IsBoldStyle();
+	float size = ((EViewState*)fStates)->Font.Size();
+	float spacing = ((EViewState*)fStates)->Font.Spacing();
+	float shear = ((EViewState*)fStates)->Font.Shear();
+	bool bold = ((EViewState*)fStates)->Font.IsBoldStyle();
 
 	engine->Lock();
 	e_font_render_mode renderMode = engine->RenderMode();
@@ -2723,23 +2153,18 @@ EView::DrawString(const char *aString, EPoint location, eint32 length, float tab
 void
 EView::DrawStringInDirectlyMode(const char *aString, EPoint location, eint32 length)
 {
-	EWindow *win = Window();
-	if(win == NULL || aString == NULL || *aString == 0 || length == 0 || !IsVisible()) return;
-
-	EFontEngine *engine = fFont.Engine();
-	if(engine == NULL) return;
+	EFontEngine *engine = ((EViewState*)fStates)->Font.Engine();
 
 	fDC->SetHighColor(HighColor());
 	fDC->SetLowColor(LowColor());
 	fDC->SetPattern(E_SOLID_HIGH);
 
-	float size = fFont.Size();
-	float spacing = fFont.Spacing();
-	float shear = fFont.Shear();
-	bool bold = fFont.IsBoldStyle();
+	float size = ((EViewState*)fStates)->Font.Size();
+	float spacing = ((EViewState*)fStates)->Font.Spacing();
+	float shear = ((EViewState*)fStates)->Font.Shear();
+	bool bold = ((EViewState*)fStates)->Font.IsBoldStyle();
 	bool force_mono = fForceFontAliasing;
 
-	EPoint oldLocation = PenLocation();
 	MovePenTo(location);
 
 	engine->Lock();
@@ -2751,7 +2176,7 @@ EView::DrawStringInDirectlyMode(const char *aString, EPoint location, eint32 len
 	if(updateRect.IsValid())
 	{
 		ConvertToWindow(&updateRect);
-		win->_Update(updateRect, false);
+		Window()->_Update(updateRect, false);
 	}
 
 	location.x += width + UnitsPerPixel();
@@ -2762,19 +2187,13 @@ EView::DrawStringInDirectlyMode(const char *aString, EPoint location, eint32 len
 void
 EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 length)
 {
-	EWindow *win = Window();
-	if(win == NULL || aString == NULL || *aString == 0 || length == 0 || !IsVisible()) return;
-
 	ERect rect = VisibleBounds();
-	if(rect.IsValid() == false) return;
+	EFontEngine *engine = ((EViewState*)fStates)->Font.Engine();
 
-	EFontEngine *engine = fFont.Engine();
-	if(engine == NULL) return;
-
-	float size = fFont.Size();
-	float spacing = fFont.Spacing();
-	float shear = fFont.Shear();
-	bool bold = fFont.IsBoldStyle();
+	float size = ((EViewState*)fStates)->Font.Size();
+	float spacing = ((EViewState*)fStates)->Font.Spacing();
+	float shear = ((EViewState*)fStates)->Font.Shear();
+	bool bold = ((EViewState*)fStates)->Font.IsBoldStyle();
 	bool is_mono = fForceFontAliasing;
 
 	eint32 w = 0, h = 0;
@@ -2795,7 +2214,7 @@ EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 lengt
 	engine->Unlock();
 
 	rect &= ERect(startPoint, startPoint + EPoint((float)w, (float)h));
-	if(!rect.IsValid() || startPoint.x > rect.right || startPoint.y > rect.bottom ||
+	if(rect.IsValid() == false || startPoint.x > rect.right || startPoint.y > rect.bottom ||
 	   startPoint.x + (float)w < rect.left || startPoint.y + (float)h < rect.top)
 	{
 		if(bitmap) delete[] bitmap;
@@ -2816,13 +2235,6 @@ EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 lengt
 	eint32 *pts = new eint32[2 * w * h];
 	euint8 *alpha = is_mono ? NULL : new euint8[w * h];
 	eint32 pointCount = 0;
-
-	if(!pts)
-	{
-		if(alpha) delete[] alpha;
-		delete[] bitmap;
-		return;
-	}
 
 	eint32 i_start = max_c((eint32)(ceil(rect.top) - ceil(startPoint.y)), 0);
 	eint32 j_start = max_c((eint32)(ceil(rect.left) - ceil(startPoint.x)), 0);
@@ -2851,12 +2263,6 @@ EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 lengt
 					pmax.y = max_c(pmax.y, pt.y);
 				}
 
-				if(IsPrinting())
-				{
-					pt.x /= UnitsPerPixel();
-					pt.y /= UnitsPerPixel();
-				}
-
 				pt.Floor();
 
 				*tmp++ = (eint32)pt.x;
@@ -2877,7 +2283,7 @@ EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 lengt
 
 		if(alpha && DrawingMode() == E_OP_ALPHA)
 		{
-			status = win->fPixmap->StrokePoints_Alphas(fDC, pts, alpha, pointCount);
+			status = Window()->fPixmap->StrokePoints_Alphas(fDC, pts, alpha, pointCount);
 		}
 		else
 		{
@@ -2901,11 +2307,11 @@ EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 lengt
 					ptColors[i].mix(lcolor);
 				}
 
-				status = win->fPixmap->StrokePoints_Colors(fDC, ptsLists, 16, ptColors);
+				status = Window()->fPixmap->StrokePoints_Colors(fDC, ptsLists, 16, ptColors);
 			}
 			else
 			{
-				status = win->fPixmap->StrokePoints(fDC, pts, pointCount);
+				status = Window()->fPixmap->StrokePoints(fDC, pts, pointCount);
 			}
 		}
 	}
@@ -2919,7 +2325,7 @@ EView::DrawStringInPixmapMode(const char *aString, EPoint location, eint32 lengt
 	{
 		EPoint _pt_ = EPoint(PenSize() / 2.f, PenSize() / 2.f);
 		ERect updateRect(pmin - _pt_, pmax + _pt_);
-		win->_Update(updateRect, false);
+		Window()->_Update(updateRect, false);
 	}
 
 	location.x += width + UnitsPerPixel();
@@ -2938,7 +2344,7 @@ void
 EView::MakeFocus(bool focusState)
 {
 	EWindow *win = Window();
-	if(!win) return;
+	if(win == NULL) return;
 
 	if(focusState)
 	{
@@ -2964,8 +2370,7 @@ bool
 EView::IsFocus() const
 {
 	EWindow *win = Window();
-	if(!win) return false;
-
+	if(win == NULL) return false;
 	return(win->fFocus == this);
 }
 
@@ -2973,7 +2378,7 @@ EView::IsFocus() const
 e_status_t
 EView::SetEventMask(euint32 mask, euint32 options)
 {
-	if(!fEventStored) return _SetEventMask(mask, options);
+	if(fEventStored == false) return _SetEventMask(mask, options);
 
 	fEventMaskStored = mask;
 	fEventOptionsStored = options;
@@ -2989,7 +2394,7 @@ EView::_SetEventMask(euint32 mask, euint32 options)
 
 	if(fEventMask != mask)
 	{
-		if(!win)
+		if(win == NULL)
 		{
 			fEventMask = mask;
 		}
@@ -3056,10 +2461,10 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 	if(mask == 0) return E_ERROR;
 
 	EWindow *win = Window();
-	if(!win) return E_ERROR;
+	if(win == NULL) return E_ERROR;
 
 	EMessage *msg = win->CurrentMessage();
-	if(!msg) return E_ERROR;
+	if(msg == NULL) return E_ERROR;
 
 	if(mask == E_KEYBOARD_EVENTS)
 	{
@@ -3069,7 +2474,10 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 	{
 		if(msg->what != E_MOUSE_DOWN) return E_ERROR;
 	}
-	else return E_ERROR;
+	else
+	{
+		return E_ERROR;
+	}
 
 	euint32 eventMask, eventNewMask;
 	euint32 eventOptions, eventNewOptions;
@@ -3077,7 +2485,7 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 	eventMask = eventNewMask = fEventMask;
 	eventOptions = eventNewOptions = fEventOptions;
 
-	if(!fEventStored)
+	if(fEventStored == false)
 	{
 		fEventStored = true;
 
@@ -3117,7 +2525,7 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 	{
 		if(mask == E_POINTER_EVENTS)
 		{
-			if(!fMouseGrabbed)
+			if(fMouseGrabbed == false)
 			{
 				if(win->_GrabMouse() == false)
 				{
@@ -3130,7 +2538,7 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 		}
 		else if(mask == E_KEYBOARD_EVENTS)
 		{
-			if(!fKeyboardGrabbed)
+			if(fKeyboardGrabbed == false)
 			{
 				if(win->_GrabKeyboard() == false)
 				{
@@ -3150,85 +2558,14 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 void
 EView::GetPreferredSize(float *width, float *height)
 {
-	float w = 0, h = 0;
-	EView *child;
-
-	ERect rect = fFrame.OffsetToCopy(E_ORIGIN);
-
-	for(eint32 i = 0; (child = ChildAt(i)) != NULL; i++)
-	{
-		float cW = 0, cH = 0;
-		euint32 cMode = child->ResizingMode();
-
-		if(child->fHidden) continue;
-		child->GetPreferredSize(&cW, &cH);
-
-		if((cMode & E_FOLLOW_LEFT) || cMode == E_FOLLOW_NONE) cW += child->fFrame.left;
-		if(cMode & E_FOLLOW_RIGHT) cW += rect.right - child->fFrame.right;
-
-		if((cMode & E_FOLLOW_TOP) || cMode == E_FOLLOW_NONE) cH += child->fFrame.top;
-		if(cMode & E_FOLLOW_BOTTOM) cH += rect.bottom - child->fFrame.bottom;
-
-		w = max_c(w, cW);
-		h = max_c(h, cH);
-	}
-
-	if(width) *width = w;
-	if(height) *height = h;
+	return fLayout->ELayoutItem::GetPreferredSize(width, height);
 }
 
 
 void
 EView::ResizeToPreferred()
 {
-	if(!fFrame.IsValid()) return;
-
-	float vWidth = -1, vHeight = -1;
-	GetPreferredSize(&vWidth, &vHeight);
-	if(vWidth < 0) vWidth = fFrame.Width();
-	if(vHeight < 0) vHeight = fFrame.Height();
-	if(vWidth == fFrame.Width() && vHeight == fFrame.Height()) return;
-
-	ERect vFrame = fFrame;
-	euint32 vMode = fViewResizingMode;
-
-	if((vMode & E_FOLLOW_H_CENTER) && !((vMode & E_FOLLOW_LEFT) || (vMode & E_FOLLOW_RIGHT)))
-	{
-		float centerX = fFrame.Center().x;
-		vFrame.left = centerX - vWidth / 2.f;
-		vFrame.right = centerX + vWidth / 2.f;
-	}
-	else if(!((vMode & E_FOLLOW_LEFT) && (vMode & E_FOLLOW_RIGHT)))
-	{
-		if(vMode & E_FOLLOW_RIGHT)
-			vFrame.left = vFrame.right - vWidth;
-		else
-			vFrame.right = vFrame.left + vWidth;
-	}
-
-	if((vMode & E_FOLLOW_V_CENTER) && !((vMode & E_FOLLOW_TOP) || (vMode & E_FOLLOW_BOTTOM)))
-	{
-		float centerY = fFrame.Center().y;
-		vFrame.top = centerY - vHeight / 2.f;
-		vFrame.bottom = centerY + vHeight / 2.f;
-	}
-	else if(!((vMode & E_FOLLOW_TOP) && (vMode & E_FOLLOW_BOTTOM)))
-	{
-		if(vMode & E_FOLLOW_BOTTOM)
-			vFrame.top = vFrame.bottom - vHeight;
-		else
-			vFrame.bottom = vFrame.top + vHeight;
-	}
-
-	if(!vFrame.IsValid()) return;
-
-	if(vFrame != fFrame)
-	{
-		if(vFrame.Width() != fFrame.Width() || vFrame.Height() != fFrame.Height())
-			ResizeTo(vFrame.Width(), vFrame.Height());
-		if(vFrame.LeftTop() != fFrame.LeftTop())
-			MoveTo(vFrame.LeftTop());
-	}
+	fLayout->ELayoutItem::ResizeToPreferred();
 }
 
 
@@ -3237,15 +2574,8 @@ EView::GetClippingRegion(ERegion *clipping) const
 {
 	if(clipping == NULL) return;
 
-	if(fHasClipping)
-	{
-		*clipping = fClipping;
-	}
-	else
-	{
-		*clipping = fVisibleRegion;
-		ConvertFromParent(clipping);
-	}
+	*clipping = *(fLayout->VisibleRegion());
+	if(((EViewState*)fStates)->Clipping != NULL) *clipping &= *(((EViewState*)fStates)->Clipping);
 }
 
 
@@ -3254,29 +2584,27 @@ EView::ConstrainClippingRegion(const ERegion *_clipping)
 {
 	if(_clipping == NULL)
 	{
-		if(fHasClipping == false) return;
+		if(((EViewState*)fStates)->Clipping == NULL) return;
 
-		fHasClipping = false;
-		fClipping.MakeEmpty();
+		delete ((EViewState*)fStates)->Clipping;
+		((EViewState*)fStates)->Clipping = NULL;
 
-		ERegion clipping(fVisibleRegion);
-		ConvertFromParent(&clipping);
+		ERegion clipping(*(fLayout->VisibleRegion()));
 		if(fClippingTemp.CountRects() > 0) clipping &= fClippingTemp;
 		ConvertToWindow(&clipping);
-		if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
 		fDC->SetClipping(clipping);
 	}
 	else
 	{
-		fHasClipping = true;
-		fClipping = *_clipping;
+		if(((EViewState*)fStates)->Clipping == NULL)
+			((EViewState*)fStates)->Clipping = new ERegion(*_clipping);
+		else
+			*(((EViewState*)fStates)->Clipping) = *_clipping;
 
-		ERegion clipping(fVisibleRegion);
-		ConvertFromParent(&clipping);
-		clipping &= fClipping;
+		ERegion clipping(*(fLayout->VisibleRegion()));
+		clipping &= *_clipping;
 		if(fClippingTemp.CountRects() > 0) clipping &= fClippingTemp;
 		ConvertToWindow(&clipping);
-		if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
 		fDC->SetClipping(clipping);
 	}
 }
@@ -3294,27 +2622,18 @@ e_status_t
 EView::GetMouse(EPoint *location, eint32 *buttons, bool checkMessageQueue)
 {
 	EWindow *win = Window();
-	if(!win || !location || !buttons) return E_ERROR;
+	if(win == NULL || location == NULL || buttons == NULL) return E_ERROR;
 
 	if(checkMessageQueue)
 	{
-		win->MessageQueue()->Lock();
-		EMessage *msg = win->MessageQueue()->FindMessage(E_MOUSE_MOVED, 0);
-		if(msg == NULL) msg = win->MessageQueue()->FindMessage(E_MOUSE_UP, 0);
-		if(msg != NULL)
-		{
-			EPoint where;
-			eint32 btns;
-			if(msg->FindPoint("where", &where) && msg->FindInt32("buttons", &btns))
-			{
-				*location = ConvertFromWindow(where);
-				*buttons = btns;
-				win->MessageQueue()->RemoveMessage(msg);
-				win->MessageQueue()->Unlock();
-				return E_OK;
-			}
-		}
-		win->MessageQueue()->Unlock();
+		// TODO
+		return E_ERROR;
+	}
+
+	if(win->fWindow == NULL)
+	{
+		// TODO
+		return E_ERROR;
 	}
 
 	eint32 mx, my;
@@ -3331,12 +2650,12 @@ bool
 EView::QueryCurrentMouse(bool pushed, eint32 buttons, bool btnsAlone, eint32 *clicks) const
 {
 	EWindow *win = Window();
-	if(!win) return false;
+	if(win == NULL) return false;
 
 	EMessage *msg = win->CurrentMessage();
 	if(msg == NULL) return false;
 	if(pushed && msg->what != E_MOUSE_DOWN) return false;
-	if(!pushed && msg->what != E_MOUSE_UP) return false;
+	if(pushed == false && msg->what != E_MOUSE_UP) return false;
 
 	eint32 btns;
 	if(msg->FindInt32("buttons", &btns) == false) return false;
@@ -3351,79 +2670,20 @@ EView::QueryCurrentMouse(bool pushed, eint32 buttons, bool btnsAlone, eint32 *cl
 
 
 void
-EView::_UpdateOriginAndVisibleRegion(bool deep)
+EView::_UpdateVisibleRegion()
 {
-	EWindow *win = Window();
-
-	if(win)
+	if(!(e_is_kind_of(Parent(), EScrollView) == false || e_cast_as(Parent(), EScrollView)->fTarget != this))
 	{
-		if(fParent)
-			fOrigin = fFrame.LeftTop() + fParent->fOrigin - fParent->fLocalOrigin;
-		else
-			fOrigin = fFrame.LeftTop();
-
-		if(!IsHidden())
-		{
-			if(fParent)
-			{
-				fVisibleRegion = fParent->fVisibleRegion;
-				if(!(!e_is_kind_of(fParent, EScrollView) || e_cast_as(fParent, EScrollView)->fTarget != this))
-				{
-					ERect targetRect = e_cast_as(fParent, EScrollView)->TargetValidFrame(false);
-					fParent->ConvertToParent(&targetRect);
-					fVisibleRegion &= targetRect;
-				}
-				fParent->ConvertFromParent(&fVisibleRegion);
-			}
-			else
-			{
-				fVisibleRegion.Set(win->Bounds());
-			}
-
-			EView *sibling = (fParent ? fParent->ChildAt(0) : win->ChildAt(0));
-			while(fVisibleRegion.CountRects() > 0)
-			{
-				if(sibling == this)
-				{
-					fVisibleRegion &= fFrame;
-					break;
-				}
-				if(sibling->fHidden == false)
-				{
-					float unitsPerPixel = (IsPrinting() ? sibling->UnitsPerPixel() : 1);
-					fVisibleRegion.Exclude(sibling->fFrame.InsetByCopy(-unitsPerPixel, -unitsPerPixel));
-				}
-				sibling = sibling->fNextSibling;
-			}
-		}
-		else
-		{
-			fVisibleRegion.MakeEmpty();
-		}
-	}
-	else
-	{
-		fOrigin = EPoint(0, 0);
-		fVisibleRegion.MakeEmpty();
+		ERegion *region;
+		e_cast_as(fLayout, EViewLayout)->_GetVisibleRegion(&region);
+		*region &= ConvertFromParent(e_cast_as(Parent(), EScrollView)->TargetValidFrame());
 	}
 
-	ERegion clipping(fVisibleRegion);
-	ConvertFromParent(&clipping);
-	if(fHasClipping) clipping &= fClipping;
+	ERegion clipping(*(fLayout->VisibleRegion()));
+	if(((EViewState*)fStates)->Clipping != NULL) clipping &= *(((EViewState*)fStates)->Clipping);
 	if(fClippingTemp.CountRects() > 0) clipping &= fClippingTemp;
 	ConvertToWindow(&clipping);
-	if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
 	fDC->SetClipping(clipping);
-
-	if(deep)
-	{
-		EView *child = ChildAt(0);
-		while(child != NULL)
-		{
-			child->_UpdateOriginAndVisibleRegion(true);
-			child = child->fNextSibling;
-		}
-	}
 }
 
 
@@ -3438,19 +2698,16 @@ EView::IsPrinting() const
 float
 EView::UnitsPerPixel() const
 {
-	if(!IsPrinting()) return 1;
-
-	// TODO
-	return 1;
+	return(fLayout->Container() != NULL ? fLayout->Container()->UnitsPerPixel() : 1);
 }
 
 
 void
 EView::SetEnabled(bool state)
 {
-	if(fEnabled != state)
+	if(e_cast_as(fLayout, EViewLayout)->IsEnabled() != state)
 	{
-		fEnabled = state;
+		e_cast_as(fLayout, EViewLayout)->SetEnabled(state);
 		if(Flags() & E_WILL_DRAW) Invalidate();
 	}
 }
@@ -3459,14 +2716,14 @@ EView::SetEnabled(bool state)
 bool
 EView::IsEnabled() const
 {
-	return fEnabled;
+	return e_cast_as(fLayout, EViewLayout)->IsEnabled();
 }
 
 
 void
 EView::ScrollBy(float dh, float dv)
 {
-	ScrollTo(EPoint(dh, dv) + fLocalOrigin);
+	ScrollTo(EPoint(dh, dv) + fLayout->LeftTop());
 }
 
 
@@ -3480,22 +2737,17 @@ EView::ScrollTo(float x, float y)
 void
 EView::ScrollTo(EPoint where)
 {
-	if(where.x < 0) where.x = 0;
-	if(where.y < 0) where.y = 0;
-
-	if(fLocalOrigin != where)
+	if(LeftTop() != where)
 	{
-		fLocalOrigin = where;
+		fLayout->ScrollTo(where);
 
-		_UpdateOriginAndVisibleRegion(true);
-
-		fScrollTimestamp = e_real_time_clock_usecs();
-		_Invalidate(Bounds(), true, fScrollTimestamp);
+		fScrollTimeStamp = e_real_time_clock_usecs();
+		Invalidate(Bounds(), true);
 
 		for(eint32 i = 0; i < fScrollBar.CountItems(); i++)
 		{
 			EScrollBar *scrollbar = (EScrollBar*)fScrollBar.ItemAt(i);
-			scrollbar->_SetValue(scrollbar->Orientation() == E_HORIZONTAL ? fLocalOrigin.x : fLocalOrigin.y, false);
+			scrollbar->_SetValue(scrollbar->Orientation() == E_HORIZONTAL ? LeftTop().x : LeftTop().y, false);
 		}
 	}
 }
@@ -3504,9 +2756,9 @@ EView::ScrollTo(EPoint where)
 void
 EView::SetSquarePointStyle(bool state)
 {
-	if(fSquarePointStyle != state)
+	if(((EViewState*)fStates)->SquarePointStyle != state)
 	{
-		if(fDC->SetSquarePointStyle(state) == E_OK) fSquarePointStyle = state;
+		if(fDC->SetSquarePointStyle(state) == E_OK) ((EViewState*)fStates)->SquarePointStyle = state;
 	}
 }
 
@@ -3514,7 +2766,7 @@ EView::SetSquarePointStyle(bool state)
 bool
 EView::IsSquarePointStyle() const
 {
-	return fSquarePointStyle;
+	return ((EViewState*)fStates)->SquarePointStyle;
 }
 
 
@@ -3538,39 +2790,33 @@ EView::DrawBitmap(const EBitmap *bitmap, EPoint where)
 void
 EView::DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect)
 {
-	if(IsVisible() == false || bitmap == NULL || bitmap->fPixmap == NULL ||
-	   srcRect.IsValid() == false || bitmap->Bounds().Intersects(srcRect) == false || destRect.IsValid() == false) return;
+	if(bitmap == NULL || bitmap->fPixmap == NULL ||
+	   srcRect.IsValid() == false || bitmap->Bounds().Intersects(srcRect) == false || destRect.IsValid() == false ||
+	   fLayout->VisibleRegion()->Intersects(destRect) == false) return;
 
-	EWindow *win = Window();
-	if(!win) return;
+	ConvertToWindow(&destRect);
+	ERect updateRect(destRect.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
 
-	ERect r = ConvertToWindow(destRect);
-	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
-
-	if(IsPrinting())
-	{
-		r.left /= UnitsPerPixel();
-		r.top /= UnitsPerPixel();
-		r.right /= UnitsPerPixel();
-		r.bottom /= UnitsPerPixel();
-	}
-
-	r.Floor();
 	srcRect.Floor();
-
-	euint32 alpha = (fDrawingMode == E_OP_ALPHA ? HighColor().alpha : 255);
-	ERegion clipping(fVisibleRegion);
-	ConvertFromParent(&clipping);
-	if(fHasClipping) clipping &= fClipping;
-	ConvertToWindow(&clipping);
-	if(IsPrinting()) clipping.Scale(1.f / UnitsPerPixel());
-
-	if(bitmap->fPixmap->CopyTo(win->fPixmap,
-				   (eint32)srcRect.left, (eint32)srcRect.top, (euint32)srcRect.Width(), (euint32)srcRect.Height(),
-				   (eint32)r.left, (eint32)r.top, (euint32)r.Width(), (euint32)r.Height(),
-				   alpha, &clipping) == E_OK) win->_Update(updateRect, false);
-
-	MovePenTo(destRect.LeftTop());
+	destRect.Floor();
+	if(bitmap->fPixmap->CopyTo(fDC, Window()->fPixmap,
+				   (eint32)srcRect.left, (eint32)srcRect.top,
+				   (euint32)srcRect.Width(), (euint32)srcRect.Height(),
+				   (eint32)destRect.left, (eint32)destRect.top,
+				   (euint32)destRect.Width(), (euint32)destRect.Height()) == E_OK) Window()->_Update(updateRect, false);
 }
 
+
+void
+EView::Flush() const
+{
+	// nothing yet
+}
+
+
+void
+EView::Sync() const
+{
+	// nothing yet
+}
 

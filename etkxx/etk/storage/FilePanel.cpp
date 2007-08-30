@@ -59,8 +59,8 @@
 #define MSG_PANEL_SET_DIR	'setd'
 #define MSG_PANEL_DONE		'done'
 
-#define MSG_PANEL_SELECT_ALL	'sel1'
-#define MSG_PANEL_DESELECT_ALL	'sel2'
+#define MSG_PANEL_SELECT_ALL	'sela'
+#define MSG_PANEL_DESELECT_ALL	'seln'
 
 #define MSG_PANEL_TOGGLE_HIDDEN	'thid'
 

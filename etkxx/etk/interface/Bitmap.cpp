@@ -36,10 +36,42 @@
 
 #include "Bitmap.h"
 
+_LOCAL class EBitmapWindow : public EWindow {
+public:
+	EBitmapWindow(ERect frame);
+	virtual ~EBitmapWindow();
 
-EBitmap::EBitmap(ERect bounds, bool acceptsViews)
-	: EArchivable(), fRows(0), fColumns(0), fPixmap(NULL)
+private:
+	virtual bool IsDependsOnOthersWhenQuitRequested() const;
+};
+
+
+EBitmapWindow::EBitmapWindow(ERect frame)
+	: EWindow(frame, NULL, E_NO_BORDER_WINDOW_LOOK, E_NORMAL_WINDOW_FEEL, 0)
 {
+}
+
+
+EBitmapWindow::~EBitmapWindow()
+{
+}
+
+
+bool
+EBitmapWindow::IsDependsOnOthersWhenQuitRequested() const
+{
+	return true;
+}
+
+
+void
+EBitmap::InitSelf(ERect bounds, bool acceptsViews)
+{
+	fRows = 0;
+	fColumns = 0;
+	fPixmap = NULL;
+	fWindow = NULL;
+
 	if(bounds.IsValid() == false) return;
 
 	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
@@ -48,68 +80,54 @@ EBitmap::EBitmap(ERect bounds, bool acceptsViews)
 		return;
 	}
 
-	if(acceptsViews)
-	{
-		// TODO
-		ETK_WARNING("[INTERFACE]: %s --- AcceptsViews not supported yet.", __PRETTY_FUNCTION__);
-		return;
-	}
-
 	fColumns = (euint32)bounds.IntegerWidth() + 1;
 	fRows = (euint32)bounds.IntegerHeight() + 1;
 
-	fPixmap = etk_app->fGraphicsEngine->CreatePixmap(fColumns - 1, fRows - 1);
+	if(acceptsViews == false)
+	{
+		fPixmap = etk_app->fGraphicsEngine->CreatePixmap(fColumns - 1, fRows - 1);
+	}
+	else
+	{
+		fWindow = new EBitmapWindow(bounds);
+		fWindow->Lock();
+		delete fWindow->fWindow;
+		fWindow->fWindow = NULL;
+		fPixmap = fWindow->fPixmap;
+		fWindow->Show();
+		fWindow->Unlock();
+	}
+}
+
+
+EBitmap::EBitmap(ERect bounds, bool acceptsViews)
+	: EArchivable()
+{
+	InitSelf(bounds, acceptsViews);
 }
 
 
 EBitmap::EBitmap(const EBitmap *bitmap, bool acceptsViews)
-	: EArchivable(), fRows(0), fColumns(0), fPixmap(NULL)
+	: EArchivable()
 {
-	if(bitmap == NULL || bitmap->fPixmap == NULL) return;
-
-	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
+	InitSelf(bitmap == NULL ? ERect() : bitmap->Bounds(), acceptsViews);
+	if(bitmap->fPixmap != NULL)
 	{
-		ETK_WARNING("[INTERFACE]: %s --- You should create EBitmap within graphics engine.", __PRETTY_FUNCTION__);
-		return;
+		EGraphicsContext *dc = etk_app->fGraphicsEngine->CreateContext();
+		if(dc)
+		{
+			bitmap->fPixmap->CopyTo(dc, fPixmap, 0, 0, fColumns - 1, fRows - 1, 0, 0, fColumns - 1, fRows - 1);
+			delete dc;
+		}
 	}
-
-	if(acceptsViews)
-	{
-		// TODO
-		ETK_WARNING("[INTERFACE]: %s --- AcceptsViews not supported yet.", __PRETTY_FUNCTION__);
-		return;
-	}
-
-	fColumns = bitmap->fColumns;
-	fRows = bitmap->fRows;
-
-	if((fPixmap = etk_app->fGraphicsEngine->CreatePixmap(fColumns - 1, fRows - 1)) != NULL)
-		bitmap->fPixmap->CopyTo(fPixmap, 0, 0, fColumns - 1, fRows - 1, 0, 0, fColumns - 1, fRows - 1, 255);
 }
 
 
 EBitmap::EBitmap(const EPixmap *pixmap, bool acceptsViews)
-	: EArchivable(), fRows(0), fColumns(0), fPixmap(NULL)
+	: EArchivable()
 {
-	if(pixmap == NULL || pixmap->IsValid() == false || pixmap->Bounds().IsValid() == false) return;
-
-	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
-	{
-		ETK_WARNING("[INTERFACE]: %s --- You should create EBitmap within graphics engine.", __PRETTY_FUNCTION__);
-		return;
-	}
-
-	if(acceptsViews)
-	{
-		// TODO
-		ETK_WARNING("[INTERFACE]: %s --- AcceptsViews not supported yet.", __PRETTY_FUNCTION__);
-		return;
-	}
-
-	fColumns = (euint32)pixmap->Bounds().IntegerWidth() + 1;
-	fRows = (euint32)pixmap->Bounds().IntegerHeight() + 1;
-
-	if((fPixmap = etk_app->fGraphicsEngine->CreatePixmap(fColumns - 1, fRows - 1)) != NULL)
+	InitSelf((pixmap == NULL || pixmap->IsValid() == false) ? ERect() : pixmap->Bounds(), acceptsViews);
+	if(fPixmap != NULL)
 	{
 		EGraphicsContext *dc = etk_app->fGraphicsEngine->CreateContext();
 		if(dc)
@@ -126,7 +144,15 @@ EBitmap::EBitmap(const EPixmap *pixmap, bool acceptsViews)
 
 EBitmap::~EBitmap()
 {
-	if(fPixmap) delete fPixmap;
+	if(fWindow)
+	{
+		fWindow->Lock();
+		fWindow->Quit();
+	}
+	else if(fPixmap)
+	{
+		delete fPixmap;
+	}
 }
 
 
@@ -149,5 +175,61 @@ EBitmap::Bounds() const
 {
 	if(fPixmap == NULL) return ERect();
 	return ERect(0, 0, (float)(fColumns - 1), (float)(fRows - 1));
+}
+
+
+void
+EBitmap::AddChild(EView *view)
+{
+	if(fWindow != NULL) fWindow->AddChild(view);
+}
+
+
+bool
+EBitmap::RemoveChild(EView *view)
+{
+	return(fWindow != NULL ? fWindow->RemoveChild(view) : false);
+}
+
+
+eint32
+EBitmap::CountChildren() const
+{
+	return(fWindow != NULL ? fWindow->CountChildren() : 0);
+}
+
+
+EView*
+EBitmap::ChildAt(eint32 index) const
+{
+	return(fWindow != NULL ? fWindow->ChildAt(index) : NULL);
+}
+
+
+EView*
+EBitmap::FindView(const char *name) const
+{
+	return(fWindow != NULL ? fWindow->FindView(name) : NULL);
+}
+
+
+EView*
+EBitmap::FindView(EPoint where) const
+{
+	return(fWindow != NULL ? fWindow->FindView(where) : NULL);
+}
+
+
+bool
+EBitmap::Lock()
+{
+	return(fWindow != NULL ? fWindow->Lock() : false);
+}
+
+
+void
+EBitmap::Unlock()
+{
+	if(fWindow != NULL) fWindow->Unlock();
 }
 

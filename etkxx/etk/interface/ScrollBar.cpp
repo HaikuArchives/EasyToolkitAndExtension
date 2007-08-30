@@ -105,9 +105,9 @@ EScrollBar::_SetValue(float value, bool response)
 		if(fTarget != NULL && response)
 		{
 			if(fOrientation == E_HORIZONTAL)
-				fTarget->ScrollTo(fValue, fTarget->fLocalOrigin.y);
+				fTarget->ScrollTo(fValue, fTarget->LeftTop().y);
 			else
-				fTarget->ScrollTo(fTarget->fLocalOrigin.x, fValue);
+				fTarget->ScrollTo(fTarget->LeftTop().x, fValue);
 		}
 
 		Invalidate();
@@ -177,9 +177,9 @@ EScrollBar::SetRange(float min, float max)
 			fValue = (fValue < fRangeMin ? fRangeMin : fRangeMax);
 
 			if(fOrientation == E_HORIZONTAL)
-				fTarget->ScrollTo(fValue, fTarget->fLocalOrigin.y);
+				fTarget->ScrollTo(fValue, fTarget->LeftTop().y);
 			else
-				fTarget->ScrollTo(fTarget->fLocalOrigin.x, fValue);
+				fTarget->ScrollTo(fTarget->LeftTop().x, fValue);
 		}
 
 		Invalidate();
@@ -235,9 +235,9 @@ EScrollBar::SetTarget(EView *target)
 	if(fTarget != NULL)
 	{
 		if(fOrientation == E_HORIZONTAL)
-			fTarget->ScrollTo(fValue, fTarget->fLocalOrigin.y);
+			fTarget->ScrollTo(fValue, fTarget->LeftTop().y);
 		else
-			fTarget->ScrollTo(fTarget->fLocalOrigin.x, fValue);
+			fTarget->ScrollTo(fTarget->LeftTop().x, fValue);
 	}
 
 	return E_OK;

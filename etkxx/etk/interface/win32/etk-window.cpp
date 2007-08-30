@@ -1011,10 +1011,10 @@ EWin32GraphicsWindow::QueryMouse(eint32 *x, eint32 *y, eint32 *buttons)
 
 
 e_status_t
-EWin32GraphicsWindow::CopyTo(EGraphicsDrawable *dstDrawable,
+EWin32GraphicsWindow::CopyTo(EGraphicsContext *dc,
+			     EGraphicsDrawable *dstDrawable,
 			     eint32 x, eint32 y, euint32 w, euint32 h,
-			     eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH,
-			     euint8 alpha, const ERegion *clipping)
+			     eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH)
 {
 	// TODO
 	return E_ERROR;

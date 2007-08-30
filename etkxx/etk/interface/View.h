@@ -77,12 +77,12 @@ enum {
 
 #ifdef __cplusplus /* Just for C++ */
 
-
 class EWindow;
 class EGraphicsContext;
 class EScrollView;
 class EBitmap;
 class ECursor;
+class ELayoutItem;
 
 
 class _IMPEXP_ETK EView : public EHandler {
@@ -313,6 +313,9 @@ public:
 	void		DrawBitmap(const EBitmap *bitmap, EPoint where);
 	void		DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect);
 
+	void		Flush() const;
+	void		Sync() const;
+
 protected:
 	// Empty functions BEGIN --- just for derivative class
 	virtual void	ChildRemoving(EView *child);
@@ -324,40 +327,21 @@ private:
 	friend class EScrollBar;
 	friend class EScrollView;
 	friend class EGraphicsEngine;
+	friend class EViewLayout;
 
 	EGraphicsContext *fDC;
+	ELayoutItem *fLayout;
 
-	EPoint fOrigin;
-	EPoint fLocalOrigin;
-	ERect fFrame;
-	ERegion fVisibleRegion;
-	euint32 fViewResizingMode;
+	void *fStates;
+
 	euint32 fViewFlags;
-
-	EList fViewsList;
-	EView *fParent;
-	EView *fNextSibling;
-	EView *fPrevSibling;
-
-	bool fHidden;
-	bool fEnabled;
-
-	EPoint fPen;
-	float fPenSize;
-
-	e_drawing_mode fDrawingMode;
-
 	e_rgb_color fViewColor;
-	e_rgb_color fHighColor;
-	e_rgb_color fLowColor;
-	bool fIsCustomViewColor;
-	bool fIsCustomHighColor;
-	bool fIsCustomLowColor;
-
-	EFont fFont;
 	bool fForceFontAliasing;
+	ERegion fClippingTemp;
+	bool fMouseInside;
 
-	bool fSquarePointStyle;
+	EList fScrollBar;
+	e_bigtime_t fScrollTimeStamp;
 
 	bool fMouseGrabbed;
 	bool fKeyboardGrabbed;
@@ -367,30 +351,18 @@ private:
 	euint32 fEventMask;
 	euint32 fEventOptions;
 
-	bool fMouseInside;
-
-	bool fHasClipping;
-	ERegion fClipping;
-	ERegion fClippingTemp;
-
-	void *fStatesList;
-
 	void AttachToWindow();
 	void DetachFromWindow();
-
-	void _WindowActivated(bool state);
-	void _UpdateOriginAndVisibleRegion(bool deep);
-
-	void _SetFrame(ERect rect, bool parent_changed);
-	e_status_t _SetEventMask(euint32 mask, euint32 options);
-	void _Expose(ERegion region, e_bigtime_t when);
-	void _Invalidate(ERect invalRect, bool redraw, e_bigtime_t when);
-
 	void DrawStringInDirectlyMode(const char *aString, EPoint location, eint32 length);
 	void DrawStringInPixmapMode(const char *aString, EPoint location, eint32 length);
 
-	EList fScrollBar;
-	e_bigtime_t fScrollTimestamp;
+	e_status_t _SetEventMask(euint32 mask, euint32 options);
+	void _Expose(ERegion region, e_bigtime_t when);
+
+	void _UpdateVisibleRegion();
+	void _FrameChanged(ERect oldFrame, ERect newFrame);
+
+	void InitSelf(ERect, euint32, euint32);
 };
 
 #endif /* __cplusplus */

@@ -168,15 +168,15 @@ EXGraphicsDrawable::ResizeTo(euint32 w, euint32 h)
 
 
 e_status_t
-EXGraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
+EXGraphicsDrawable::CopyTo(EGraphicsContext *_dc_,
+			   EGraphicsDrawable *dstDrawable,
 			   eint32 x, eint32 y, euint32 w, euint32 h,
-			   eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH,
-			   euint8 alpha, const ERegion *clipping)
+			   eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH)
 {
-	if(w != dstW || h != dstH || alpha != 255)
+	if(w != dstW || h != dstH)
 	{
 		// TODO
-		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: (w != dstW || h != dstY || alpha != 255).", __PRETTY_FUNCTION__);
+		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: (w != dstW || h != dstY).", __PRETTY_FUNCTION__);
 		return E_ERROR;
 	}
 
@@ -191,13 +191,17 @@ EXGraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
 	EAutolock <EXGraphicsEngine> autolock(fEngine);
 	if(autolock.IsLocked() == false || fEngine->InitCheck() != E_OK) return E_ERROR;
 
+	EXGraphicsContext *dc = e_cast_as(_dc_, EXGraphicsContext);
+	if(dc == NULL || dc->fEngine != fEngine) return E_ERROR;
+	if(dc->DrawingMode() != E_OP_COPY)
+	{
+		// TODO
+		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: unsupported drawing mode.", __PRETTY_FUNCTION__);
+		return E_ERROR;
+	}
+
 	EXGraphicsWindow *win = NULL;
 	EXGraphicsDrawable *pix = NULL;
-
-	XSetFunction(fEngine->xDisplay, xGC, GXcopy);
-
-	Region xRegion = NULL;
-	if(fEngine->ConvertRegion(clipping, &xRegion)) XSetRegion(fEngine->xDisplay, xGC, xRegion);
 
 	e_status_t retVal = E_OK;
 
@@ -207,15 +211,6 @@ EXGraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
 		XCopyArea(fEngine->xDisplay, xPixmap, pix->xPixmap, xGC, x, y, w + 1, h + 1, dstX, dstY);
 	else
 		retVal = E_ERROR;
-
-	XRectangle xRect;
-	xRect.x = 0;
-	xRect.y = 0;
-	xRect.width = E_MAXUSHORT;
-	xRect.height = E_MAXUSHORT;
-	XSetClipRectangles(fEngine->xDisplay, xGC, 0, 0, &xRect, 1, Unsorted);
-
-	if(xRegion != NULL) XDestroyRegion(xRegion);
 
 	XFlush(fEngine->xDisplay);
 

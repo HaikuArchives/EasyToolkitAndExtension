@@ -86,11 +86,7 @@ ETab::Select()
 void
 ETab::Deselect()
 {
-	if(fOwner == NULL) return;
-
-	eint32 index = fOwner->TabIndexOf(this);
-	if(index != fOwner->fSelection) return;
-
+	if(IsSelected() == false) return;
 	fOwner->fSelection = -1;
 	if(fView) fView->Hide();
 }
@@ -565,6 +561,7 @@ ETabView::MouseDown(EPoint where)
 	if(index < 0 || fSelection == index) return;
 
 	ETab *tab = (ETab*)fTabs.ItemAt(index);
+	if(tab->IsEnabled() == false) return;
 	tab->Select();
 
 	ERect r = Frame().OffsetToSelf(E_ORIGIN);

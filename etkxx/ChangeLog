@@ -1,3 +1,7 @@
+2007-08-30  anthonylee
+	Added accept_views mode of EBitmap.
+	Clean up EWindow/EView.
+
 2007-08-17  anthonylee
 	Fixed EDirectory::GetNextEntry() on Win32.
 	Fixed header problems when use Win32API.

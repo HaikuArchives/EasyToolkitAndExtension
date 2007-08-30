@@ -45,20 +45,107 @@
 #include "layout/Layout.h"
 
 
-#ifndef HAVE_ROUND
-inline double etk_round(double value)
+_LOCAL class EWindowLayoutItem : public ELayoutItem {
+public:
+	EWindowLayoutItem(ERect frame);
+	virtual ~EWindowLayoutItem();
+
+	virtual void	Invalidate(ERect rect);
+};
+
+
+_LOCAL class EWindowLayoutContainer : public ELayoutContainer {
+public:
+	EWindowLayoutContainer(EWindow *win, ERect frame);
+	virtual ~EWindowLayoutContainer();
+
+	void		MoveTo(EPoint where);
+	void		ResizeTo(float width, float height);
+
+	EPoint		Origin() const;
+	ELayoutItem	*TopItem() const;
+
+	virtual void	Invalidate(ERect rect);
+
+private:
+	EWindow *fWindow;
+	EPoint fOrigin;
+	ELayoutItem *fTopItem;
+};
+
+
+EWindowLayoutItem::EWindowLayoutItem(ERect frame)
+	: ELayoutItem(frame, E_FOLLOW_NONE)
 {
-	double iValue = 0;
-	double fValue = modf(value, &iValue);
-
-	if(fValue >= 0.5) iValue += 1;
-	else if(fValue <= -0.5) iValue -= 1;
-
-	return iValue;
 }
-#else
-#define etk_round(a) round(a)
-#endif // HAVE_ROUND
+
+
+EWindowLayoutItem::~EWindowLayoutItem()
+{
+}
+
+
+void
+EWindowLayoutItem::Invalidate(ERect rect)
+{
+	if(Container() == NULL) return;
+	rect.OffsetTo(ConvertToContainer(rect.LeftTop()));
+	Container()->Invalidate(rect);
+}
+
+
+EWindowLayoutContainer::EWindowLayoutContainer(EWindow *win, ERect frame)
+	: ELayoutContainer(), fWindow(NULL)
+{
+	fOrigin = frame.LeftTop();
+	fTopItem = new EWindowLayoutItem(frame.OffsetToSelf(E_ORIGIN));
+	fTopItem->Hide();
+	AddItem(fTopItem);
+
+	fWindow = win;
+}
+
+
+EWindowLayoutContainer::~EWindowLayoutContainer()
+{
+}
+
+
+void
+EWindowLayoutContainer::MoveTo(EPoint where)
+{
+	fOrigin = where;
+}
+
+
+void
+EWindowLayoutContainer::ResizeTo(float width, float height)
+{
+	fTopItem->ResizeTo(width, height);
+}
+
+
+EPoint
+EWindowLayoutContainer::Origin() const
+{
+	return fOrigin;
+}
+
+
+ELayoutItem*
+EWindowLayoutContainer::TopItem() const
+{
+	return fTopItem;
+}
+
+
+void
+EWindowLayoutContainer::Invalidate(ERect rect)
+{
+	if(fWindow == NULL) return;
+	rect.OffsetTo(E_ORIGIN);
+	fWindow->Invalidate(rect, true);
+}
 
 
 void
@@ -67,11 +154,14 @@ EWindow::InitSelf(ERect frame, const char *title, e_window_look look, e_window_f
 	if(etk_app == NULL || etk_app->fGraphicsEngine == NULL)
 		ETK_ERROR("[INTERFACE]: Window must created within a application which has graphics-engine!");
 
+#ifdef ETK_ENABLE_DEBUG
 	EString winLooperName;
 	winLooperName << "Window " << etk_get_handler_token(this);
 	SetName(winLooperName.String());
+#endif // ETK_ENABLE_DEBUG
 
-	fFrame = frame;
+	fLayout = new EWindowLayoutContainer(this, frame);
+
 	frame.Floor();
 	if((fWindow = etk_app->fGraphicsEngine->CreateWindow((eint32)frame.left, (eint32)frame.top,
 							     (euint32)max_c(frame.Width(), 0),
@@ -83,23 +173,20 @@ EWindow::InitSelf(ERect frame, const char *title, e_window_look look, e_window_f
 	else if((fDC = etk_app->fGraphicsEngine->CreateContext()) == NULL)
 		ETK_ERROR("[INTERFACE]: %s --- Unable to create graphics context!", __PRETTY_FUNCTION__);
 
-	fLayout = new ELayoutItem(frame, E_FOLLOW_NONE);
-
-	fBackgroundColor.set_to(e_ui_color(E_PANEL_BACKGROUND_COLOR));
 	fDC->SetClipping(ERegion(frame.OffsetToCopy(E_ORIGIN)));
 	fDC->SetDrawingMode(E_OP_COPY);
 	fDC->SetPattern(E_SOLID_HIGH);
-	fDC->SetHighColor(fBackgroundColor);
+	fDC->SetHighColor(e_ui_color(E_PANEL_BACKGROUND_COLOR));
 	fDC->SetPenSize(0);
 
 	fWindowFlags = flags;
 	fWindowLook = look;
 	fWindowFeel = feel;
-	fWindowTitle = (title ? EStrdup(title) : NULL);
+	fWindowTitle = title ? EStrdup(title) : NULL;
 	fWindow->SetFlags(fWindowFlags);
 	fWindow->SetLook(fWindowLook);
 	fWindow->SetFeel(fWindowFeel);
-	fWindow->SetBackgroundColor(fBackgroundColor);
+	fWindow->SetBackgroundColor(fDC->HighColor());
 	fWindow->SetTitle(fWindowTitle);
 
 	EMessenger msgrSelf(this);
@@ -111,18 +198,18 @@ EWindow::InitSelf(ERect frame, const char *title, e_window_look look, e_window_f
 	fUpdateHolderThreadId = 0;
 	fUpdateHolderCount = E_INT64_CONSTANT(-1);
 	fInUpdate = false;
-	fHidden = true;
 	fMinimized = false;
 	fActivated = false;
-	fActivatedTimemap = 0;
-	fPositionChangedTimemap = 0;
-	fSizeChangedTimemap = 0;
+	fActivatedTimeStamp = 0;
+	fPositionChangedTimeStamp = 0;
+	fSizeChangedTimeStamp = 0;
 	fMouseGrabCount = 0;
 	fKeyboardGrabCount = 0;
 	fBrokeOnExpose = false;
 	fWindowWorkspaces = 0;
 
 	fWindow->ContactTo(&msgrSelf);
+
 	SetWorkspaces(workspace);
 }
 
@@ -185,13 +272,14 @@ EWindow::~EWindow()
 	Hide();
 
 	EView *child = NULL;
-	while((child = (EView*)fViewsList.LastItem()) != NULL)
+	while((child = ChildAt(CountChildren() - 1)) != NULL)
 	{
 		RemoveChild(child);
 		delete child;
 	}
 
-	delete fWindow;
+	if(fWindow) delete fWindow;
+
 	delete fPixmap;
 	delete fDC;
 	delete fLayout;
@@ -204,7 +292,7 @@ EWindow::EWindow(EMessage *from)
 	: ELooper(NULL, E_DISPLAY_PRIORITY)
 {
 	// TODO
-	InitSelf(ERect(0, 0, 1, 1), NULL, E_TITLED_WINDOW_LOOK, E_NORMAL_WINDOW_FEEL, 0, E_CURRENT_WORKSPACE);
+	ETK_ERROR("[INTERFACE]: %s --- Unsupported yet.", __PRETTY_FUNCTION__);
 }
 
 
@@ -235,7 +323,7 @@ void
 EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 {
 	if(target == NULL) target = PreferredHandler();
-	if(!target || target->Looper() != this) return;
+	if(target == NULL || target->Looper() != this) return;
 
 	if(target != this)
 	{
@@ -243,17 +331,17 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 		return;
 	}
 
-	bool IsCurrentMessage = (CurrentMessage() == msg ? true : false);
 	bool sendNotices = true;
 
 	msg->RemoveBool("etk:msg_from_gui");
 	switch(msg->what)
 	{
 		case E_PULSE:
+			if(IsHidden()) break;
 			for(eint32 i = 0; i < fNeededToPulseViews.CountItems(); i++)
 			{
 				EView *view = (EView*)fNeededToPulseViews.ItemAt(i);
-				view->MessageReceived(msg);
+				if(view->IsHidden() == false) PostMessage(msg, view);
 			}
 			break;
 
@@ -262,7 +350,6 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 		case E_MOUSE_MOVED:
 		case E_MOUSE_WHEEL_CHANGED:
 			{
-				EView *view;
 				EPoint where;
 				if(msg->FindPoint("where", &where) == false && msg->what != E_MOUSE_WHEEL_CHANGED)
 				{
@@ -275,64 +362,46 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 					msg->AddPoint("where", where);
 				}
 
-				if(msg->what != E_MOUSE_WHEEL_CHANGED)
-				{
-					EList Views;
-
-					for(eint32 i = 0; i < fMouseInsideViews.CountItems(); i++)
-					{
-						if((view = (EView*)fMouseInsideViews.ItemAt(i)) == NULL) continue;
-						if(view->EventMask() & E_POINTER_EVENTS) continue;
-						if(view->VisibleBoundsRegion().Contains(view->ConvertFromWindow(where))) continue;
-						Views.AddItem(view);
-					}
-
-					if(!Views.IsEmpty())
-					{
-						EMessage aMsg(*msg);
-						aMsg.what = E_MOUSE_MOVED;
-
-						for(eint32 i = 0; i < Views.CountItems(); i++)
-						{
-							if((view = (EView*)Views.ItemAt(i)) == NULL || view->Window() != this) continue;
-							EPoint pt = view->ConvertFromWindow(where);
-							aMsg.ReplacePoint("where", pt);
-							view->MessageReceived(&aMsg);
-						}
-
-						if(IsCurrentMessage && !CurrentMessage()) break;
-					}
-				}
-
 				EMessage aMsg(*msg);
 
-				for(eint32 i = 0; i < fViewsList.CountItems(); i++)
+				if(msg->what != E_MOUSE_WHEEL_CHANGED)
 				{
-					if((view = (EView*)fViewsList.ItemAt(i)) == NULL || view->Window() != this) continue;
-					if(view->VisibleFrameRegion().Contains(where) == false) continue;
+					euint32 saveWhat = aMsg.what;
+					aMsg.what = E_MOUSE_MOVED;
+					for(eint32 i = 0; i < fMouseInsideViews.CountItems(); i++)
+					{
+						EView *view = (EView*)fMouseInsideViews.ItemAt(i);
+
+						EPoint pt = view->ConvertFromWindow(where);
+						if(view->fLayout->VisibleRegion()->Contains(pt)) continue;
+						if(view->EventMask() & E_POINTER_EVENTS) continue;
+
+						aMsg.ReplacePoint("where", pt);
+						PostMessage(&aMsg, view);
+					}
+					aMsg.what = saveWhat;
+				}
+
+				for(EView *view = ChildAt(0); view != NULL; view = view->NextSibling())
+				{
+					EPoint pt = view->fLayout->ConvertFromContainer(where);
+					if(view->fLayout->VisibleRegion()->Contains(pt) == false) continue;
 
 					if(!(view->EventMask() & E_POINTER_EVENTS))
 					{
-						EPoint pt = view->ConvertFromWindow(where);
 						aMsg.ReplacePoint("where", pt);
-
-						view->MessageReceived(&aMsg);
+						PostMessage(&aMsg, view);
 					}
 
 					break; // just one child can receive the message
 				}
 
-				EList viewsList(fMouseInterestedViews);
-				for(eint32 i = 0; i < viewsList.CountItems(); i++)
+				for(eint32 i = 0; i < fMouseInterestedViews.CountItems(); i++)
 				{
-					if((view = (EView*)viewsList.ItemAt(i)) == NULL || view->Window() != this) continue;
+					EView *view = (EView*)fMouseInterestedViews.ItemAt(i);
 
-					EPoint pt = view->ConvertFromWindow(where);
-					aMsg.ReplacePoint("where", pt);
-
-					view->MessageReceived(&aMsg);
-
-					if(IsCurrentMessage && !CurrentMessage()) break;
+					aMsg.ReplacePoint("where", view->ConvertFromWindow(where));
+					PostMessage(&aMsg, view);
 				}
 			}
 			break;
@@ -344,18 +413,11 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 		case E_MODIFIERS_CHANGED:
 			{
 				// TODO: shortcuts
-				EView *view;
-
-				if((view = CurrentFocus()) != NULL) view->MessageReceived(msg);
-				if(IsCurrentMessage && !CurrentMessage()) break;
-
-				EList viewsList(fKeyboardInterestedViews);
-				for(eint32 i = 0; i < viewsList.CountItems(); i++)
+				for(eint32 i = -1; i < fKeyboardInterestedViews.CountItems(); i++)
 				{
-					if((view = (EView*)viewsList.ItemAt(i)) == NULL || view->Window() != this) continue;
-					if(view != CurrentFocus()) view->MessageReceived(msg);
-
-					if(IsCurrentMessage && !CurrentMessage()) break;
+					EView *view = i < 0 ? CurrentFocus() : (EView*)fKeyboardInterestedViews.ItemAt(i);
+					if((i < 0 && view == NULL) || (i >= 0 && view == CurrentFocus())) continue;
+					PostMessage(msg, view);
 				}
 			}
 			break;
@@ -363,9 +425,9 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 		case E_WORKSPACES_CHANGED:
 			{
 				euint32 curWorkspace;
+
 				if(msg->FindInt32("new", (eint32*)&curWorkspace) == false) break;
-				if(curWorkspace == 0) break;
-				if(fWindowWorkspaces != curWorkspace)
+				if(curWorkspace != 0 && fWindowWorkspaces != curWorkspace)
 				{
 					euint32 oldWorkspace = fWindowWorkspaces;
 					fWindowWorkspaces = curWorkspace;
@@ -377,23 +439,20 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 		case E_WINDOW_ACTIVATED:
 			{
 				e_bigtime_t when;
-				bool active;
-				if(msg->FindInt64("when", (eint64*)&when) == false) break;
-				if(fWindow->GetActivatedState(&active) != E_OK) break;
+				bool active = fActivated;
 
-				if(fActivated != active && fActivatedTimemap <= when)
+				if(msg->FindInt64("when", (eint64*)&when) == false) break;
+				if(!(fWindow == NULL || fWindow->GetActivatedState(&active) == E_OK)) break;
+
+				if(fActivated != active && fActivatedTimeStamp <= when)
 				{
 					fActivated = active;
-					fActivatedTimemap = when;
-					if(active && !(fWindowFlags & E_AVOID_FRONT)) fWindow->Raise();
+					fActivatedTimeStamp = when;
+					if((active && !(fWindowFlags & E_AVOID_FRONT)) && fWindow) fWindow->Raise();
 					WindowActivated(active);
-
-					EView *view;
-					EList viewsList(fViewsList);
-					for(eint32 i = 0; i < viewsList.CountItems(); i++)
+					for(EView *view = ChildAt(0); view != NULL; view = view->NextSibling())
 					{
-						if((view = (EView*)viewsList.ItemAt(i)) == NULL || view->Window() != this) continue;
-						view->_WindowActivated(active);
+						PostMessage(msg, view);
 					}
 				}
 			}
@@ -404,27 +463,26 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 			{
 				e_bigtime_t when;
 				if(msg->FindInt64("when", &when) == false) break;
-				if(msg->what == E_WINDOW_MOVED && when < fPositionChangedTimemap) break;
-				if(msg->what == E_WINDOW_RESIZED && when < fSizeChangedTimemap) break;
+				if(msg->what == E_WINDOW_MOVED && when < fPositionChangedTimeStamp) break;
+				if(msg->what == E_WINDOW_RESIZED && when < fSizeChangedTimeStamp) break;
 
-				EPoint where = fFrame.LeftTop();
-				float w = fFrame.Width();
-				float h = fFrame.Height();
-
-				bool doMoved = false, doResized = false;
+				ERect frame = Frame();
+				EPoint where = frame.LeftTop();
+				float w = frame.Width();
+				float h = frame.Height();
 
 				if(msg->what == E_WINDOW_RESIZED)
 				{
 					if(msg->FindFloat("width", &w) == false || msg->FindFloat("height", &h) == false) break;
 					msg->FindPoint("where", &where);
 				}
-				else if(msg->what == E_WINDOW_MOVED)
+				else // E_WINDOW_MOVED
 				{
 					if(msg->FindPoint("where", &where) == false) break;
 				}
 
-				doMoved = (msg->what == E_WINDOW_MOVED ? fFrame.LeftTop() != where : false);
-				doResized = (msg->what == E_WINDOW_RESIZED ? (fFrame.Width() != w || fFrame.Height() != h) : false);
+				bool doMoved = frame.LeftTop() != where;
+				bool doResized = (frame.Width() != w || frame.Height() != h);
 
 				if(CurrentMessage() == msg)
 				{
@@ -432,7 +490,7 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 					while(MessageQueue()->IsEmpty() == false)
 					{
 						EMessage *aMsg = MessageQueue()->FindMessage((eint32)0);
-						if(!aMsg) break;
+						if(aMsg == NULL) break;
 
 						if(!(aMsg->what == E_WINDOW_RESIZED || aMsg->what == E_WINDOW_MOVED))
 						{
@@ -473,8 +531,8 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 							when = nextWhen;
 						}
 
-						if(fFrame.LeftTop() != where && !doMoved) doMoved = true;
-						if((fFrame.Width() != w || fFrame.Height() != h) && !doResized) doResized = true;
+						if(frame.LeftTop() != where) doMoved = true;
+						if(frame.Width() != w || frame.Height() != h) doResized = true;
 
 						MessageQueue()->RemoveMessage(aMsg);
 					}
@@ -483,131 +541,60 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 
 				if(doMoved)
 				{
-					fPositionChangedTimemap = when;
-
-					fFrame.OffsetTo(where);
+					fPositionChangedTimeStamp = when;
+					e_cast_as(fLayout, EWindowLayoutContainer)->MoveTo(where);
 				}
 
 				if(doResized)
 				{
-					fSizeChangedTimemap = when;
+					fSizeChangedTimeStamp = when;
 
-					ERect oldFrame = fFrame;
-					fFrame.right = fFrame.left + w;
-					fFrame.bottom = fFrame.top + h;
-
-					ERect rFrame = fFrame.FloorCopy();
+					ERect rFrame = frame;
+					rFrame.right = rFrame.left + w;
+					rFrame.bottom = rFrame.top + h;
+					rFrame.Floor();
 					fPixmap->ResizeTo((euint32)max_c(rFrame.Width(), 0), (euint32)max_c(rFrame.Height(), 0));
 					fDC->SetClipping(ERegion(rFrame.OffsetToCopy(E_ORIGIN)));
 
 					fExposeRect = Bounds();
 					fBrokeOnExpose = false;
-					PostMessage(_UPDATE_IF_NEEDED_, this);
+					if(fInUpdate == false) PostMessage(_UPDATE_IF_NEEDED_, this);
 
 					// for disable update
-					bool oldInUpdate = fInUpdate;
+					bool saveInUpdate = fInUpdate;
 					fInUpdate = true;
-
-					EView *view;
-					for(eint32 i = 0; (view = (EView*)fViewsList.ItemAt(i)) != NULL; i++)
-					{
-						euint32 vMode = view->ResizingMode();
-						ERect vFrame = view->Frame();
-
-						if(vMode == E_FOLLOW_NONE || vMode == (E_FOLLOW_LEFT | E_FOLLOW_TOP))
-						{
-							view->_SetFrame(vFrame, true);
-							continue;
-						}
-
-						float width_offset = fFrame.Width() - oldFrame.Width();
-						float height_offset = fFrame.Height() - oldFrame.Height();
-
-						if((vMode & E_FOLLOW_H_CENTER) && !((vMode & E_FOLLOW_LEFT) && (vMode & E_FOLLOW_RIGHT)))
-						{
-							float newCenter = fFrame.Center().x - (oldFrame.Center().x - vFrame.Center().x);
-							if(vMode & E_FOLLOW_RIGHT)
-							{
-								vFrame.right += width_offset;
-								vFrame.left = vFrame.right - 2.f * (vFrame.right - newCenter);
-							}
-							else if(vMode & E_FOLLOW_LEFT)
-							{
-								vFrame.right = vFrame.left + 2.f * (newCenter - vFrame.left);
-							}
-							else
-							{
-								float vWidth = vFrame.Width();
-								vFrame.left = newCenter - vWidth / 2.f;
-								vFrame.right = newCenter + vWidth / 2.f;
-							}
-						}
-						else if(vMode & E_FOLLOW_RIGHT)
-						{
-							vFrame.right += width_offset;
-							if(!(vMode & E_FOLLOW_LEFT))
-								vFrame.left += width_offset;
-						}
-
-						if((vMode & E_FOLLOW_V_CENTER) && !((vMode & E_FOLLOW_TOP) && (vMode & E_FOLLOW_BOTTOM)))
-						{
-							float newCenter = fFrame.Center().y - (oldFrame.Center().y - vFrame.Center().y);
-							if(vMode & E_FOLLOW_TOP_BOTTOM)
-							{
-								vFrame.bottom += height_offset;
-								vFrame.top = vFrame.bottom - 2.f * (vFrame.bottom - newCenter);
-							}
-							else if(vMode & E_FOLLOW_TOP)
-							{
-								vFrame.bottom = vFrame.top + 2.f * (newCenter - vFrame.top);
-							}
-							else
-							{
-								float vHeight = vFrame.Height();
-								vFrame.top = newCenter - vHeight / 2.f;
-								vFrame.bottom = newCenter + vHeight / 2.f;
-							}
-						}
-						else if(vMode & E_FOLLOW_BOTTOM)
-						{
-							vFrame.bottom += height_offset;
-							if(!(vMode & E_FOLLOW_TOP))
-								vFrame.top += height_offset;
-						}
-
-						view->_SetFrame(vFrame, true);
-					}
-
-					fInUpdate = oldInUpdate;
+					e_cast_as(fLayout, EWindowLayoutContainer)->ResizeTo(w, h);
+					fInUpdate = saveInUpdate;
 				}
 				else if(fBrokeOnExpose)
 				{
 					fBrokeOnExpose = false;
-					PostMessage(_UPDATE_IF_NEEDED_, this);
+					if(fInUpdate == false) PostMessage(_UPDATE_IF_NEEDED_, this);
 				}
 
 				sendNotices = false;
 
+				frame = Frame();
 				if(doMoved)
 				{
-					FrameMoved(where);
-					if(IsWatched())
+					FrameMoved(frame.LeftTop());
+					if(IsWatched(E_WINDOW_MOVED))
 					{
 						EMessage aMsg(E_WINDOW_MOVED);
 						aMsg.AddInt64("when", when);
-						aMsg.AddPoint("where", where);
+						aMsg.AddPoint("where", frame.LeftTop());
 						SendNotices(E_WINDOW_MOVED, &aMsg);
 					}
 				}
 				if(doResized)
 				{
-					FrameResized(fFrame.Width(), fFrame.Height());
-					if(IsWatched())
+					FrameResized(frame.Width(), frame.Height());
+					if(IsWatched(E_WINDOW_RESIZED))
 					{
 						EMessage aMsg(E_WINDOW_RESIZED);
 						aMsg.AddInt64("when", when);
-						aMsg.AddFloat("width", fFrame.Width());
-						aMsg.AddFloat("height", fFrame.Height());
+						aMsg.AddFloat("width", frame.Width());
+						aMsg.AddFloat("height", frame.Height());
 						SendNotices(E_WINDOW_RESIZED, &aMsg);
 					}
 				}
@@ -615,25 +602,11 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 			break;
 
 		case E_MINIMIZE:
-			{
-				bool minimize;
-				if(msg->FindBool("minimize", &minimize) == false) break;
-
-				Minimize(minimize);
-			}
-			break;
-
 		case E_MINIMIZED:
 			{
 				bool minimize;
 				if(msg->FindBool("minimize", &minimize) == false) break;
-
-				if(fMinimized != minimize)
-				{
-					fMinimized = minimize;
-					// in order call the virtual function
-					if(!IsHidden()) Minimize(minimize);
-				}
+				Minimize(minimize);
 			}
 			break;
 
@@ -687,10 +660,8 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 					rect &= Bounds();
 					if(rect.IsValid())
 					{
-						if(expose)
-							fExposeRect = fExposeRect.IsValid() ? (fExposeRect | rect) : rect;
-						else
-							fUpdateRect = fUpdateRect.IsValid() ? (fUpdateRect | rect) : rect;
+						if(expose) fExposeRect |= rect;
+						else fUpdateRect |= rect;
 					}
 				}
 
@@ -719,7 +690,7 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 					if(noNeededToSendUpdate) break;
 				}
 
-				PostMessage(_UPDATE_IF_NEEDED_, this);
+				if(fInUpdate == false) PostMessage(_UPDATE_IF_NEEDED_, this);
 			}
 			break;
 
@@ -728,7 +699,7 @@ EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 			ELooper::DispatchMessage(msg, target);
 	}
 
-	if(sendNotices && IsWatched()) SendNotices(msg->what, msg);
+	if(sendNotices && IsWatched(msg->what)) SendNotices(msg->what, msg);
 }
 
 
@@ -753,24 +724,17 @@ EWindow::Quit()
 void
 EWindow::Show()
 {
-	if(!fHidden) return;
+	if(e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->IsHidden(false) == false) return;
 
-	fHidden = false;
+	e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->Show();
+
 	fMinimized = false;
-
-	fWindow->Show();
+	if(fWindow) fWindow->Show();
 
 	if(fPulseRunner)
-		fPulseRunner->SetCount((fPulseRate > E_INT64_CONSTANT(0) && fNeededToPulseViews.CountItems() > 0) ? -1 : 0);
+		fPulseRunner->SetCount((fPulseRate > 0 && fNeededToPulseViews.CountItems() > 0) ? -1 : 0);
 
 	if(!(IsRunning() || Proxy() != this)) Run();
-
-	EMessage msg(_UPDATE_);
-	msg.AddInt64("when", e_real_time_clock_usecs());
-	msg.AddRect("etk:frame", Bounds());
-	msg.AddBool("etk:expose", true);
-
-	PostMessage(&msg, this);
 
 	if(fWindowFeel == E_MODAL_APP_WINDOW_FEEL)
 	{
@@ -783,9 +747,9 @@ EWindow::Show()
 void
 EWindow::Hide()
 {
-	if(fHidden) return;
+	if(e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->IsHidden(false)) return;
 
-	if(fPulseRunner) fPulseRunner->SetCount(E_INT64_CONSTANT(0));
+	if(fPulseRunner) fPulseRunner->SetCount(0);
 
 	if(fWindowFeel == E_MODAL_APP_WINDOW_FEEL)
 	{
@@ -795,33 +759,30 @@ EWindow::Hide()
 
 	if(fMouseGrabCount > 0)
 	{
-		fWindow->UngrabMouse();
+		if(fWindow) fWindow->UngrabMouse();
 		fMouseGrabCount = 0;
 
-		EView *view;
 		for(eint32 i = 0; i < fMouseInterestedViews.CountItems(); i++)
 		{
-			if((view = (EView*)fMouseInterestedViews.ItemAt(i)) == NULL) continue;
-			if(view->fMouseGrabbed) view->fMouseGrabbed = false;
+			EView *view = (EView*)fMouseInterestedViews.ItemAt(i);
+			view->fMouseGrabbed = false;
 		}
 	}
 
 	if(fKeyboardGrabCount > 0)
 	{
-		fWindow->UngrabKeyboard();
+		if(fWindow) fWindow->UngrabKeyboard();
 		fKeyboardGrabCount = 0;
 
-		EView *view;
 		for(eint32 i = 0; i < fKeyboardInterestedViews.CountItems(); i++)
 		{
-			if((view = (EView*)fKeyboardInterestedViews.ItemAt(i)) == NULL) continue;
-			if(view->fKeyboardGrabbed) view->fKeyboardGrabbed = false;
+			EView *view = (EView*)fKeyboardInterestedViews.ItemAt(i);
+			view->fKeyboardGrabbed = false;
 		}
 	}
 
-	fWindow->Hide();
+	if(fWindow) fWindow->Hide();
 
-	fHidden = true;
 	fMinimized = false;
 	fBrokeOnExpose = false;
 
@@ -832,13 +793,15 @@ EWindow::Hide()
 		aMsg.AddBool("minimize", false);
 		SendNotices(E_MINIMIZED, &aMsg);
 	}
+
+	e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->Hide();
 }
 
 
 bool
 EWindow::IsHidden() const
 {
-	return fHidden;
+	return e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->IsHidden();
 }
 
 
@@ -847,7 +810,6 @@ EWindow::IsMinimized() const
 {
 	if(IsHidden()) return false;
 	if(fMinimized) return true;
-
 	return false;
 }
 
@@ -855,9 +817,8 @@ EWindow::IsMinimized() const
 void
 EWindow::AddViewChildrenToHandlersList(EWindow *win, EView *child)
 {
-	if(!win || !child) return;
-	EView *view = NULL;
-	for(eint32 i = 0; (view = child->ChildAt(i)) != NULL; i++)
+	if(win == NULL || child == NULL) return;
+	for(EView *view = child->ChildAt(0); view != NULL; view = view->NextSibling())
 	{
 		win->AddHandler(view);
 
@@ -879,9 +840,8 @@ EWindow::AddViewChildrenToHandlersList(EWindow *win, EView *child)
 void
 EWindow::RemoveViewChildrenFromHandlersList(EWindow *win, EView *child)
 {
-	if(!win || !child || child->Looper() != win) return;
-	EView *view = NULL;
-	for(eint32 i = 0; (view = child->ChildAt(i)) != NULL; i++)
+	if(win == NULL || child == NULL || child->Looper() != win) return;
+	for(EView *view = child->ChildAt(0); view != NULL; view = view->NextSibling())
 	{
 		RemoveViewChildrenFromHandlersList(win, view);
 		view->AllDetached();
@@ -897,51 +857,33 @@ EWindow::RemoveViewChildrenFromHandlersList(EWindow *win, EView *child)
 void
 EWindow::AddChild(EView *child, EView *nextSibling)
 {
-	eint32 indexNext = -1;
-
 	if(child == NULL || child->Looper() != NULL || child->Parent() != NULL ||
-	   (nextSibling == NULL ? false : (nextSibling->Looper() != this ||
-					   nextSibling->Parent() != NULL ||
-					   (indexNext = fViewsList.IndexOf(nextSibling)) < 0)))
+	   (nextSibling == NULL ? false : (nextSibling->Looper() != this || nextSibling->Parent() != NULL)))
 	{
 		ETK_WARNING("[INTERFACE]: %s --- Unable to add child.", __PRETTY_FUNCTION__);
-		return;
-	}
-
-	EView *prevSibling = (indexNext >= 0 ? nextSibling->fPrevSibling : (EView*)fViewsList.LastItem());
-	if((indexNext >= 0 ? fViewsList.AddItem(child, indexNext) : fViewsList.AddItem(child)) == false)
-	{
-		ETK_WARNING("[INTERFACE]: %s --- Unable to add child to views list.", __PRETTY_FUNCTION__);
 		return;
 	}
 
 	AddHandler(child);
 	if(child->Looper() != this)
 	{
-		fViewsList.RemoveItem(child);
 		ETK_WARNING("[INTERFACE]: %s --- Unable to attach child to window, abort to add child.", __PRETTY_FUNCTION__);
 		return;
 	}
 
-	if(prevSibling != NULL) prevSibling->fNextSibling = child;
-	if(nextSibling != NULL) nextSibling->fPrevSibling = child;
-
-	child->fPrevSibling = prevSibling;
-	child->fNextSibling = nextSibling;
+	ELayoutItem *topItem = e_cast_as(fLayout, EWindowLayoutContainer)->TopItem();
+	if(topItem->AddItem(child->fLayout, nextSibling == NULL ? -1 : topItem->IndexOf(nextSibling->fLayout)) == false)
+	{
+		RemoveHandler(child);
+		ETK_WARNING("[INTERFACE]: %s --- Unable to add child to layout.", __PRETTY_FUNCTION__);
+		return;
+	}
 
 	child->AttachToWindow();
 	child->AttachedToWindow();
 
 	AddViewChildrenToHandlersList(this, child);
 	child->AllAttached();
-
-	if(child->fHidden) return;
-
-	while(nextSibling != NULL)
-	{
-		if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-		nextSibling = nextSibling->fNextSibling;
-	}
 }
 
 
@@ -949,11 +891,6 @@ bool
 EWindow::RemoveChild(EView *child)
 {
 	if(child == NULL || child->Looper() != this || child->Parent() != NULL) return false;
-
-	eint32 childIndex = fViewsList.IndexOf(child);
-	if(childIndex < 0) return false;
-
-	bool childIsHidden = child->fHidden;
 
 	if(child->fScrollBar.IsEmpty() == false)
 	{
@@ -975,8 +912,6 @@ EWindow::RemoveChild(EView *child)
 		}
 	}
 
-	if(child->Parent()) child->Parent()->ChildRemoving(child);
-
 	RemoveViewChildrenFromHandlersList(this, child);
 	child->AllDetached();
 
@@ -985,20 +920,7 @@ EWindow::RemoveChild(EView *child)
 	child->DetachFromWindow();
 	RemoveHandler(child);
 
-	fViewsList.RemoveItem(childIndex);
-
-	EView *nextSibling = child->fNextSibling;
-
-	if(child->fPrevSibling != NULL) child->fPrevSibling->fNextSibling = child->fNextSibling;
-	if(child->fNextSibling != NULL) child->fNextSibling->fPrevSibling = child->fPrevSibling;
-	child->fPrevSibling = NULL;
-	child->fNextSibling = NULL;
-
-	while(childIsHidden == false && nextSibling != NULL)
-	{
-		if(nextSibling->fHidden == false) nextSibling->_UpdateOriginAndVisibleRegion(true);
-		nextSibling = nextSibling->fNextSibling;
-	}
+	e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->RemoveItem(child->fLayout);
 
 	return true;
 }
@@ -1007,14 +929,15 @@ EWindow::RemoveChild(EView *child)
 eint32
 EWindow::CountChildren() const
 {
-	return fViewsList.CountItems();
+	return e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->CountItems();
 }
 
 
 EView*
 EWindow::ChildAt(eint32 index) const
 {
-	return((EView*)fViewsList.ItemAt(index));
+	ELayoutItem *topItem = e_cast_as(fLayout, EWindowLayoutContainer)->TopItem();
+	return(topItem->ItemAt(index) != NULL ? (EView*)topItem->ItemAt(index)->PrivateData() : NULL);
 }
 
 
@@ -1022,7 +945,7 @@ void
 EWindow::ConvertToScreen(EPoint* pt) const
 {
 	if(!pt) return;
-	*pt += fFrame.LeftTop();
+	*pt += e_cast_as(fLayout, EWindowLayoutContainer)->Origin();
 }
 
 
@@ -1039,7 +962,7 @@ void
 EWindow::ConvertFromScreen(EPoint* pt) const
 {
 	if(!pt) return;
-	*pt -= fFrame.LeftTop();
+	*pt -= e_cast_as(fLayout, EWindowLayoutContainer)->Origin();
 }
 
 
@@ -1151,29 +1074,30 @@ EWindow::FrameResized(float new_width, float new_height)
 void
 EWindow::Minimize(bool minimize)
 {
-	if(fMouseGrabCount > 0)
+	if(minimize)
 	{
-		fWindow->UngrabMouse();
-		fMouseGrabCount = 0;
-
-		EView *view;
-		for(eint32 i = 0; i < fMouseInterestedViews.CountItems(); i++)
+		if(fMouseGrabCount > 0)
 		{
-			if((view = (EView*)fMouseInterestedViews.ItemAt(i)) == NULL) continue;
-			if(view->fMouseGrabbed) view->fMouseGrabbed = false;
+			if(fWindow) fWindow->UngrabMouse();
+			fMouseGrabCount = 0;
+
+			for(eint32 i = 0; i < fMouseInterestedViews.CountItems(); i++)
+			{
+				EView *view = (EView*)fMouseInterestedViews.ItemAt(i);
+				view->fMouseGrabbed = false;
+			}
 		}
-	}
 
-	if(fKeyboardGrabCount > 0)
-	{
-		fWindow->UngrabKeyboard();
-		fKeyboardGrabCount = 0;
-
-		EView *view;
-		for(eint32 i = 0; i < fKeyboardInterestedViews.CountItems(); i++)
+		if(fKeyboardGrabCount > 0)
 		{
-			if((view = (EView*)fKeyboardInterestedViews.ItemAt(i)) == NULL) continue;
-			if(view->fKeyboardGrabbed) view->fKeyboardGrabbed = false;
+			if(fWindow) fWindow->UngrabKeyboard();
+			fKeyboardGrabCount = 0;
+
+			for(eint32 i = 0; i < fKeyboardInterestedViews.CountItems(); i++)
+			{
+				EView *view = (EView*)fKeyboardInterestedViews.ItemAt(i);
+				view->fKeyboardGrabbed = false;
+			}
 		}
 	}
 
@@ -1181,7 +1105,7 @@ EWindow::Minimize(bool minimize)
 
 	fMinimized = minimize;
 
-	if(fHidden) return;
+	if(IsHidden() || fWindow == NULL) return;
 
 	if(fMinimized)
 		fWindow->Iconify();
@@ -1193,14 +1117,39 @@ EWindow::Minimize(bool minimize)
 ERect
 EWindow::Bounds() const
 {
-	return fFrame.OffsetToCopy(E_ORIGIN);
+	return e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->Bounds();
 }
 
 
 ERect
 EWindow::Frame() const
 {
-	return fFrame;
+	ERect rect = e_cast_as(fLayout, EWindowLayoutContainer)->TopItem()->Frame();
+	rect.OffsetTo(e_cast_as(fLayout, EWindowLayoutContainer)->Origin());
+	return rect;
+}
+
+
+void
+EWindow::Invalidate(ERect invalRect, bool redraw)
+{
+	if(IsHidden() || invalRect.IsValid() == false) return;
+
+	if(redraw) fExposeRect |= invalRect;
+	else fUpdateRect |= invalRect;
+
+	if(fInUpdate == false)
+	{
+		if(fWindow == NULL)
+		{
+			// TODO
+			UpdateIfNeeded();
+		}
+		else
+		{
+			PostMessage(_UPDATE_IF_NEEDED_, this);
+		}
+	}
 }
 
 
@@ -1209,21 +1158,18 @@ EWindow::DisableUpdates()
 {
 	eint64 currentThread = etk_get_current_thread_id();
 
-	if(fUpdateHolderThreadId != E_INT64_CONSTANT(0) && fUpdateHolderThreadId != currentThread)
-		ETK_ERROR("[INTERFACE]: %s --- Must call \"DisableUpdates()\" and \"EnableUpdates()\" in a same thread!", __PRETTY_FUNCTION__);
-	else if(currentThread == E_INT64_CONSTANT(0))
-		ETK_ERROR("[INTERFACE]: %s --- Thread not support!", __PRETTY_FUNCTION__);
+	if(fUpdateHolderThreadId != 0 && fUpdateHolderThreadId != currentThread)
+		ETK_ERROR("[INTERFACE]: %s --- Invalid \"DisableUpdates()\" and \"EnableUpdates()\" call!", __PRETTY_FUNCTION__);
 
-	if(fUpdateHolderThreadId == E_INT64_CONSTANT(0))
+	if(fUpdateHolderThreadId == 0)
 	{
 		fUpdateHolderThreadId = currentThread;
 		fUpdateHolderCount = 1;
 	}
 	else
 	{
-		if(E_MAXINT64 - E_INT64_CONSTANT(1) < fUpdateHolderCount)
+		if(E_MAXINT64 - 1 < fUpdateHolderCount)
 			ETK_ERROR("[INTERFACE]: %s --- Call \"DisableUpdates()\" more than limited times!", __PRETTY_FUNCTION__);
-
 		fUpdateHolderCount++;
 	}
 }
@@ -1234,33 +1180,31 @@ EWindow::EnableUpdates()
 {
 	eint64 currentThread = etk_get_current_thread_id();
 
-	if(fUpdateHolderThreadId != E_INT64_CONSTANT(0) && fUpdateHolderThreadId != currentThread)
-		ETK_ERROR("[INTERFACE]: %s --- Must call \"DisableUpdates()\" and \"EnableUpdates()\" in a same thread!", __PRETTY_FUNCTION__);
-	else if(currentThread == E_INT64_CONSTANT(0))
-		ETK_ERROR("[INTERFACE]: %s --- Thread not support!", __PRETTY_FUNCTION__);
-	else if(fUpdateHolderThreadId <= E_INT64_CONSTANT(0))
+	if(fUpdateHolderThreadId != 0 && fUpdateHolderThreadId != currentThread)
+		ETK_ERROR("[INTERFACE]: %s --- Invalid \"DisableUpdates()\" and \"EnableUpdates()\" call!", __PRETTY_FUNCTION__);
+	else if(fUpdateHolderThreadId == 0)
 	{
-		ETK_WARNING("[INTERFACE]: %s --- Must call \"DisableUpdates()\" before \"EnableUpdates()\"!", __PRETTY_FUNCTION__);
+		ETK_WARNING("[INTERFACE]: %s --- Please call \"DisableUpdates()\" before \"EnableUpdates()\"!", __PRETTY_FUNCTION__);
 		return;
 	}
 
 	fUpdateHolderCount--;
-	if(fUpdateHolderCount > E_INT64_CONSTANT(0)) return;
+	if(fUpdateHolderCount > 0) return;
 
-	fUpdateHolderCount = E_INT64_CONSTANT(0);
-	fUpdateHolderThreadId = E_INT64_CONSTANT(0);
+	fUpdateHolderCount = 0;
+	fUpdateHolderThreadId = 0;
 
-	if(fUpdateRect.IsValid() && !_HasResizeMessage(false))
+	if(fWindow && fUpdateRect.IsValid() && !_HasResizeMessage(false))
 	{
 		fUpdateRect.Floor();
-		fPixmap->CopyTo(fWindow,
+		fPixmap->CopyTo(fDC, fWindow,
 				(eint32)fUpdateRect.left, (eint32)fUpdateRect.top,
 				(euint32)fUpdateRect.Width(), (euint32)fUpdateRect.Height(),
 				(eint32)fUpdateRect.left, (eint32)fUpdateRect.top,
-				(euint32)fUpdateRect.Width(), (euint32)fUpdateRect.Height(),
-				255, NULL);
-		fUpdateRect = ERect();
+				(euint32)fUpdateRect.Width(), (euint32)fUpdateRect.Height());
 	}
+
+	fUpdateRect = ERect();
 }
 
 
@@ -1274,13 +1218,13 @@ EWindow::NeedsUpdate() const
 void
 EWindow::_UpdateIfNeeded(e_bigtime_t when)
 {
-	if(_HasResizeMessage(false) || !NeedsUpdate() || !fWindow) return;
+	if(_HasResizeMessage(false) || NeedsUpdate() == false) return;
 
 	fBrokeOnExpose = false;
 	ERect r = fExposeRect;
 	if(r.IsValid())
 	{
-		bool oldInUpdate = fInUpdate;
+		bool saveInUpdate = fInUpdate;
 
 		fExposeRect = ERect();
 
@@ -1288,23 +1232,23 @@ EWindow::_UpdateIfNeeded(e_bigtime_t when)
 		_Expose(r, when);
 		if(fBrokeOnExpose)
 		{
-			fExposeRect = fExposeRect.IsValid() ? (fExposeRect | r) : r;
-			fInUpdate = oldInUpdate;
+			fExposeRect |= r;
+			fInUpdate = saveInUpdate;
 			fBrokeOnExpose = false;
-			PostMessage(_UPDATE_IF_NEEDED_, this);
+			if(fInUpdate == false) PostMessage(_UPDATE_IF_NEEDED_, this);
 			return;
 		}
 		else if(fExposeRect.IsValid())
 		{
-			fUpdateRect = fUpdateRect.IsValid() ? (fUpdateRect | r) : r;
-			fInUpdate = oldInUpdate;
+			fUpdateRect |= r;
+			fInUpdate = saveInUpdate;
 			_UpdateIfNeeded(e_real_time_clock_usecs());
 			return;
 		}
 
-		if(fUpdateRect.IsValid()) r |= fUpdateRect;
+		r |= fUpdateRect;
 
-		fInUpdate = oldInUpdate;
+		fInUpdate = saveInUpdate;
 	}
 	else
 	{
@@ -1315,13 +1259,12 @@ EWindow::_UpdateIfNeeded(e_bigtime_t when)
 
 	r &= Bounds();
 
-	if(r.IsValid() == false) return;
+	if(r.IsValid() == false || fWindow == NULL) return;
 
 	r.Floor();
-	fPixmap->CopyTo(fWindow,
+	fPixmap->CopyTo(fDC, fWindow,
 			(eint32)r.left, (eint32)r.top, (euint32)r.Width(), (euint32)r.Height(),
-			(eint32)r.left, (eint32)r.top, (euint32)r.Width(), (euint32)r.Height(),
-			255, NULL);
+			(eint32)r.left, (eint32)r.top, (euint32)r.Width(), (euint32)r.Height());
 }
 
 
@@ -1336,34 +1279,32 @@ void
 EWindow::_Update(ERect rect, bool force_update)
 {
 	if(rect.IsValid() == false) return;
-	fUpdateRect = fUpdateRect.IsValid() ? (fUpdateRect | rect) : rect;
+	fUpdateRect |= rect;
 	if(fInUpdate) return;
 	if(fUpdateRect.IsValid() == false) return;
-	if(force_update || fUpdateHolderThreadId == E_INT64_CONSTANT(0))
+	if(fWindow && (force_update || fUpdateHolderThreadId == 0))
 	{
 		fUpdateRect.Floor();
-		fPixmap->CopyTo(fWindow,
+		fPixmap->CopyTo(fDC, fWindow,
 				(eint32)fUpdateRect.left, (eint32)fUpdateRect.top,
 				(euint32)fUpdateRect.Width(), (euint32)fUpdateRect.Height(),
 				(eint32)fUpdateRect.left, (eint32)fUpdateRect.top,
-				(euint32)fUpdateRect.Width(), (euint32)fUpdateRect.Height(),
-				255, NULL);
-		fUpdateRect = ERect();
+				(euint32)fUpdateRect.Width(), (euint32)fUpdateRect.Height());
 	}
+	fUpdateRect = ERect();
 }
 
 
 void
 EWindow::SetBackgroundColor(e_rgb_color c)
 {
-	if(fBackgroundColor != c)
+	if(fDC->HighColor() != c)
 	{
-		fBackgroundColor.set_to(c.red, c.green, c.blue, c.alpha);
-		fWindow->SetBackgroundColor(fBackgroundColor);
-		fDC->SetHighColor(fBackgroundColor);
+		if(fWindow) fWindow->SetBackgroundColor(c);
+		fDC->SetHighColor(c);
 
 		fExposeRect = Bounds();
-		PostMessage(_UPDATE_IF_NEEDED_, this);
+		if(fInUpdate == false) PostMessage(_UPDATE_IF_NEEDED_, this);
 	}
 }
 
@@ -1380,15 +1321,13 @@ EWindow::SetBackgroundColor(euint8 r, euint8 g, euint8 b, euint8 a)
 e_rgb_color
 EWindow::BackgroundColor() const
 {
-	return fBackgroundColor;
+	return fDC->HighColor();
 }
 
 
 void
 EWindow::_Expose(ERect rect, e_bigtime_t when)
 {
-	if(!fWindow) return;
-
 	rect &= Bounds();
 	if(rect.IsValid() == false) return;
 
@@ -1397,12 +1336,10 @@ EWindow::_Expose(ERect rect, e_bigtime_t when)
 
 	ERegion region(rect);
 
-	EView *child;
-	for(eint32 i = 0; (child = (EView*)fViewsList.ItemAt(i)) != NULL; i++)
+	for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
 	{
 		if(fBrokeOnExpose || _HasResizeMessage(true)) break;
-		if(child->fVisibleRegion.Intersects(rect) == false) continue;
-
+		if(child->fLayout->VisibleRegion()->Intersects(child->ConvertFromParent(rect)) == false) continue;
 		child->_Expose(child->ConvertFromParent(region), when);
 	}
 }
@@ -1418,49 +1355,46 @@ EWindow::InUpdate() const
 bool
 EWindow::_HasResizeMessage(bool setBrokeOnExpose)
 {
-	bool ret = false;
+	bool retVal = false;
+	ERect frame = Frame();
 
 	MessageQueue()->Lock();
-
-	EMessage *msg = MessageQueue()->FindMessage(E_WINDOW_RESIZED, 0, 20);
-	if(msg)
+	EMessage *msg;
+	eint32 fromIndex = 0;
+	while(retVal == false && (msg = MessageQueue()->FindMessage(E_WINDOW_RESIZED, fromIndex, 20)) != NULL)
 	{
 		float w, h;
-		if(msg->FindFloat("width", &w) && msg->FindFloat("height", &h))
-			ret = (fFrame.Width() != w || fFrame.Height() != h);
+		if(msg->FindFloat("width", &w) == false || msg->FindFloat("height", &h) == false) break;
+		fromIndex = MessageQueue()->IndexOfMessage(msg) + 1;
+		retVal = frame.Width() != w || frame.Height() != h;
 	}
-
 	MessageQueue()->Unlock();
 
-	if(ret && setBrokeOnExpose) fBrokeOnExpose = true;
+	if(retVal && setBrokeOnExpose) fBrokeOnExpose = true;
 
-	return ret;
+	return retVal;
 }
 
 
 void
 EWindow::Activate(bool state)
 {
-	if(!(fHidden || fMinimized) || !state)
+	if(!(IsHidden() || fMinimized) || !state)
 	{
-		if(fWindow->Activate(state) != E_OK)
+		if(!(fWindow == NULL || fWindow->Activate(state) == E_OK))
 		{
-			ETK_DEBUG("[INTERFACE]: %s --- Unable to %s window.", __PRETTY_FUNCTION__, (state ? "activate" : "inactivate"));
+			ETK_DEBUG("[INTERFACE]: %s --- Unable to %s window.", __PRETTY_FUNCTION__, state ? "activate" : "inactivate");
 			return;
 		}
 
-		fActivatedTimemap = e_real_time_clock_usecs();
+		fActivatedTimeStamp = e_real_time_clock_usecs();
 		fActivated = state;
-		if(state && !(fWindowFlags & E_AVOID_FRONT)) fWindow->Raise();
+		if((state && !(fWindowFlags & E_AVOID_FRONT)) && fWindow) fWindow->Raise();
 		WindowActivated(state);
 
-		EView *view;
-		EList viewsList(fViewsList);
-		for(eint32 i = 0; i < viewsList.CountItems(); i++)
-		{
-			if((view = (EView*)viewsList.ItemAt(i)) == NULL || view->Window() != this) continue;
-			view->_WindowActivated(state);
-		}
+		EMessage aMsg(E_WINDOW_ACTIVATED);
+		aMsg.AddInt64("when", e_real_time_clock_usecs());
+		for(EView *view = ChildAt(0); view != NULL; view = view->NextSibling()) PostMessage(&aMsg, view);
 	}
 }
 
@@ -1483,17 +1417,14 @@ EWindow::FindView(const char *name) const
 {
 	EString srcStr(name);
 
-	EView *view;
-	for(eint32 i = 0; i < fViewsList.CountItems(); i++)
+	for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
 	{
-		if((view = (EView*)fViewsList.ItemAt(i)) == NULL) continue;
+		EString destStr(child->Name());
 
-		EString destStr(view->Name());
+		if(srcStr == destStr) return child;
 
-		if(srcStr == destStr) return view;
-
-		EView *cView = view->FindView(name);
-		if(cView) return cView;
+		EView *view = child->FindView(name);
+		if(view != NULL) return view;
 	}
 
 	return NULL;
@@ -1505,11 +1436,9 @@ EWindow::FindView(EPoint where) const
 {
 	if(Bounds().Contains(where) == false) return NULL;
 
-	EView *view;
-	for(eint32 i = 0; i < fViewsList.CountItems(); i++)
+	for(EView *child = ChildAt(0); child != NULL; child = child->NextSibling())
 	{
-		if((view = (EView*)fViewsList.ItemAt(i)) == NULL) continue;
-		if(view->VisibleFrameRegion().Contains(where)) return view;
+		if(child->fLayout->VisibleRegion()->Contains(child->fLayout->ConvertFromContainer(where))) return child;
 	}
 
 	return NULL;
@@ -1557,11 +1486,11 @@ EWindow::SetType(e_window_type type)
 
 	e_status_t status;
 
-	e_window_look oldLook = fWindowLook;
+	e_window_look saveLook = fWindowLook;
 	if((status = SetLook(look)) != E_OK) return status;
 	if((status = SetFeel(feel)) != E_OK)
 	{
-		SetLook(oldLook);
+		SetLook(saveLook);
 		return status;
 	}
 
@@ -1591,7 +1520,7 @@ EWindow::SetLook(e_window_look look)
 {
 	if(fWindowLook != look)
 	{
-		e_status_t status = fWindow->SetLook(look);
+		e_status_t status = fWindow == NULL ? E_OK : fWindow->SetLook(look);
 		if(status != E_OK) return status;
 		fWindowLook = look;
 	}
@@ -1612,7 +1541,7 @@ EWindow::SetFeel(e_window_feel feel)
 {
 	if(fWindowFeel != feel)
 	{
-		e_status_t status = fWindow->SetFeel(feel);
+		e_status_t status = fWindow == NULL ? E_OK : fWindow->SetFeel(feel);
 		if(status != E_OK) return status;
 
 		e_window_feel oldFeel = fWindowFeel;
@@ -1644,27 +1573,23 @@ EWindow::SetFlags(euint32 flags)
 {
 	if(fWindowFlags != flags)
 	{
-		e_status_t status = fWindow->SetFlags(flags);
+		e_status_t status = fWindow == NULL ? E_OK : fWindow->SetFlags(flags);
 		if(status != E_OK) return status;
 		fWindowFlags = flags;
 		if(flags & E_AVOID_FOCUS)
 		{
 			if(fActivated != false)
 			{
-				if(fWindow->Activate(false) == E_OK)
+				if(fWindow == NULL ? true : (fWindow->Activate(false) == E_OK))
 				{
-					fActivatedTimemap = e_real_time_clock_usecs();
+					fActivatedTimeStamp = e_real_time_clock_usecs();
 
 					fActivated = false;
 					WindowActivated(false);
 
-					EView *view;
-					EList viewsList(fViewsList);
-					for(eint32 i = 0; i < viewsList.CountItems(); i++)
-					{
-						if((view = (EView*)viewsList.ItemAt(i)) == NULL || view->Window() != this) continue;
-						view->_WindowActivated(false);
-					}
+					EMessage aMsg(E_WINDOW_ACTIVATED);
+					aMsg.AddInt64("when", e_real_time_clock_usecs());
+					for(EView *view = ChildAt(0); view != NULL; view = view->NextSibling()) PostMessage(&aMsg, view);
 				}
 			}
 		}
@@ -1689,6 +1614,12 @@ EWindow::SetWorkspaces(euint32 workspace)
 		if(etk_app->fGraphicsEngine->GetCurrentWorkspace(&workspace) != E_OK || workspace == 0) return;
 	}
 
+	if(fWindow == NULL)
+	{
+		// TODO
+		return;
+	}
+
 	if(fWindowWorkspaces != workspace || fWindowWorkspaces == 0)
 	{
 		if(fWindow->SetWorkspaces(workspace) == E_OK)
@@ -1711,33 +1642,40 @@ EWindow::Workspaces() const
 void
 EWindow::MoveBy(float dx, float dy)
 {
-	MoveTo(fFrame.LeftTop() + EPoint(dx, dy));
+	MoveTo(Frame().LeftTop() + EPoint(dx, dy));
 }
 
 
 void
 EWindow::ResizeBy(float dx, float dy)
 {
-	ResizeTo(fFrame.Width() + dx, fFrame.Height() + dy);
+	ERect frame = Frame();
+	ResizeTo(frame.Width() + dx, frame.Height() + dy);
 }
 
 
 void
 EWindow::MoveTo(EPoint where)
 {
-	if(fFrame.LeftTop() != where)
+	if(fWindow == NULL)
+	{
+		// TODO
+		return;
+	}
+
+	if(Frame().LeftTop() != where)
 	{
 		EPoint pt = where.FloorCopy();
 		if(fWindow->MoveTo((eint32)pt.x, (eint32)pt.y) != E_OK) return;
 
-		fPositionChangedTimemap = e_real_time_clock_usecs();
-		fFrame.OffsetTo(where);
+		fPositionChangedTimeStamp = e_real_time_clock_usecs();
+		e_cast_as(fLayout, EWindowLayoutContainer)->MoveTo(where);
 		FrameMoved(where);
 
 		if(IsWatched(E_WINDOW_MOVED))
 		{
 			EMessage aMsg(E_WINDOW_MOVED);
-			aMsg.AddInt64("when", fPositionChangedTimemap);
+			aMsg.AddInt64("when", fPositionChangedTimeStamp);
 			aMsg.AddPoint("where", where);
 			SendNotices(E_WINDOW_MOVED, &aMsg);
 		}
@@ -1758,6 +1696,12 @@ EWindow::MoveToCenter()
 void
 EWindow::ResizeTo(float w, float h)
 {
+	if(fWindow == NULL)
+	{
+		// TODO
+		return;
+	}
+
 	euint32 min_h = E_MAXUINT32, max_h = E_MAXUINT32, min_v = E_MAXUINT32, max_v = E_MAXUINT32;
 	fWindow->GetSizeLimits(&min_h, &max_h, &min_v, &max_v);
 
@@ -1766,113 +1710,37 @@ EWindow::ResizeTo(float w, float h)
 	if(h < (float)min_v && min_v != E_MAXUINT32) h = (float)min_v;
 	else if(h > (float)max_v && max_v != E_MAXUINT32) h = (float)max_v;
 
-	if(fFrame.Width() != w || fFrame.Height() != h)
+	ERect frame = Frame();
+	if(frame.Width() != w || frame.Height() != h)
 	{
-		ERect frame(fFrame);
 		frame.right = frame.left + w;
 		frame.bottom = frame.top + h;
 		frame.Floor();
 		if(fWindow->MoveAndResizeTo((eint32)frame.left, (eint32)frame.top,
 					    (euint32)max_c(frame.Width(), 0),
 					    (euint32)max_c(frame.Height(), 0)) != E_OK) return;
+		fPixmap->ResizeTo((euint32)max_c(frame.Width(), 0), (euint32)max_c(frame.Height(), 0));
+		fDC->SetClipping(ERegion(frame.OffsetToCopy(E_ORIGIN)));
 
-		fSizeChangedTimemap = e_real_time_clock_usecs();
-
-		ERect oldFrame = fFrame;
-		fFrame.right = fFrame.left + w;
-		fFrame.bottom = fFrame.top + h;
-
-		ERect rFrame = fFrame.FloorCopy();
-		fPixmap->ResizeTo((euint32)max_c(rFrame.Width(), 0), (euint32)max_c(rFrame.Height(), 0));
-		fDC->SetClipping(ERegion(rFrame.OffsetToCopy(E_ORIGIN)));
+		fSizeChangedTimeStamp = e_real_time_clock_usecs();
 
 		fExposeRect = Bounds();
-		PostMessage(_UPDATE_IF_NEEDED_, this);
+		if(fInUpdate == false) PostMessage(_UPDATE_IF_NEEDED_, this);
 
 		// for disable update
-		bool oldInUpdate = fInUpdate;
+		bool saveInUpdate = fInUpdate;
 		fInUpdate = true;
+		e_cast_as(fLayout, EWindowLayoutContainer)->ResizeTo(w, h);
+		fInUpdate = saveInUpdate;
 
-		EView *view;
-		for(eint32 i = 0; (view = (EView*)fViewsList.ItemAt(i)) != NULL; i++)
-		{
-			euint32 vMode = view->ResizingMode();
-			ERect vFrame = view->Frame();
-
-			if(vMode == E_FOLLOW_NONE || vMode == (E_FOLLOW_LEFT | E_FOLLOW_TOP))
-			{
-				view->_SetFrame(vFrame, true);
-				continue;
-			}
-
-			float width_offset = fFrame.Width() - oldFrame.Width();
-			float height_offset = fFrame.Height() - oldFrame.Height();
-
-			if((vMode & E_FOLLOW_H_CENTER) && !((vMode & E_FOLLOW_LEFT) && (vMode & E_FOLLOW_RIGHT)))
-			{
-				float newCenter = fFrame.Center().x - (oldFrame.Center().x - vFrame.Center().x);
-				if(vMode & E_FOLLOW_RIGHT)
-				{
-					vFrame.right += width_offset;
-					vFrame.left = vFrame.right - 2.f * (vFrame.right - newCenter);
-				}
-				else if(vMode & E_FOLLOW_LEFT)
-				{
-					vFrame.right = vFrame.left + 2.f * (newCenter - vFrame.left);
-				}
-				else
-				{
-					float vWidth = vFrame.Width();
-					vFrame.left = newCenter - vWidth / 2.f;
-					vFrame.right = newCenter + vWidth / 2.f;
-				}
-			}
-			else if(vMode & E_FOLLOW_RIGHT)
-			{
-				vFrame.right += width_offset;
-				if(!(vMode & E_FOLLOW_LEFT))
-					vFrame.left += width_offset;
-			}
-
-			if((vMode & E_FOLLOW_V_CENTER) && !((vMode & E_FOLLOW_TOP) && (vMode & E_FOLLOW_BOTTOM)))
-			{
-				float newCenter = fFrame.Center().y - (oldFrame.Center().y - vFrame.Center().y);
-				if(vMode & E_FOLLOW_TOP_BOTTOM)
-				{
-					vFrame.bottom += height_offset;
-					vFrame.top = vFrame.bottom - 2.f * (vFrame.bottom - newCenter);
-				}
-				else if(vMode & E_FOLLOW_TOP)
-				{
-					vFrame.bottom = vFrame.top + 2.f * (newCenter - vFrame.top);
-				}
-				else
-				{
-					float vHeight = vFrame.Height();
-					vFrame.top = newCenter - vHeight / 2.f;
-					vFrame.bottom = newCenter + vHeight / 2.f;
-				}
-			}
-			else if(vMode & E_FOLLOW_BOTTOM)
-			{
-				vFrame.bottom += height_offset;
-				if(!(vMode & E_FOLLOW_TOP))
-					vFrame.top += height_offset;
-			}
-
-			view->_SetFrame(vFrame, true);
-		}
-
-		fInUpdate = oldInUpdate;
-
-		FrameResized(fFrame.Width(), fFrame.Height());
+		FrameResized(w, h);
 
 		if(IsWatched(E_WINDOW_RESIZED))
 		{
 			EMessage aMsg(E_WINDOW_RESIZED);
-			aMsg.AddInt64("when", fSizeChangedTimemap);
-			aMsg.AddFloat("width", fFrame.Width());
-			aMsg.AddFloat("height", fFrame.Height());
+			aMsg.AddInt64("when", fSizeChangedTimeStamp);
+			aMsg.AddFloat("width", w);
+			aMsg.AddFloat("height", h);
 			SendNotices(E_WINDOW_RESIZED, &aMsg);
 		}
 	}
@@ -1882,21 +1750,27 @@ EWindow::ResizeTo(float w, float h)
 void
 EWindow::SetSizeLimits(float min_h, float max_h, float min_v, float max_v)
 {
+	if(fWindow == NULL)
+	{
+		// TODO
+		return;
+	}
+
 	euint32 minH = E_MAXUINT32, maxH = E_MAXUINT32, minV = E_MAXUINT32, maxV = E_MAXUINT32;
-	if(min_h >= 0) minH = (euint32)etk_round((double)min_h);
-	if(max_h >= 0) maxH = (euint32)etk_round((double)max_h);
-	if(min_v >= 0) minV = (euint32)etk_round((double)min_v);
-	if(max_v >= 0) maxV = (euint32)etk_round((double)max_v);
+	if(min_h >= 0) minH = (euint32)ceil((double)min_h);
+	if(max_h >= 0) maxH = (euint32)ceil((double)max_h);
+	if(min_v >= 0) minV = (euint32)ceil((double)min_v);
+	if(max_v >= 0) maxV = (euint32)ceil((double)max_v);
 
 	if(fWindow->SetSizeLimits(minH, maxH, minV, maxV) == E_OK)
 	{
 		if(min_h >= 0 || min_v >= 0)
 		{
-			ERect r = fFrame;
+			ERect r = Frame();
 			if(r.Width() < min_h && min_h >= 0) r.right = r.left + min_h;
 			if(r.Height() < min_v && min_v >= 0) r.bottom = r.top + min_v;
 
-			if(r != fFrame) ResizeTo(r.Width(), r.Height());
+			if(r != Frame()) ResizeTo(r.Width(), r.Height());
 		}
 	}
 }
@@ -1906,19 +1780,24 @@ void
 EWindow::GetSizeLimits(float *min_h, float *max_h, float *min_v, float *max_v) const
 {
 	euint32 minH = E_MAXUINT32, maxH = E_MAXUINT32, minV = E_MAXUINT32, maxV = E_MAXUINT32;
-	fWindow->GetSizeLimits(&minH, &maxH, &minV, &maxV);
+	if(fWindow) fWindow->GetSizeLimits(&minH, &maxH, &minV, &maxV);
 
-	if(min_h) *min_h = (minH != E_MAXUINT32 ? (float)minH : -1.f);
-	if(max_h) *max_h = (maxH != E_MAXUINT32 ? (float)maxH : -1.f);
-	if(min_v) *min_v = (minV != E_MAXUINT32 ? (float)minV : -1.f);
-	if(max_v) *max_v = (maxV != E_MAXUINT32 ? (float)maxV : -1.f);
+	if(min_h) *min_h = minH != E_MAXUINT32 ? (float)minH : -1.f;
+	if(max_h) *max_h = maxH != E_MAXUINT32 ? (float)maxH : -1.f;
+	if(min_v) *min_v = minV != E_MAXUINT32 ? (float)minV : -1.f;
+	if(max_v) *max_v = maxV != E_MAXUINT32 ? (float)maxV : -1.f;
 }
 
 
 e_status_t
 EWindow::SendBehind(const EWindow *win)
 {
-	if(fWindow == NULL) return E_ERROR;
+	if(fWindow == NULL)
+	{
+		// TODO
+		return E_ERROR;
+	}
+
 	if(win)
 	{
 		if(win->fWindow == NULL) return E_ERROR;
@@ -1932,6 +1811,12 @@ EWindow::SendBehind(const EWindow *win)
 bool
 EWindow::_GrabMouse()
 {
+	if(fWindow == NULL)
+	{
+		// TODO
+		return false;
+	}
+
 	if(fMouseGrabCount == 0)
 	{
 		if(fWindow->GrabMouse() != E_OK)
@@ -1955,6 +1840,12 @@ EWindow::_GrabMouse()
 bool
 EWindow::_GrabKeyboard()
 {
+	if(fWindow == NULL)
+	{
+		// TODO
+		return false;
+	}
+
 	if(fKeyboardGrabCount == 0)
 	{
 		if(fWindow->GrabKeyboard() != E_OK)
@@ -1978,6 +1869,12 @@ EWindow::_GrabKeyboard()
 void
 EWindow::_UngrabMouse()
 {
+	if(fWindow == NULL)
+	{
+		// TODO
+		return;
+	}
+
 	if(fMouseGrabCount == 0) return;
 	fMouseGrabCount--;
 	if(fMouseGrabCount == 0) fWindow->UngrabMouse();
@@ -1988,6 +1885,12 @@ EWindow::_UngrabMouse()
 void
 EWindow::_UngrabKeyboard()
 {
+	if(fWindow == NULL)
+	{
+		// TODO
+		return;
+	}
+
 	if(fKeyboardGrabCount == 0) return;
 	fKeyboardGrabCount--;
 	if(fKeyboardGrabCount == 0) fWindow->UngrabKeyboard();
@@ -2043,7 +1946,7 @@ EWindow::SetPulseRate(e_bigtime_t rate)
 	if(fPulseRunner->SetInterval(rate) == E_OK)
 	{
 		fPulseRate = rate;
-		fPulseRunner->SetCount((rate > E_INT64_CONSTANT(0) && fNeededToPulseViews.CountItems() > 0 && !IsHidden()) ? -1 : 0);
+		fPulseRunner->SetCount((rate > 0 && fNeededToPulseViews.CountItems() > 0 && !IsHidden()) ? -1 : 0);
 	}
 	else
 	{
@@ -2074,7 +1977,7 @@ EWindow::SetTitle(const char *title)
 	{
 		if(fWindowTitle) delete[] fWindowTitle;
 		fWindowTitle = EStrdup(str.String());
-		fWindow->SetTitle(fWindowTitle);
+		if(fWindow) fWindow->SetTitle(fWindowTitle);
 	}
 }
 

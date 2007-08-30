@@ -1099,6 +1099,7 @@ ETextView::SetText(const char *text, const e_text_run_array *runs, bool utf8)
 {
 	Delete(0, -1, false);
 	Insert(0, text, (utf8 ? e_utf8_strlen(text) : strlen(text)), runs, utf8);
+	Invalidate();
 }
 
 
@@ -1107,6 +1108,7 @@ ETextView::SetText(const char *text, eint32 length, const e_text_run_array *runs
 {
 	Delete(0, -1, false);
 	Insert(0, text, length, runs, utf8);
+	Invalidate();
 }
 
 
@@ -1126,6 +1128,7 @@ ETextView::SetText(EFile *file, eint64 fileOffset, eint32 length, const e_text_r
 	file->Seek(oldPos, E_SEEK_SET);
 
 	free(buffer);
+	Invalidate();
 }
 
 

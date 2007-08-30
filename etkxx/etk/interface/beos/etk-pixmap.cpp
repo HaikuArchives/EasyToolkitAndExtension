@@ -166,25 +166,26 @@ static void __etk_convert_region(const ERegion *region, BRegion *beRegion, BRect
 
 
 e_status_t
-EBeGraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
+EBeGraphicsDrawable::CopyTo(EGraphicsContext *dc,
+			    EGraphicsDrawable *dstDrawable,
 			    eint32 x, eint32 y, euint32 w, euint32 h,
-			    eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH,
-			    euint8 alpha, const ERegion *clipping)
+			    eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH)
 {
-	if(alpha != 255)
-	{
-		// TODO
-		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: (alpha != 255).", __PRETTY_FUNCTION__);
-		return E_ERROR;
-	}
-
 	if(w == E_MAXUINT32 || h == E_MAXUINT32 || dstW == E_MAXUINT32 || dstH == E_MAXUINT32)
 	{
 		ETK_DEBUG("[GRAPHICS]: %s --- Either width or height is so large.", __PRETTY_FUNCTION__);
 		return E_ERROR;
 	}
 
-	if(fEngine == NULL || dstDrawable == NULL || fEngine->Lock() == false) return E_ERROR;
+	if(fEngine == NULL || dc == NULL || dstDrawable == NULL || fEngine->Lock() == false) return E_ERROR;
+
+	if(dc->DrawingMode() != E_OP_COPY)
+	{
+		// TODO
+		fEngine->Unlock();
+		ETK_DEBUG("[GRAPHICS]: %s --- FIXME: unsupported drawing mode.", __PRETTY_FUNCTION__);
+		return E_ERROR;
+	}
 
 	if(fEngine->InitCheck() != E_OK || beBitmap == NULL || beBitmap->fView == NULL)
 	{
@@ -210,7 +211,7 @@ EBeGraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
 			msg.AddPointer("bitmap", beBitmap);
 			msg.AddRect("src", BRect(x, y, x + w, y + h));
 			msg.AddRect("dest", BRect(dstX, dstY, dstX + dstW, dstY + dstH));
-			if(clipping != NULL) msg.AddPointer("clipping", (const void*)clipping);
+			if(dc->Clipping() != NULL) msg.AddPointer("clipping", (const void*)dc->Clipping());
 
 			win->beWinMsgr.SendMessage(&msg, &msg);
 		}
@@ -226,7 +227,7 @@ EBeGraphicsDrawable::CopyTo(EGraphicsDrawable *dstDrawable,
 			pix->beBitmap->Lock();
 
 			BRegion beRegion;
-			__etk_convert_region(clipping, &beRegion, pix->beBitmap->Bounds());
+			__etk_convert_region(dc->Clipping(), &beRegion, pix->beBitmap->Bounds());
 			pix->beBitmap->fView->ConstrainClippingRegion(&beRegion);
 			pix->beBitmap->fView->DrawBitmap(beBitmap, BRect(x, y, x + w, y + h), BRect(dstX, dstY, dstX + dstW, dstY + dstH));
 

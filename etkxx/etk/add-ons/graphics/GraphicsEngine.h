@@ -84,10 +84,10 @@ public:
 	virtual e_status_t		SetBackgroundColor(e_rgb_color bkColor);
 
 	virtual e_status_t		ResizeTo(euint32 w, euint32 h) = 0;
-	virtual e_status_t		CopyTo(EGraphicsDrawable *dstDrawable,
+	virtual e_status_t		CopyTo(EGraphicsContext *dc,
+					       EGraphicsDrawable *dstDrawable,
 					       eint32 x, eint32 y, euint32 w, euint32 h,
-					       eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH,
-					       euint8 alpha = 255, const ERegion *clipping = NULL) = 0;
+					       eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH) = 0;
 	virtual e_status_t		DrawPixmap(EGraphicsContext *dc, const EPixmap *pix,
 						   eint32 x, eint32 y, euint32 w, euint32 h,
 						   eint32 dstX, eint32 dstY, euint32 dstW, euint32 dstH) = 0;

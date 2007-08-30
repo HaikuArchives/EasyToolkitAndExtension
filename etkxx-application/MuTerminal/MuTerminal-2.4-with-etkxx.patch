@@ -56,9 +56,224 @@ diff -Nur MuTerm/etc/sample.mp.msys MuTerm_working/etc/sample.mp.msys
 +"Drag'n Copy" , "0"
 +"Language" , "English"
 +"Input Method Aware" , "0"
+diff -Nur MuTerm/help/pics/logo.xpm MuTerm_working/help/pics/logo.xpm
+--- MuTerm/help/pics/logo.xpm	Thu Jan  1 08:00:00 1970
++++ MuTerm_working/help/pics/logo.xpm	Wed Aug 29 21:02:14 2007
+@@ -0,0 +1,211 @@
++/* XPM */
++static char * logo_xpm[] = {
++"160 68 140 2",
++"  	c #FFFFFF",
++". 	c #FEFEFE",
++"+ 	c #FBFBFB",
++"@ 	c #FCFCFC",
++"# 	c #FDFDFD",
++"$ 	c #FAFAFA",
++"% 	c #F8F8F8",
++"& 	c #C9C9C9",
++"* 	c #7D7D7D",
++"= 	c #828282",
++"- 	c #7F7F7F",
++"; 	c #959595",
++"> 	c #C0C0C0",
++", 	c #848484",
++"' 	c #CFCFCF",
++") 	c #A2A2A2",
++"! 	c #DFDFDF",
++"~ 	c #B9B9B9",
++"{ 	c #858585",
++"] 	c #989898",
++"^ 	c #C4C4C4",
++"/ 	c #7E7E7E",
++"( 	c #818181",
++"_ 	c #B2B2B2",
++": 	c #7C7C7C",
++"< 	c #B7B7B7",
++"[ 	c #7B7B7B",
++"} 	c #898989",
++"| 	c #808080",
++"1 	c #A1A1A1",
++"2 	c #D3D3D3",
++"3 	c #CECECE",
++"4 	c #A0A0A0",
++"5 	c #CCCCCC",
++"6 	c #CBCBCB",
++"7 	c #CDCDCD",
++"8 	c #E2E2E2",
++"9 	c #D5D5D5",
++"0 	c #7A7A7A",
++"a 	c #040404",
++"b 	c #000000",
++"c 	c #252525",
++"d 	c #050505",
++"e 	c #222222",
++"f 	c #6E6E6E",
++"g 	c #020202",
++"h 	c #010101",
++"i 	c #F7F7F7",
++"j 	c #030303",
++"k 	c #A7A7A7",
++"l 	c #292929",
++"m 	c #ECECEC",
++"n 	c #0E0E0E",
++"o 	c #DDDDDD",
++"p 	c #202020",
++"q 	c #D8D8D8",
++"r 	c #3A3A3A",
++"s 	c #6C6C6C",
++"t 	c #353535",
++"u 	c #585858",
++"v 	c #BBBBBB",
++"w 	c #919191",
++"x 	c #515151",
++"y 	c #545454",
++"z 	c #D9D9D9",
++"A 	c #DCDCDC",
++"B 	c #060606",
++"C 	c #EBEBEB",
++"D 	c #070707",
++"E 	c #C6C6C6",
++"F 	c #111111",
++"G 	c #BFBFBF",
++"H 	c #F4F4F4",
++"I 	c #5F5F5F",
++"J 	c #5D5D5D",
++"K 	c #D4D4D4",
++"L 	c #E3E3E3",
++"M 	c #E5E5E5",
++"N 	c #101010",
++"O 	c #303030",
++"P 	c #EFEFEF",
++"Q 	c #1B1B1B",
++"R 	c #C8C8C8",
++"S 	c #6F6F6F",
++"T 	c #B0B0B0",
++"U 	c #707070",
++"V 	c #F3F3F3",
++"W 	c #6B6B6B",
++"X 	c #4A4A4A",
++"Y 	c #3C3C3C",
++"Z 	c #2A2A2A",
++"` 	c #B4B4B4",
++" .	c #5C5C5C",
++"..	c #3D3D3D",
++"+.	c #0C0C0C",
++"@.	c #737373",
++"#.	c #D1D1D1",
++"$.	c #DADADA",
++"%.	c #E6E6E6",
++"&.	c #606060",
++"*.	c #F5F5F5",
++"=.	c #AFAFAF",
++"-.	c #333333",
++";.	c #D0D0D0",
++">.	c #1E1E1E",
++",.	c #616161",
++"'.	c #5B5B5B",
++").	c #F9F9F9",
++"!.	c #393939",
++"~.	c #5E5E5E",
++"{.	c #080808",
++"].	c #797979",
++"^.	c #4D4D4D",
++"/.	c #8B8B8B",
++"(.	c #575757",
++"_.	c #9A9A9A",
++":.	c #232323",
++"<.	c #747474",
++"[.	c #EEEEEE",
++"}.	c #8E8E8E",
++"|.	c #131313",
++"1.	c #3E3E3E",
++"2.	c #979797",
++"3.	c #888888",
++"4.	c #404040",
++"5.	c #BEBEBE",
++"6.	c #3F3F3F",
++"7.	c #C3C3C3",
++"8.	c #434343",
++"9.	c #838383",
++"0.	c #414141",
++"a.	c #424242",
++"b.	c #C1C1C1",
++"c.	c #C2C2C2",
++"d.	c #3B3B3B",
++"e.	c #BDBDBD",
++"f.	c #BCBCBC",
++"g.	c #787878",
++"h.	c #444444",
++"i.	c #BABABA",
++"  . .     +         . . .     .   . .     @   + +   @     . .       #   @   # . . .   @     @     @ #   @   . .   #       # @     +   .   # #   . . #     . #       # .   #         .   #   @   .     @   +     #   .   . .   .                                   @   .   .   .   #         #   .       .           #     . #   ",
++"#     .     +     #     .   #   .         .   . .   .         . # .   . #           .   + .     # .   .     @   @   .   @     # #                     # .   . . . #   . @   # . .     @   #   +   $         # .   .   #     $                                   .     @ .   +           %   # .   . @   #   $         . #   # . ",
++"  . #       .   .   . #     #   #   #   #   +     +   #   #   #       @   . . .       +     .   #   . @ . #   .   + .   . #   .     #   @     .   +     . #   .   #       @       @ @   # . @   .     # @   . . .   . .   + .                                   @   .         @   +           # .         +   #     @   +       ",
++"#   .   & * = * - ; &     @   .     @     + > , , > +     @     .   @ ' ) !   .   ~ , {   @     ] ^     #         = - - / ( = - _     .     @ * / = - : < $   # #   @ .     . - - / ( [ ( - ( +     #     } | ( - * 1 2       @                                 3 / / | | 4 5   @       .   + 6 1 7     #   8 1 9     .   @   . ",
++"  .     0 a b b b b b a }     .   +     c d b b b b d c     +       # b a e       b b a +     f b a @   .     # @ g b a b b h b i   @   # # . j b b j b b b d . #         .   g h b b b b h k     @   # . g b b b j b b b l                                     * b g b h h j b * @ @ .   #   b h b m   . . h b n   #         $ ",
++"    .   , b b o   . h b b .         . p b b q     q b b p .     . .   r b a   @ 2 b n b s   . b b t   . # $   #   j h u     .     @   @       b h b     v b g w   .       $   b b j .     . # . . .   .   b j h .     x d b y .                                 - b h z   + g b b .           % b h b   . d b b . #   . . . #   ",
++"  #   + | b h A     b j B @     @     b g g   # #   g g b     @   #   C D b E . F g G j h .   b g H . .     .     b g I     .       .     $   b g b   . J a b K @     @     @ b g b         #       #   @ a b b   .   $ b b a                                   | b b L $ % b b e . .   .   @   M g h N O b b     #   #   .   $ ",
++".       / g b b b b a b P   .       + a b b .     . b b a +         .   b h Q   b b   b b R S b b .   . #   .     g b b h b h J     .       @ h b h h b b b T .     .   +   . b b b a b j b     .     +   b h h .   +   b h b                                   - h b b b b h 4     .     .       7 h h j b %   .   @   .   $   ",
++"  .     - h b U / k V       #     @   b b b         b b b   @       # . W b j : j X . Y g Z b b ` $   @         . h b  .  .       #   +   . . h b g + j b ..      #     #     b b g .       #     #     . b b b         g b b .                                 | b a q   ' +.b b + .               @.h b #.  .   @   # #   .   ",
++"  #   $ , b b $.  +   + #     #     + j b b @     @ b b j +           #   a b b b     %.b b b j +   .             b d &..   # .   . .   . #   b h j @ *.h b r       # #   # . b b g @ .   #   .       .   h h b     # =.b h -.                                  ( b b A     ;.b b |     . .       . | b h A #       .     # #   ",
++"# . .   : b j $.  # . #   @   . .     % b h g &.&.g h b %     .         . b h b n   #   b b j x   @     @ . #     b b >.,.'.I I > @ @ . #     h b b   ).9 d h !..         .   b g b I ~. .&.W   . +       d b b '.~.n b b {.  .                                 ].D b U [ ^.h g h ).  .         .   ( b h $.    .       @     # ",
++"      # /.h b L           $         # #   ~ ..d d ..~   # #     #     #   4 g b ! # .   (.j b   #       .   .   $ D b b h b b b {       #   . h h j       _.:.<.[.#     #   @ b b b b j b b {..     .     B b d a b p I q   ).                                  }.b b b h |.1.2.  .   #   # #   .   3.h b L   #   @     .   . . ",
++"    @       #   . # . #     . #   #     + # #     # # +     #       # #     @ .         +   #       @ #           #   #       +   +   #     .     . #   # #   @   @   @   +   . .   . @   # .     @           $ #     #   @                                     #                 .   %               .   . .   +           @   ",
++"    @   . .       .   # #   #       #     .   # #   .     #     .   .   +       # . . @       @           $   . .   @   # @ @     # .     .     #       @   #               #     +   @   @   @     . .   .       @   . +     .                                   #     @ #   . #   .   @ #   # .       @     #     $ .   @   # ",
++"@ .   @ .     .   .             @     @     @ . . @     @     @   #       . @         #   @       . . #       #         @       #     # .   @ .       +       .   #     #       #   .   i     @     .       .     . #                                           +     +     . # .   # @   .     .   +   . @   . . @     .   #   ",
++"  b b b g b b b h b b g b b h b b h b j b h b b b b h b j b h b h b j b b h g .   . b a b h j b h b h b j b b g b b g b g g b b h b h b b b b h b b b g b b h g b h b b a b b h b b b g b h b h b b b b b b b b b h b b b j b h b b b b b b b b b b b b b b b b g b b b b b b g h h b g b b b b h b g b h g b h b b b g -   .   ",
++"  b b b b b b b b g b h b b g b b h h b h b g b b g h j b b b h b b b b b b b     . b b h b h b b g b h b h b j b b b g b b h b b h h b b g b b b g b h b b g b b b b b b b b b b g b h b g b h b g b j b g b b b j b b b b b h h b b h b b b b b b h h b g b b b b d b h b b b b h b h b h b b h b h b h b j b b h b b = #   @ ",
++"  b b b b b b b h h b b d j b b g b h b b b b b g b a b b d h b b b b b b b b     . h b           #     .   . .     .         .   #               + .   .   +                   . #   $   #       $               @         +   .     @                                     #   .   .               .   +         # ( g [       ",
++"  b b b b b b b b b h h b b h g b j b g b D b b b g b a b b b b b b b b b b b   #   b b     @               .       @ . @   @   #   +       @   .       #                           +   #     $ .     .       . . .     # .   .   +   .   #   .     . .   . . @     #   @                 #   # .     #   . .     # - g :     @ ",
++"  b b b b b b b g b b G   . g b b b h h h b b B b 4.|     @ # h b b b b b b b       b D %   . . # . . +   @     . @       #       #   @   #     .   # #   @                     #     @     .   .   .   + @       .   @     # . #     # +   #       . @       . .         @   . #   #   # . #         .     .       - h * .     ",
++"  b b b b b b b b g g . .   b h b h j b g a 5..     . $       h b b b b b b b   . . h b   #         .         #     #   #           $   . @   .         @   @                           .         @ . .       #           $       +     . #     + .       @     . # # @     #       . @           #   # . .     @   / b =   # . ",
++"  b b b b b b b g h b .   . a b b b 6.    #   .   #       # . h b b b b b b b       b h .     #   # .   #   #   #   $     . .   @       #     #     ).  #     # . . . . . . . .     @       +   .   . . # # #   # @   @     . . .   .       . .       . #     # .         @     # +     .   $   @ .     .   +     @ * g - @     ",
++"  b b b b b b b b h h   #   b h 7.@   .   . $     # / h b j b b b b b b b b b   #   h h . .     - * - - - ( | 5.      . 1.h b h j b h / #   #   #     #   * / j h h h h h h h h b h 4.= $     @   .   #       / - d b h b a b h b b a b | 5.).  .           5.| - | / / / ( @   #   v b j b g b b 8.v #   .   . #   9.b /       ",
++"  b b b b b b b b b b   .   .   .     .   # ( b b h b h b h b g b b b b b b b       b b       . b g h b h b h - . - h b b b j b b j b b b G .     #   - h b h b b b b b b b b b h b h b h h v   .   #   + h g b b b a b b b j b h b b b h b g b     # .   # | h b h h h h h .   6.b h b b h b b b b g a $   @     + - b |       ",
++"  b j b g b g h h b b @   #   #       | b b b b b h h b b b b j b b g b h b h .     b b         b g g b b b b 0.b b b h h b b b b h b g b b (       . ( h h b b b j b j b h h b b g g b j h b h       . . h h b b b b b b g b b b b b b h b h b b a.#       / h h b h b h b = b g b b d b h b h g b b b b #         - b -       ",
++". j b j b b g b b , .     . $   . h g h b g b g g b > .   / a.b g g b b b b b       b b         g b b h h g b g g h b h h b h g b b g b a b b         * g b h b b b b b h b b b h b b b b b j b 6.  #     j b h b h b g b h g b g b h b b b g b h b b.@     | b b D b g b b b b b g b b b h g b b b g b d b         - b -       ",
++"  b j b g j b 0.    # @ #   9.b j b j b B b j b b |     #   #   . b d b b h b       b b         b h h b b b a b b h b h h b h b b g h h h h b 1.@   . ( b a b b - b.      . | 6.b g h j b h b g g +   +   b g b b b | .   . .   / h d b g b b B j b a     # | b g b g b B h b b a b h g b h b h g h b h b B G       - b -       ",
++"  b b b b b 5.  @       # / b b b h g g g b b h h * . @       .   . 1.b b h g #     b b         b h g b b g b j b b.  # #   b.b h b j b b h b j   @ . c.:   #     . %     #   .   d.g b h g b h b = +   . - G         # +     .   # ).d b g b b b j g @   # = b h b a g b b j 4.#     #   | b g b b b b h b 6.      - b -       ",
++"$ a b b j b.  #   +   # # 9.b h h b b h b j b j b d b g 4.* @ . @ . @ a b b g       b b         h h b b g b a *   # #     # #   g b b b h g b b #     @ #       .     $   #         a b g b h b b :   .   # @     # .     @   .       | b g a b j b g   #   / h h b h b a j # # .     #   . = b h h g b b b h       - b -       ",
++"  b b b b .   #   b .     b g b b g b a b b a b j b b g g b h j     . h b j b .     b b         h b a a b h b | #   @     @   # b b h b g b g b .   . .     .   . @ ( 9.b a b b b b b g b g b h b 9..         @ . .     - * h b h b g b h b b b b j b       : b b j b b b b       . @   .     h b b h b h h b       - b -       ",
++". b j h b 4.  b.b j   #   b g b b h b b d b b j b h h b b b d b g * 6.b g b b       b b         h b b b g g b /   @   . .   @   h b b g b g b b   #   +     d.j j h b b b b h b h g h b g b j b h / #     # # b.b a b g b h b b b g b b b h b h g b h #   # , h b b h h g b     . #   .   .   b b b b h g b b       - b -       ",
++". j b b b j b b h b   #   b b b b b g h b h b .   # g b h b b g h b b h b b b       b b         h b b b j b g |                 b g b b h g b b .   .   h b j b b b b b b h b b b b b h b j b g b *   #   G h b g b h b b b b b b g b h b b j b b b b   .   / b b h b b b h #   .   @   . .   b h b h h b b g .     - b -       ",
++"  b b b b b b b b b       b h b h b d b b b h       @ b g b j b b b j h b b h .     b b         b b b b b b b -                 b b b b b b b b     # g b h b g h b d b b b b b b b b h b b b g b - #   G b h b b b b g b b g b b b h b g b h g b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b b b b h j b b 4..     G b h b b b h b b g g b       b b         b b b b b b b -                 b b b b b b b b     j b h h b b b j b |   .       @ b b g b b b b |   # h g b b h h b b h > .     .   * b g g b b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b b d g b b h h b 4.@     h b b b h b j b g b b       b b         b b b b b b b -                 b b b b b b b b   @ b b b b b h b a.  @     .   .   g b b b h g g *   / j b b h b a b G     # . +   # = b b j j b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b b b b b b.    #       #     $     : | g b h g       b b         b b b b b b b -                 b b b b b b b b . = b b h b h b b +       #   @ . . b b j b b b b -   b b b b b h b h   @   +     #   ].j b b b b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b b g e.  @   #   .   #   .   .     #   - a b h       b b         b b b b b b b -                 b b b b b b b b . = b b h b h b h c.#   +   +     5.j h b g b b b -   b b b b b b g g #   #   . #   # a.h b b b b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b b *   +   @               .   +   #   [ b {.b .     b b         b b b b b b b -                 b b b b b b b b   @ b b b b b h b b ..    . # = b b b b b b j b g *   / j b b h j b b b =   .   b...h b b b h b b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b h #     . b a b b b   . + g b g h * - a b b b       b b         b b b b b b b -                 b b b b b b b b     j b h h b b h b j h b j h b b b b h b g b j b |   # h g b b b h a b b j b b b g b b j b b g b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b b       b h b b   . # g b b b b j . .   h b b b h b g h b j @     b b         b b b b b b b -                 b b b b b b b b     # g b h b g b b h b a b g b b 4.b b h b j b b - #   G b h b h h b j b b b g b b b 6.b b h b b b b     . - b b b b b b b                   b b b b b b b b       - b -       ",
++"  b b b b b b b b j #     b b b b   #   b g b h G   .     b h b b b b b b b b       b b         b h h b h b h -                 b b b b b b b b         b b g b b g b h b b b b   . h b h b b b b -   #   v a b b j b b b a b h h 1.# - b g b b b b b .   @ ( b b b b h b h .       . #       b b b b g b b b     . / b -     . ",
++"  b b b b b b b h b     . g b h h @ .         . #     @ h a b h b b b b b b b     # b h # .   @ - / | | - = ( 5.                - - - - - - - -   # . . .   Y g a b d b j (   #   . = - - - ( | - > .   #   @ > h b a b h b d -       > * - / | - / , .     5.( | ( - - - = .   . .       . @ | - - : / * | ( .     - b /       ",
++"  b b b b b b b h g   +   b g b h a.# @   $         # h b b b h b b b b b b b   @   b h .   @     # .   @   #                                   #   #     @   .     # .   #     .   +         # .   #   # #   #         #   @ # #   i         @   # .   #   @   #         +   .     . # #       #         . #     # : j |     @ ",
++"  b b b b b b b g b j b b b j b b b h         # ( b h b b g g b b b b b b b b       b b             . .       @                                   $       @   . #   .         +   .     @ # . .   @ #   @   #   .   ).    .   . . #   @ . @       .   .   .     . . # @     .   @   .       %     #   + .     $ .   | j * #     ",
++"  b b b b b b b j j b b a b b b h g b j b b h b b b h b j b b j b b b b b b b     . g h # @     .     @   #                                           # $       . .       .     .   @         .   .   #   @       .     #           # .             $         # .         @   .     @ . #     . . .       # #     . [ j -   .   ",
++"  b b b b b b b b b d h b b b b h b j b h b j g h b h j b g h b b b b b b b b       b g .         .   . .   # .                                             #       # #     +         @   #     .     @ .     . .     #     . . .   +     # . @ #     . # #         #   @         #           # .   @     . .   .   / b /   @   ",
++"  b b b b b b b a b b g b g b g b b j b b D b b g b a b j b b j b b b b b b b       b b g b b b b b h h b j b b b b b b b b b b b b b b b b b b b h g b b h h b b h g b b h h h b b j b b b b h b B b j a h b h h b g h b b b h b b g b b b a b b b h b a j b b h b b b b j b b b b g b b b b g h g b b b h g b h h b h - $     ",
++"  b b b b b b b b g b b h b a b b g b h g b b h b j b g b h b b b b b b b b b   .   b j b g b g b h b h b h b g b b b b b b b b b b b b b b b b b b b g b h b h g b b g b b h b b b b h b d b b g b d b b h h b h b b b b b j b b g b h b a b h b h h b b b b g b b d b h b b b b g b b b h h b b b g b b b b b b h b b (   .   ",
++"  #   .     @     @   #     .       .     #     . .     .   .           .             .   #   .                 .   .   .         #   .   .         #   .                         @   @     .       #     .   @ # . .   #         #   .   .       .   +   .                       # #   #   .       .   . @     .       +   .   ",
++"  .   #   @   # # . .   @     . .     #   .       +       ).      .     .     #   @ @   @                         #     . .         . .     . . @     # .   .                     .       $     .     #   .           @   # @       . .     . .   #     #                         #   @       .     # #       +   . # .   @ @   ",
++"#   @       @ .     #     .   .   ).  #   #   . #   .   @   # . @   .   #   @         @     #                       . .     # . #   .   # .       @     .     #                 .   . . #   . #   . +     #   . . @     @     # #   .   # .     .   # #   . .                     .     +             .   # .   # .     @ .   + ",
++"  @   # .         @ . +       .     #       #   #   #     +       . . #       . +   .                           @         ).    .     @   + . .     @     ).                        #   #   .   .       +       #   # . . .     .     @   + . .           .   #                 @   #       .   . . #   +   . #     #     .   # ",
++"#     # ..b j b b b a a b h h 6.# .   # #   + .         # h g b h b j g b b h b B b b b g b b                       b g b d b     # #   %     b h b a - .   # .                 . b g b h b g h b h b b d b { #           +       # #   %     b h b b #     #                       # > Y b g b b b a b j b b - # .   +     +   ",
++"    ..j b j b h | / = b a h b b b 4.$   #       . . @     b b b b b b g b b b h b b g b b b b                   # . b g b b g     .   #       b b g b :   . .                   # h b h j b b h b g h h j b b h 0.. @   @     .   .   #       b g b h   .                         + g j b j b a b B b b b g b b b 4.$   ).  . . ",
++"#   b b b g   # #   +     f.b h b h c.).  @             @     .       # g b b b -   # .   #   #                     b b h b b .         . @   h a b b |   .   #                   b a b b     .   +     g.g j b b b   . #     .         . @   h b j b +   @ .                   7.b b b b 4.  #   ).  #   ( b g b h g   . .     ",
++"  : h h h b       #     #   | / ( / G   .   .   . .   .   . . . .   .   b g b h - #       # .                     @ b b b b b   #   #   .     b b b j /   .                     # h b b h   .     . .       b b b g - #     .   #   #   .     b h g b                           b h b b b.. #   #   .       # b h b b - #   @ . ",
++"# . h b a b a b | #       #   + .       # .                             b b b b -                                 . h b j b h .     .         b b b b | .   @                     h b g b .       #         b b b b b   @     .               b b b b           .   @         - h b b h #         #   @   .   5.b h b j #   .   ",
++"    @ B b g b h b g j b b b b a.7.  +     # .                           b b b b -                               @   b h b b b   #     @     + b b h h 0       @                 # h b b j   +   #   + .   . ( b b h b . .   .                 b b b b                   @     b b b b =     +   . .   .   # .   h b b b .   .   ",
++"@ . #       / / b g b a b d b b b b 7.#   @                             b b b b -                                   g b h a h @     #     .   b j b b = . @                       b a b b ).  .   # #   @   : h b h b   .   # @               b b b b             # .       + a b b b ].  .             @   . # b b j g   $   # ",
++"        $   #     #     # e.h g a g b . .   . .                         b b b b -                                 % j h b h b   @         @   h b d b (     . .                   b b b j   . # @     @   @ b h h b ( #   @ .                 b b b b               . +   .   v h b j b       #   . . . # @   ( b h g b     .   ",
++"  j b b j b   .     @         b b h b   #   +                           b b b b -                               .   b h b g g #     .         b h b j * +   @                   @ h j b b .       $   . # h.g b j b   .   +   #               b b b b           . .       . ).  b g b g ..        .   . .     b b b b 7.).  +   ",
++"  @ g a b b 6.  .     # @   9.b h b h         #                         b b b b -                               .     b j b b 0.  .   + .   b h h b g @       #                   b g b b . #   # . b./ g b h b b   @       @                 b b b b               + .       # . b j b h b /   .   #     b h g g h 0.#   .   @ ",
++"  #   b b g h b b b b b d b b h b g . +   #                             b b b b -                                 # .   b g h b g b b B b b g b b j .     @ #                     h b h b b g b b j b b j b b 1.  $     # @ .                 b b b b           @   . .   $     . # a.b b a b b g b h j b b j b g i.  # #   #   ",
++".   #     * b h h b j b b j b |                                         b b b b -                                     #   @ | b b h h b d b b -   @     #                         g b b g b h b b b b g / G .                 .               b b b b             # .   #   . .     +   e.6.b b h b g b b j :   #   .     @     ",
++"                                                                                                                                                                                                                                                                                                                                ",
++"                                                                                                                                                                                                                                                                                                                                ",
++"                                                                                                                                                                                                                                                                                                                                ",
++"                                                                                                                                                                                                                                                                                                                                "};
 diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
 --- MuTerm/src/AboutDlg.cpp	Sun Jul  1 12:28:10 2001
-+++ MuTerm_working/src/AboutDlg.cpp	Sat May 12 02:40:16 2007
++++ MuTerm_working/src/AboutDlg.cpp	Fri Aug 31 00:28:23 2007
 @@ -16,6 +16,10 @@
   AboutDlg.cpp,v Implementation for MuTerminal About Dialog.
  
@@ -83,7 +298,7 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
  
  #include "AboutDlg.h"
  #include "TermApp.h"
-@@ -40,6 +46,54 @@
+@@ -40,6 +46,50 @@
  extern char *last_update;
  extern char *machine_type;
  
@@ -100,10 +315,6 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
 +    << "Copyright " B_UTF8_COPYRIGHT "1999, 2000 Kazuho Okui and Takashi Murai.\n"
 +    "ALL RIGHT RESERVED.\n"
 +    "\n"
-+#ifdef USE_ETKXX
-+    "Ported to Windows/Linux by Anthony Lee\n"
-+    "\n"
-+#endif
 +    "You may redistribute copies of MuTerminal\n"
 +    "under the terms of the GNU General Public License.\n"
 +    "For more information about Help menu.\n\n\n\n\n"
@@ -138,30 +349,15 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
  //////////////////////////////////////////////////////////////////////////////
  // AboutDlg
  // 	Constructer
-@@ -50,17 +104,29 @@
+@@ -50,6 +100,7 @@
  	    B_NOT_RESIZABLE|B_NOT_ZOOMABLE)
  {
    fApp = app;
 +
-+#ifndef USE_ETKXX
    AboutView *view = new AboutView (Bounds ());
    AddChild (view);
    SetPulseRate (100 * 1000);
-+#else
-+  SetBackgroundColor(255, 255, 255);
-+  EStringView *strView = new EStringView(ERect(0, 0, 1, 1), NULL, NULL);
-+  EString aboutMsg;
-+  get_about_msg(aboutMsg);
-+  strView->SetText(aboutMsg.String());
-+  strView->SetAlignment(E_ALIGN_LEFT);
-+  strView->SetVerticalAlignment(E_ALIGN_TOP);
-+  strView->ResizeToPreferred();
-+  strView->ResizeBy(10, 10);
-+  ResizeTo(strView->Frame().Width() + E_V_SCROLL_BAR_WIDTH + 1, Frame().Height() + 50);
-+  AddChild(new EScrollView(Frame().OffsetToCopy(E_ORIGIN).InsetBySelf(5, 5), NULL, strView, E_FOLLOW_ALL));
-+#endif
- 
-   PrefHandler text;
+@@ -58,9 +109,6 @@
    LoadLocaleFile (&text);
  
    this->SetTitle (text.getString ("About MuTerminal"));
@@ -171,31 +367,101 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
  }
  
  AboutDlg::~AboutDlg (void)
-@@ -75,6 +141,7 @@
-   BWindow::Quit ();
- }
- 
-+#ifndef USE_ETKXX
- /*
+@@ -79,13 +127,20 @@
   * About panel view object
   */
-@@ -83,6 +150,7 @@
+ AboutView::AboutView (BRect frame)
++#ifndef USE_ETKXX
+   :BView (frame, NULL, B_FOLLOW_NONE, B_WILL_DRAW | B_PULSE_NEEDED)
++#else
++  :BView (frame, NULL, B_FOLLOW_ALL, B_WILL_DRAW | B_PULSE_NEEDED)
++#endif
  {
    staffroll = false;
    count = 10;
 +  background = NULL;
    offscreen = NULL;
    textbitmap = NULL;
+-  
++#ifdef USE_ETKXX
++  SetViewColor(255,255,255);
++#endif
+ }
+ 
+ AboutView::~AboutView ()
+@@ -99,12 +154,17 @@
    
-@@ -116,7 +184,6 @@
+ }
+ 
++#ifndef USE_ETKXX
+ #define BACKIMAGE "/boot/home/config/settings/MuTerminal/help/pics/muterm.jpg"
+ #define LOGOIMAGE "/boot/home/config/settings/MuTerminal/help/pics/logo.jpg"
++#else
++#include "../help/pics/logo.xpm"
++#endif
+ 
+ void
+ AboutView::AttachedToWindow (void)
+ {
++#ifndef USE_ETKXX
+   /* Create background bitmap. */
+   BFile file (BACKIMAGE, B_READ_ONLY);
+   if (file.InitCheck () == B_NO_ERROR) {
+@@ -116,79 +176,65 @@
    else {
      background = new BBitmap (Bounds (), B_COLOR_8_BIT, false);
    }
 -  
+-
+-  BRect rect(0, 0, 350, 1000);
  
-   BRect rect(0, 0, 350, 1000);
+   /* Create offscreen bitmap. */
+   BView *view = new BView (Bounds(), NULL, B_FOLLOW_NONE, 0);
+   offscreen = new BBitmap (Bounds(), B_RGB32, true);
++  offscreen->Lock();
+   offscreen->AddChild (view);
++  offscreen->Unlock();
++#endif
  
-@@ -145,45 +212,7 @@
+   /* Create text bitmap. */
++  BRect rect(0, 0, 450, 1000);
++#ifndef USE_ETKXX
+   textbitmap = new BBitmap (rect, B_RGB32, true);
++#else
++  textbitmap = new EBitmap (rect, true);
++#endif
+   BTextView *offview = new BTextView (rect, NULL, rect,
+-				      B_FOLLOW_NONE, 0);
+-  textbitmap->AddChild (offview);
+-  
++				      B_FOLLOW_NONE);
+   textbitmap->Lock ();
+ 
++  textbitmap->AddChild (offview);
++
++#ifndef USE_ETKXX
+   BFont *font = new BFont ();
+   font->SetFamilyAndStyle ("Humnst777 BT", "Bold");
+   font->SetSize (11);
+   offview->SetFont (font);
+   delete font;
+-  
++#else
++  EFont font;
++  offview->GetFont(&font);
++#ifdef ETK_OS_WIN32
++  font.SetFamilyAndStyle("Arial", "Regular");
++  font.SetSize(13);
++#endif
++  e_text_run_array runs;
++  runs.count = 1;
++  runs.runs[0].font = font;
++  offview->SetRunArray(0, -1, &runs);
++#endif
++
+   // Fill background transparent
+   offview->SetHighColor (255,255,255,0); //alpha = 0 (trabnsparent)
+   offview->FillRect (offview->Bounds());
    offview->SetHighColor (255,255,255,255);
  
    BString aboutMsg;
@@ -240,25 +506,103 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
 -    "\tAnd all MuTerm users!";
 +  get_about_msg(aboutMsg);
  
++#ifdef USE_ETKXX
++  offview->SetViewColor(255,255,255);
++  offview->SetTextBackground(e_make_rgb_color(255,255,255));
++  offview->MakeEditable(false);
++#endif
    offview->SetText (aboutMsg.String());
-   BPoint logo_p = offview->PointAt (offview->OffsetAt (offview->CountLines ()));
-@@ -216,7 +245,6 @@
+-  BPoint logo_p = offview->PointAt (offview->OffsetAt (offview->CountLines ()));
++  BPoint logo_p = offview->PointAt (offview->OffsetAt (offview->CountLines () - 1));
+   last_point = (int32) logo_p.y + (int32) offview->LineHeight ();
+-  
++
++#ifndef USE_ETKXX
+   file.SetTo (LOGOIMAGE, B_READ_ONLY);
+   if (file.InitCheck () == B_NO_ERROR) {
+     BTranslatorRoster *roster = BTranslatorRoster::Default ();
+@@ -203,7 +249,6 @@
+     offview->DrawBitmap (logobitmap,
+ 			 BPoint (10, logo_p.y + 51 + offview->LineHeight()));
    }
+-  
+ 
+   /* Set transparent color to backgound. */
+   int max = textbitmap->Bounds().IntegerWidth() *
+@@ -214,9 +259,18 @@
+   for (int i = 0; i < max; i++, bits++) {
+     if (*bits == white) *bits = B_TRANSPARENT_MAGIC_RGBA32;
+   }
++#else
++  {
++	EPixmap *pixmap = new EPixmap(160, 68, E_RGB32);
++	pixmap->DrawXPM((const char**)logo_xpm, 0, 0, 0, 0);
++	EBitmap *logobitmap = new EBitmap(pixmap, false);
++	delete pixmap;
++	offview->DrawBitmap(logobitmap, BPoint(10, logo_p.y + 51 + offview->LineHeight()));
++	delete logobitmap;
++  }
++#endif  
    
    textbitmap->Unlock();
 -  
  }
  
  void
-@@ -269,3 +297,5 @@
+@@ -236,36 +290,35 @@
+ AboutView::Pulse (void)
+ {
+   if (staffroll && count > -last_point) {
+-    offscreen->Lock ();
+-    BView *view = offscreen->ChildAt (0);
+-    view->SetDrawingMode (B_OP_COPY);
+-    view->DrawBitmap (background);
+-    view->SetDrawingMode (B_OP_MIN);
+-    view->DrawBitmap (textbitmap, BPoint (10, count--));
+-    view->Sync();
+-  
+-    offscreen->Unlock ();
+-    DrawBitmap (offscreen);
+-
+-    if (count < -last_point) {
++#ifndef USE_ETKXX
++    if (--count < -last_point) {
++#else
++    if (--count < -last_point || Bounds().Height() > last_point + 130) {
++#endif
+       count = 10;
+-      //Invalidate ();
++      staffroll = false;
+     }
++    Invalidate ();
+   }
+ }
+ 
+ void
+ AboutView::Draw (BRect updateRect)
+ {
++#ifndef USE_ETKXX
+   offscreen->Lock ();
+   BView *view = offscreen->ChildAt (0);
+ 
+   view->SetDrawingMode (B_OP_COPY);
+-  view->DrawBitmap (background);
++  view->DrawBitmap (background, BPoint(0, 0));
+   view->SetDrawingMode (B_OP_MIN);
+   view->DrawBitmap (textbitmap, BPoint (10, count));
+   view->Sync();
+-  
++
    offscreen->Unlock ();
    DrawBitmap (offscreen, updateRect, updateRect);
++#else
++  DrawBitmap (textbitmap, BPoint (10, count));
++#endif
  }
-+#endif // !USE_ETKXX
 +
 diff -Nur MuTerm/src/AboutDlg.h MuTerm_working/src/AboutDlg.h
 --- MuTerm/src/AboutDlg.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/AboutDlg.h	Sat May 12 00:42:58 2007
++++ MuTerm_working/src/AboutDlg.h	Mon Aug 27 14:24:20 2007
 @@ -18,8 +18,12 @@
  #ifndef ABOUTDLG_H_INCLUDED
  #define ABOUTDLG_H_INCLUDED
@@ -272,21 +616,6 @@ diff -Nur MuTerm/src/AboutDlg.h MuTerm_working/src/AboutDlg.h
  
  const ulong MSG_ABOUT_CLOSED = 'msac';
  
-@@ -42,6 +46,7 @@
- 
- };
- 
-+#ifndef USE_ETKXX
- class AboutView : public BView
- {
-  public:
-@@ -63,5 +68,6 @@
-   int32		last_point;
- 
- };
-+#endif
- 
- #endif /* ABOUTDLG_H_INCLUDED */
 diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm_working/src/AppearPrefView.cpp
 --- MuTerm/src/AppearPrefView.cpp	Sun Apr  2 23:00:00 2000
 +++ MuTerm_working/src/AppearPrefView.cpp	Fri May 11 12:29:45 2007
@@ -480,12 +809,12 @@ diff -Nur MuTerm/src/LangPrefView.cpp MuTerm_working/src/LangPrefView.cpp
  //
 diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm_working/src/Makefile_with_etkxx
 --- MuTerm/src/Makefile_with_etkxx	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/Makefile_with_etkxx	Wed May 16 16:20:44 2007
++++ MuTerm_working/src/Makefile_with_etkxx	Fri Aug 31 00:19:12 2007
 @@ -0,0 +1,123 @@
 +DEBUG_OPTIONS = -g -Wall
 +OPTIMIZE = -O3
 +
-+MIN_ETKXX_VER = 0.3.2
++MIN_ETKXX_VER = 0.3.3
 +
 +ifeq ($(OSTYPE),msys)
 +PREFIX =
@@ -1311,7 +1640,7 @@ diff -Nur MuTerm/src/TTextControl.h MuTerm_working/src/TTextControl.h
  {
 diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
 --- MuTerm/src/TermApp.cpp	Sun Jul  1 12:27:21 2001
-+++ MuTerm_working/src/TermApp.cpp	Tue May 15 23:48:26 2007
++++ MuTerm_working/src/TermApp.cpp	Fri Aug 31 00:04:56 2007
 @@ -24,6 +24,10 @@
  char *muterm_ver = "2.4";
  char *last_update = "2001/7/1";
@@ -3461,8 +3790,8 @@ diff -Nur MuTerm/src/WelcomeMessage.h MuTerm_working/src/WelcomeMessage.h
  
 diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
 --- MuTerm/src/etkxx-impl.h	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/etkxx-impl.h	Sat May 12 01:04:57 2007
-@@ -0,0 +1,212 @@
++++ MuTerm_working/src/etkxx-impl.h	Thu Aug 30 23:53:34 2007
+@@ -0,0 +1,213 @@
 +#ifndef __ETKXX_IMPL_H__
 +#define __ETKXX_IMPL_H__
 +
@@ -3603,6 +3932,7 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
 +#define BView			EView
 +#define B_FOLLOW_NONE		E_FOLLOW_NONE
 +#define B_FOLLOW_ALL_SIDES	E_FOLLOW_ALL
++#define B_FOLLOW_ALL		E_FOLLOW_ALL
 +#define B_WILL_DRAW		E_WILL_DRAW
 +#define B_FRAME_EVENTS		E_FRAME_EVENTS
 +#define B_PULSE_NEEDED		E_PULSE_NEEDED

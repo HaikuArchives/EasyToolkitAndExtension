@@ -656,6 +656,9 @@
 					RelativePath="..\..\..\etk\interface\TextView.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\interface\ViewPrivate.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\interface\View.h">
 				</File>
 				<File

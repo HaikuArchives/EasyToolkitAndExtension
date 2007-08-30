@@ -94,7 +94,7 @@ class EView;
 class EGraphicsContext;
 class EGraphicsDrawable;
 class EGraphicsWindow;
-class ELayoutItem;
+class ELayoutContainer;
 
 class _IMPEXP_ETK EWindow : public ELooper {
 public:
@@ -168,6 +168,7 @@ public:
 	virtual void	WorkspaceActivated(eint32 ws, bool state);
 	// Empty functions END
 
+	void		Invalidate(ERect invalRect, bool redraw = true);
 	void		DisableUpdates();
 	void		EnableUpdates();
 
@@ -217,20 +218,18 @@ private:
 	friend class EApplication;
 	friend class EView;
 	friend class EGraphicsEngine;
+	friend class EBitmap;
 
 	EGraphicsWindow *fWindow;
 	EGraphicsDrawable *fPixmap;
 	EGraphicsContext *fDC;
-	ELayoutItem *fLayout;
+	ELayoutContainer *fLayout;
 
-	ERect fFrame;
 	char *fWindowTitle;
 	e_window_look fWindowLook;
 	e_window_feel fWindowFeel;
 	euint32 fWindowFlags;
 	euint32 fWindowWorkspaces;
-
-	EList fViewsList;
 
 	EView *fFocus;
 	EList fMouseInterestedViews;
@@ -253,15 +252,12 @@ private:
 
 	bool _HasResizeMessage(bool setBrokeOnExpose);
 
-	e_rgb_color fBackgroundColor;
-
-	bool fHidden;
 	bool fMinimized;
 	bool fActivated;
 
-	e_bigtime_t fActivatedTimemap;
-	e_bigtime_t fPositionChangedTimemap;
-	e_bigtime_t fSizeChangedTimemap;
+	e_bigtime_t fActivatedTimeStamp;
+	e_bigtime_t fPositionChangedTimeStamp;
+	e_bigtime_t fSizeChangedTimeStamp;
 
 	euint32 fMouseGrabCount;
 	euint32 fKeyboardGrabCount;

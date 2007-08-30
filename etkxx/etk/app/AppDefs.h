@@ -41,7 +41,6 @@ enum {
 	E_APP_CURSOR_REQUESTED			= '_CUR',
 	E_ARGV_RECEIVED 			= '_ARG',
 	E_QUIT_REQUESTED 			= '_QRQ',
-	E_CLOSE_REQUESTED 			= '_QRQ', /* Same as E_QUIT_REQUESTED */
 	E_CANCEL				= '_CNC',
 	E_KEY_DOWN 				= '_KYD',
 	E_KEY_UP 				= '_KYU',
