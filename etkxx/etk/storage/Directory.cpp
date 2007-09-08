@@ -39,10 +39,6 @@
 
 #ifdef _WIN32
 
-#define STRICT
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
-#endif
 #include <windows.h>
 
 #undef HAVE_DIRENT_H
@@ -125,7 +121,7 @@ EDirectory::SetTo(const char *path)
 #else
 #ifdef _WIN32
 		DWORD attr = GetFileAttributes(dirname);
-		if(attr == INVALID_FILE_ATTRIBUTES) break;
+		if(attr == (DWORD)-1/*INVALID_FILE_ATTRIBUTES*/) break;
 		if(!(attr & FILE_ATTRIBUTE_DIRECTORY)) {retVal = E_ENTRY_NOT_FOUND; break;}
 
 		if(fDir == NULL)

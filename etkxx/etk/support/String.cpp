@@ -2268,6 +2268,8 @@ bool e_get_hex(const EString &str, TYPE_INT *value)
 bool
 EString::GetDecimal(float *value) const
 {
+#if !(defined(_MSC_VER) && _MSC_VER <= 0x4b0)
+
 	if(!value || !IsNumber()) return false;
 
 	euint64 tmp;
@@ -2280,12 +2282,19 @@ EString::GetDecimal(float *value) const
 #endif
 
 	return true;
+
+#else
+	// TODO
+	return false;
+#endif
 }
 
 
 bool
 EString::GetDecimal(double *value) const
 {
+#if !(defined(_MSC_VER) && _MSC_VER <= 0x4b0)
+
 	if(!value || !IsNumber()) return false;
 
 	euint64 tmp;
@@ -2294,6 +2303,11 @@ EString::GetDecimal(double *value) const
 	*value = strtod(String(), NULL);
 
 	return true;
+
+#else
+	// TODO
+	return false;
+#endif
 }
 
 
@@ -2403,7 +2417,11 @@ EString::GetInteger(eint64 *value) const
 	return true;
 #else
 #if SIZEOF___INT64 == 8
+#if _MSC_VER <= 0x4b0
+	*value = (eint64)_atoi64(String());
+#else
 	*value = (eint64)_strtoi64(String(), NULL, 10);
+#endif
 	return true;
 #else
 	return false;
@@ -2416,6 +2434,7 @@ EString::GetInteger(eint64 *value) const
 bool
 EString::GetInteger(euint64 *value) const
 {
+#if !(defined(_MSC_VER) && _MSC_VER <= 0x4b0)
 	if(!value || !IsNumber()) return false;
 
 	if(e_get_hex(*this, value)) return true;
@@ -2435,6 +2454,11 @@ EString::GetInteger(euint64 *value) const
 	return false;
 #endif
 #endif
+#endif
+
+#else
+	// TODO
+	return false;
 #endif
 }
 

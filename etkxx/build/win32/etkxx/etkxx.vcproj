@@ -154,6 +154,9 @@
 					RelativePath="..\..\..\etk\support\ByteOrder.c">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\support\DataIO.cpp">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\support\List.cpp">
 				</File>
 				<File
@@ -319,6 +322,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\Theme.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\ToolTip.cpp">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\View.cpp">
@@ -519,6 +525,9 @@
 					RelativePath="..\..\..\etk\support\ClassInfo.h">
 				</File>
 				<File
+					RelativePath="..\..\..\etk\support\DataIO.h">
+				</File>
+				<File
 					RelativePath="..\..\..\etk\support\Errors.h">
 				</File>
 				<File
@@ -585,6 +594,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\GraphicsDefs.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\Input.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\InterfaceDefs.h">
@@ -654,6 +666,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\TextView.h">
+				</File>
+				<File
+					RelativePath="..\..\..\etk\interface\ToolTip.h">
 				</File>
 				<File
 					RelativePath="..\..\..\etk\interface\ViewPrivate.h">

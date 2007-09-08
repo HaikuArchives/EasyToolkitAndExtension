@@ -1,3 +1,9 @@
+2007-09-09  anthonylee
+	Added EDataIO/EPositionIO/EMallocIO/EMemoryIO for SupportKit
+
+2007-09-04  anthonylee
+	Fixed for MS VC++6
+
 2007-08-30  anthonylee
 	Added accept_views mode of EBitmap.
 	Clean up EWindow/EView.

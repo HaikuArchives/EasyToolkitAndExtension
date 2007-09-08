@@ -1720,7 +1720,11 @@ void
 EView::StrokeRoundRect(ERect r, float xRadius, float yRadius, e_pattern p)
 {
 	if(r.IsValid() == false || xRadius < 0 || yRadius < 0 || IsVisible() == false) return;
-	if(r.Width() == 0 || r.Height() == 0 || (xRadius == 0 && yRadius == 0)) return StrokeRect(r, p);
+	if(r.Width() == 0 || r.Height() == 0 || (xRadius == 0 && yRadius == 0))
+	{
+		StrokeRect(r, p);
+		return;
+	}
 
 	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
@@ -1742,7 +1746,11 @@ void
 EView::FillRoundRect(ERect r, float xRadius, float yRadius, e_pattern p)
 {
 	if(r.IsValid() == false || xRadius < 0 || yRadius < 0 || IsVisible() == false) return;
-	if(r.Width() == 0 || r.Height() == 0 || (xRadius == 0 && yRadius == 0)) return FillRect(r, p);
+	if(r.Width() == 0 || r.Height() == 0 || (xRadius == 0 && yRadius == 0))
+	{
+		FillRect(r, p);
+		return;
+	}
 
 	ConvertToWindow(&r);
 	ERect updateRect(r.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
@@ -1833,28 +1841,28 @@ EView::FillArc(ERect r, float start_angle, float arc_angle, e_pattern p)
 void
 EView::StrokeEllipse(EPoint center, float xRadius, float yRadius, e_pattern p)
 {
-	return StrokeArc(center, xRadius, yRadius, 0, 360, p);
+	StrokeArc(center, xRadius, yRadius, 0, 360, p);
 }
 
 
 void
 EView::StrokeEllipse(ERect rect, e_pattern p)
 {
-	return StrokeArc(rect, 0, 360, p);
+	StrokeArc(rect, 0, 360, p);
 }
 
 
 void
 EView::FillEllipse(EPoint center, float xRadius, float yRadius, e_pattern p)
 {
-	return FillArc(center, xRadius, yRadius, 0, 360, p);
+	FillArc(center, xRadius, yRadius, 0, 360, p);
 }
 
 
 void
 EView::FillEllipse(ERect rect, e_pattern p)
 {
-	return FillArc(rect, 0, 360, p);
+	FillArc(rect, 0, 360, p);
 }
 
 
@@ -2558,7 +2566,7 @@ EView::SetPrivateEventMask(euint32 mask, euint32 options)
 void
 EView::GetPreferredSize(float *width, float *height)
 {
-	return fLayout->ELayoutItem::GetPreferredSize(width, height);
+	fLayout->ELayoutItem::GetPreferredSize(width, height);
 }
 
 

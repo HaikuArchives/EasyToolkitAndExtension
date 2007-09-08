@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,46 +22,76 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: InterfaceKit.h
- * 
+ *
+ * File: ToolTip.h
+ *
  * --------------------------------------------------------------------------*/
 
+#ifndef __ETK_TOOL_TIP_H__
+#define __ETK_TOOL_TIP_H__
+
+#include <etk/app/Messenger.h>
 #include <etk/interface/GraphicsDefs.h>
-#include <etk/interface/InterfaceDefs.h>
 #include <etk/interface/Point.h>
-#include <etk/interface/Rect.h>
-#include <etk/interface/Polygon.h>
-#include <etk/interface/Region.h>
 #include <etk/interface/Font.h>
-#include <etk/interface/Screen.h>
-#include <etk/interface/Window.h>
-#include <etk/interface/View.h>
-#include <etk/interface/LimitedView.h>
-#include <etk/interface/ScrollBar.h>
-#include <etk/interface/ScrollView.h>
-#include <etk/interface/Control.h>
-#include <etk/interface/ColorControl.h>
-#include <etk/interface/Button.h>
-#include <etk/interface/Alert.h>
-#include <etk/interface/CheckBox.h>
-#include <etk/interface/RadioButton.h>
-#include <etk/interface/MenuItem.h>
-#include <etk/interface/Menu.h>
-#include <etk/interface/PopUpMenu.h>
-#include <etk/interface/MenuBar.h>
-#include <etk/interface/MenuField.h>
-#include <etk/interface/StringView.h>
-#include <etk/interface/Box.h>
-#include <etk/interface/StatusBar.h>
-#include <etk/interface/TextEditable.h>
-#include <etk/interface/TextControl.h>
-#include <etk/interface/ListItem.h>
-#include <etk/interface/ListView.h>
-#include <etk/interface/OutlineListView.h>
-#include <etk/interface/TabView.h>
-#include <etk/interface/TextView.h>
-#include <etk/interface/Bitmap.h>
-#include <etk/interface/ToolTip.h>
-#include <etk/interface/Input.h>
+
+
+#if 0
+class _IMPEXP_ETK EToolTipInfo {
+public:
+	EToolTipInfo();
+	virtual ~EToolTipInfo();
+
+	void			SetText(const char *text);
+	const char		*Text() const;
+
+	void			SetFont(const EFont *font);
+	const EFont*		Font() const;
+
+	void			SetBackgroundColor(e_rgb_color color);
+	e_rgb_color		BackgroundColor() const;
+
+	void			SetTextColor(e_rgb_color color);
+	e_rgb_color		TextColor() const;
+
+	void			SetInline(bool state);
+	bool			IsInline() const;
+
+	void			SetTextOrigin(EPoint origin);
+	EPoint			TextOrigin() const;
+
+private:
+	char *fText;
+	EFont fFont;
+	e_rgb_color fColor[2];
+	bool fIsInline;
+	EPoint fTextOrigin;
+};
+
+
+class _IMPEXP_ETK EToolTip {
+public:
+	EToolTip();
+	virtual ~EToolTip();
+
+	virtual e_status_t	ShowTip(const EMessenger &msgr);
+	virtual e_status_t	HideTip(const EMessenger &msgr);
+	virtual e_status_t	KillTip(const EMessenger &msgr);
+	virtual e_status_t	SetToolTipInfo(const EMessenger &msgr,
+					       ERect region,
+					       EToolTipInfo *info);
+
+	virtual e_status_t	CursorMoved(const EMessenger &msgr,
+					    EPoint where,
+					    EPoint delta);
+
+	static EToolTip		*Default();
+
+private:
+	void *fData;
+};
+#endif
+
+
+#endif /* __ETK_TOOL_TIP_H__ */
 

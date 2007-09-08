@@ -30,10 +30,6 @@
 #include <etk/config.h>
 
 #ifdef _WIN32
-#define STRICT
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
-#endif
 #include <windows.h>
 #undef HAVE_MNTENT_H
 #endif // _WIN32

@@ -105,7 +105,7 @@ public:
 	virtual void	MessageReceived(EMessage *msg);
 
 private:
-	const char *fText;
+	char *fText;
 	bool fEditable;
 	bool fSelectable;
 	e_alignment fAlignment;

@@ -40,7 +40,7 @@
 
 #include <etk/support/SupportDefs.h>
 
-#if defined(__MWERKS__)
+#if defined(__MWERKS__) || defined(_MSC_VER)
 /* for Metrowerks, etc. */
 #ifndef __FUNCTION__
 #define __FUNCTION__	"Unknown"

@@ -19,6 +19,12 @@ How to compile ETK++ from source
 	  IPC on Linux --- 2.6.x kernel
 	  IPC on FreeBSD 6.x --- Add "options P1003_1B_SEMAPHORES" to kernel config and recompile kernel
 
+ * Windows MSVC++ 6.0:
+	1. run "./configure --with-built-in-graphics=win32" within MinGW to generate the files
+	2. open "build/win32/etkxx.dsw" in MSVC++ 6.0
+	3. compile the project named "etkxx"
+	4. the "build/win32/example.dsw" just for compiling examples
+
  * Windows MSVC .NET:
 	1. run "./configure --with-built-in-graphics=win32" within MinGW to generate the files
 	2. open "build/win32/etkxx.sln" in MSVC .NET

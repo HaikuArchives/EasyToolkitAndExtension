@@ -83,7 +83,9 @@
 /* #undef HAVE_LOCALTIME_R */
 
 /* Define if you have the 'long long' type. */
-#define HAVE_LONG_LONG 1
+#if _MSC_VER > 0x4b0
+	#define HAVE_LONG_LONG
+#endif
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -212,7 +214,9 @@
 #define SIZEOF_LONG 4
 
 /* The size of a `long long', as computed by sizeof. */
-#define SIZEOF_LONG_LONG 8
+#if _MSC_VER > 0x4b0
+	#define SIZEOF_LONG_LONG 8
+#endif
 
 /* The size of a `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2

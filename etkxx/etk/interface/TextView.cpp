@@ -1122,10 +1122,8 @@ ETextView::SetText(EFile *file, eint64 fileOffset, eint32 length, const e_text_r
 	if(buffer == NULL) return;
 	bzero(buffer, (size_t)length + 1);
 
-	eint64 oldPos = file->Position();
 	ssize_t nRead = file->ReadAt(fileOffset, buffer, (size_t)length);
 	if(nRead > 0) Insert(0, buffer, (eint32)nRead, runs, utf8);
-	file->Seek(oldPos, E_SEEK_SET);
 
 	free(buffer);
 	Invalidate();

@@ -30,10 +30,10 @@
 #ifndef __ETK_WIN32GDI_H__
 #define __ETK_WIN32GDI_H__
 
-#define STRICT
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500
 #endif
+
 #ifndef WINVER
 #define WINVER 0x0500
 #endif
@@ -397,6 +397,10 @@ typedef struct etk_win32_gdi_callback_t {
 	const void *data;
 } etk_win32_gdi_callback_t;
 
+
+#ifndef GET_WHEEL_DELTA_WPARAM
+#define GET_WHEEL_DELTA_WPARAM(wparam)	((short)HIWORD(wparam))
+#endif
 
 #endif /* __ETK_WIN32GDI_H__ */
 

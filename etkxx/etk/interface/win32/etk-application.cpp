@@ -1095,6 +1095,7 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 				}
 				break;
 
+#ifdef _WIN32_WINNT
 			case WM_MOUSEWHEEL:
 				{
 					short zDelta = GET_WHEEL_DELTA_WPARAM(winMsg->wParam);
@@ -1107,6 +1108,7 @@ static bool etk_process_win32_event(EWin32GraphicsEngine *win32Engine, MSG *winM
 					etkWinMsgr.SendMessage(&message);
 				}
 				break;
+#endif
 
 			case WM_MOUSEMOVE:
 				{

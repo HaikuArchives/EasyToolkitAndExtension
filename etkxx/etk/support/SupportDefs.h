@@ -198,9 +198,20 @@ extern _IMPEXP_ETK const euint16 etk_binary_age;
 	#ifdef CreateWindow
 		#undef CreateWindow
 	#endif /* CreateWindow */
+
+	#if defined(_MSC_VER) && _MSC_VER <= 0x4b0
+	#define for	if (0); else for
+	#endif
 #endif /* ETK_OS_WIN32 */
 
 #endif /* __cplusplus */
+
+/* seek_mode */
+enum {
+	E_SEEK_SET = 0,
+	E_SEEK_CUR,
+	E_SEEK_END,
+};
 
 #ifndef __ETK_DEBUG_H__
 #include <etk/kernel/Debug.h>

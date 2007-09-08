@@ -289,8 +289,11 @@ ssize_t
 EFile::ReadAt(eint64 pos, void *buffer, size_t size)
 {
 	if(!IsReadable() || buffer == NULL) return -1;
+	eint64 savePosition = Position();
 	if(Seek(pos, E_SEEK_SET) < E_INT64_CONSTANT(0)) return -1;
-	return Read(buffer, size);
+	ssize_t retVal = Read(buffer, size);
+	Seek(savePosition, E_SEEK_SET);
+	return retVal;
 }
 
 
@@ -312,8 +315,11 @@ ssize_t
 EFile::WriteAt(eint64 pos, const void *buffer, size_t size)
 {
 	if(!IsWritable() || buffer == NULL) return -1;
+	eint64 savePosition = Position();
 	if(Seek(pos, E_SEEK_SET) < E_INT64_CONSTANT(0)) return -1;
-	return Write(buffer, size);
+	ssize_t retVal = Write(buffer, size);
+	Seek(savePosition, E_SEEK_SET);
+	return retVal;
 }
 
 
@@ -339,7 +345,7 @@ EFile::Seek(eint64 position, euint32 seek_mode)
 	LARGE_INTEGER li;
 	li.QuadPart = position;
 	li.LowPart = SetFilePointer((HANDLE)fFD, li.LowPart, &li.HighPart, whence);
-	if(li.LowPart == INVALID_SET_FILE_POINTER) return E_INT64_CONSTANT(-1);
+	if(li.LowPart == (DWORD)-1/*INVALID_SET_FILE_POINTER*/) return E_INT64_CONSTANT(-1);
 	return li.QuadPart;
 #endif
 }
@@ -358,7 +364,7 @@ EFile::Position() const
 	LARGE_INTEGER li;
 	li.HighPart = 0;
 	li.LowPart = SetFilePointer((HANDLE)fFD, 0, &li.HighPart, FILE_CURRENT);
-	if(li.LowPart == INVALID_SET_FILE_POINTER) return E_INT64_CONSTANT(-1);
+	if(li.LowPart == (DWORD)-1/*INVALID_SET_FILE_POINTER*/) return E_INT64_CONSTANT(-1);
 	return li.QuadPart;
 #endif
 }
