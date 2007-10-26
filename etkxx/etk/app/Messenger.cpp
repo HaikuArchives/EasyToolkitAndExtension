@@ -44,6 +44,7 @@ extern bool etk_is_current_at_looper_thread(euint64 token);
 extern euint64 etk_get_ref_handler_token(const EHandler *handler);
 extern e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
 extern ELocker* etk_get_handler_operator_locker();
+extern euint64 etk_get_ref_looper_token(euint64 token);
 
 
 EMessenger::EMessenger()

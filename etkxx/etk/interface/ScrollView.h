@@ -44,11 +44,6 @@ public:
 		    e_border_style border = E_FANCY_BORDER);
 	virtual ~EScrollView();
 
-	// Archiving
-	EScrollView(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	// SetTarget: When it return E_OK, the oldTarget was removed and destroy automatically.
 	//            If you want to keep the oldTarget, try oldTarget->RemoveSelf() before.
 	e_status_t	SetTarget(EView *newTarget);

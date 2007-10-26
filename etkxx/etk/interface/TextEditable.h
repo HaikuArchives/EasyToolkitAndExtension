@@ -46,11 +46,6 @@ public:
 		      euint32 flags = E_WILL_DRAW | E_FRAME_EVENTS);
 	virtual ~ETextEditable();
 
-	// Archiving
-	ETextEditable(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	void		MakeEditable(bool editable);
 	bool		IsEditable() const;
 

@@ -49,11 +49,6 @@ public:
 		 bool resizeToFit = true);
 	virtual ~EMenuBar();
 
-	// Archiving
-	EMenuBar(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual void		SetBorder(e_menu_bar_border border);
 	e_menu_bar_border	Border() const;
 

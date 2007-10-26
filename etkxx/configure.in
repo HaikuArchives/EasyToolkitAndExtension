@@ -10,8 +10,8 @@ AC_PREREQ(2.54)
 #
 m4_define([etk_major_version], [0])
 m4_define([etk_minor_version], [3])
-m4_define([etk_micro_version], [3])
-m4_define([etk_interface_age], [0])
+m4_define([etk_micro_version], [4])
+m4_define([etk_interface_age], [1])
 m4_define([etk_binary_age],
           [m4_eval(100 * etk_minor_version + etk_micro_version)])
 m4_define([etk_version],
@@ -307,7 +307,7 @@ case $etk_native_os_extra in
     ETK_WIN32_RESOURCE=etkxx-win32res.lo
     ETK_DEF=etkxx.def
     etk_win32_libs="-lmsvcrt -lkernel32 -luser32"
-    etk_win32_libs_extra=
+    etk_win32_libs_extra="-luserenv -ladvapi32"
     ;;
   cygwin)
     ETK_WIN32_RESOURCE=etkxx-win32res.lo
@@ -896,7 +896,7 @@ if test "x$no_x" != xyes; then
     fi
   fi
   case $etk_native_os_extra in
-	mingw|cygwin)
+	mingw)
 		case " $etk_graphics_x11_libs " in
 		*[[\ \	]]-lws2_32[[\ \	]]*) ;;
 		*) etk_graphics_x11_libs="$etk_graphics_x11_libs -lws2_32" ;;

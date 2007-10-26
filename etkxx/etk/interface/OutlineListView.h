@@ -44,11 +44,6 @@ public:
 			 euint32 flags = E_WILL_DRAW | E_NAVIGABLE | E_FRAME_EVENTS);
 	virtual ~EOutlineListView();
 
-	// Archiving
-	EOutlineListView(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual bool		AddUnder(EListItem *item, EListItem *superitem);
 
 	virtual bool		AddItem(EListItem *item);

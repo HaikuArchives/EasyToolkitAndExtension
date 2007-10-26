@@ -52,9 +52,9 @@ public:
 	virtual ~EHandler();
 
 	// Archiving
-	EHandler(EMessage *from);
-	static EArchivable *Instantiate(EMessage *from);
+	EHandler(const EMessage *from);
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
+	static EArchivable *Instantiate(const EMessage *from);
 
 	void		SetName(const char *name);
 	const char	*Name() const;

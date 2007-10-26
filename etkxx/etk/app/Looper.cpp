@@ -46,6 +46,7 @@ extern ELocker* etk_get_handler_operator_locker();
 extern bool etk_ref_handler(euint64 token);
 extern bool etk_unref_handler(euint64 token);
 extern e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
+extern e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout);
 
 EList ELooper::sLooperList;
 
@@ -113,7 +114,7 @@ ELooper::~ELooper()
 }
 
 
-ELooper::ELooper(EMessage *from)
+ELooper::ELooper(const EMessage *from)
 	: EHandler(from), fDeconstructing(false), fProxy(NULL), fThreadPriority(E_NORMAL_PRIORITY), fPreferredHandler(NULL), fLocker(NULL), fLocksCount(E_INT64_CONSTANT(0)), fThread(NULL), fSem(NULL), fMessageQueue(NULL), fCurrentMessage(NULL), fThreadExited(NULL)
 {
 	ELocker *hLocker = etk_get_handler_operator_locker();
@@ -146,7 +147,7 @@ ELooper::Archive(EMessage *into, bool deep) const
 
 
 EArchivable*
-ELooper::Instantiate(EMessage *from)
+ELooper::Instantiate(const EMessage *from)
 {
 	if(e_validate_instantiation(from, "ELooper"))
 		return new ELooper(from);

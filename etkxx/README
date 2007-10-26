@@ -25,9 +25,9 @@ How to compile ETK++ from source
 	3. compile the project named "etkxx"
 	4. the "build/win32/example.dsw" just for compiling examples
 
- * Windows MSVC .NET:
+ * Windows MSVC .NET/2005:
 	1. run "./configure --with-built-in-graphics=win32" within MinGW to generate the files
-	2. open "build/win32/etkxx.sln" in MSVC .NET
+	2. open "build/win32/etkxx.sln" in MSVC .NET/2005
 	3. compile the project named "etkxx"
 	4. the "build/win32/example.sln" just for compiling examples
 

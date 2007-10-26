@@ -16,5 +16,6 @@ CLEANFILES =			\
 DISTCLEANFILES = Makefile.in
 
 clean-local:
+	-rm -f *.vcproj.*.user
 	-rm -rf Debug Release
 

@@ -53,9 +53,9 @@ public:
 	virtual ~ENetAddress();
 
 	// Archiving
-	ENetAddress(EMessage *from);
-	static EArchivable *Instantiate(EMessage *from);
+	ENetAddress(const EMessage *from);
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
+	static EArchivable *Instantiate(const EMessage *from);
 
 	e_status_t	InitCheck() const;
 

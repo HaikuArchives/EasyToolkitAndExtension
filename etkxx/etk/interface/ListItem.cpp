@@ -297,36 +297,6 @@ EStringItem::~EStringItem()
 }
 
 
-EStringItem::EStringItem(EMessage *from)
-	: EListItem(from), fText(NULL)
-{
-	// TODO
-}
-
-
-e_status_t
-EStringItem::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EListItem::Archive(into, deep);
-	into->AddString("class", "EStringItem");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EStringItem::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EStringItem"))
-		return new EStringItem(from);
-	return NULL;
-}
-
-
 void
 EStringItem::DrawItem(EView *owner, ERect itemRect, bool drawEverything)
 {

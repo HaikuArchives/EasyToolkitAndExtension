@@ -136,7 +136,7 @@ EApplication::~EApplication()
 }
 
 
-EApplication::EApplication(EMessage *from)
+EApplication::EApplication(const EMessage *from)
 	: ELooper(NULL, E_DISPLAY_PRIORITY), fQuit(false), fSignature(NULL),
 	  fPulseRate(E_INT64_CONSTANT(500000)), fPulseRunner(NULL),
 	  fGraphicsEngine(NULL), fGraphicsEngineAddon(NULL),
@@ -162,7 +162,7 @@ EApplication::Archive(EMessage *into, bool deep) const
 
 
 EArchivable*
-EApplication::Instantiate(EMessage *from)
+EApplication::Instantiate(const EMessage *from)
 {
 	if(e_validate_instantiation(from, "EApplication"))
 		return new EApplication(from);

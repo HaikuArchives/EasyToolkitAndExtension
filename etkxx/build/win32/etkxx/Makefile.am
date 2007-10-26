@@ -6,5 +6,6 @@ CLEANFILES = etkxx.plg
 DISTCLEANFILES = Makefile.in
 
 clean-local:
+	-rm -f *.vcproj.*.user
 	-rm -rf Debug Release
 

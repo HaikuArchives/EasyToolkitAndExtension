@@ -155,37 +155,6 @@ EView::~EView()
 }
 
 
-EView::EView(EMessage *from)
-	: EHandler(from)
-{
-	// TODO
-	ETK_ERROR("[INTERFACE]: %s --- Unsupported yet.", __PRETTY_FUNCTION__);
-}
-
-
-e_status_t
-EView::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EHandler::Archive(into, deep);
-	into->AddString("class", "EView");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EView::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EView"))
-		return new EView(from);
-	return NULL;
-}
-
-
 void
 EView::MessageReceived(EMessage *msg)
 {

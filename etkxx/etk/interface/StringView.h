@@ -45,11 +45,6 @@ public:
 		    euint32 flags = E_WILL_DRAW);
 	virtual ~EStringView();
 
-	// Archiving
-	EStringView(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual void		SetText(const char *text);
 	void			SetText(const EString &text);
 	const char*		Text() const;

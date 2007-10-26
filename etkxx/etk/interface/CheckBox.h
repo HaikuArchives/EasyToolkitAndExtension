@@ -45,11 +45,6 @@ public:
 		  euint32 flags = E_WILL_DRAW | E_NAVIGABLE);
 	virtual ~ECheckBox();
 
-	// Archiving
-	ECheckBox(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual void	SetLabel(const char *label);
 
 	virtual void	Draw(ERect updateRect);

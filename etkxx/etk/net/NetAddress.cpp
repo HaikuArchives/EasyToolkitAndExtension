@@ -103,7 +103,7 @@ ENetAddress::~ENetAddress()
 }
 
 
-ENetAddress::ENetAddress(EMessage *from)
+ENetAddress::ENetAddress(const EMessage *from)
 	: EArchivable(from), fStatus(E_NO_INIT)
 {
 	bzero(&fAddr, sizeof(struct sockaddr_in));
@@ -126,7 +126,7 @@ ENetAddress::Archive(EMessage *into, bool deep) const
 
 
 EArchivable*
-ENetAddress::Instantiate(EMessage *from)
+ENetAddress::Instantiate(const EMessage *from)
 {
 	if(e_validate_instantiation(from, "ENetAddress"))
 		return new ENetAddress(from);

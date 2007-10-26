@@ -39,38 +39,8 @@ ECheckBox::ECheckBox(ERect frame, const char *name, const char *label,
 }
 
 
-ECheckBox::ECheckBox(EMessage *from)
-	: EControl(from)
-{
-	// TODO
-}
-
-
 ECheckBox::~ECheckBox()
 {
-}
-
-
-e_status_t
-ECheckBox::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EControl::Archive(into, deep);
-	into->AddString("class", "ECheckBox");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-ECheckBox::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "ECheckBox"))
-		return new ECheckBox(from);
-	return NULL;
 }
 
 

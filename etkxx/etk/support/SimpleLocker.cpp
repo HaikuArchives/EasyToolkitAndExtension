@@ -36,7 +36,7 @@
 ESimpleLocker::ESimpleLocker(bool assert)
 {
 	fLocker = etk_create_simple_locker();
-	if(!fLocker && assert) ETK_ERROR("[SUPPORT]: %s --- Create simple locker failed!", __PRETTY_FUNCTION__);
+	if(fLocker == NULL && assert) ETK_ERROR("[SUPPORT]: %s --- Create simple locker failed!", __PRETTY_FUNCTION__);
 }
 
 

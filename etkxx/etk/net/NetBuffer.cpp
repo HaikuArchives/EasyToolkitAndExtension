@@ -52,7 +52,7 @@ ENetBuffer::~ENetBuffer()
 }
 
 
-ENetBuffer::ENetBuffer(EMessage *from)
+ENetBuffer::ENetBuffer(const EMessage *from)
 	: EArchivable(from), fData(NULL), fSize(0), fPos(0)
 {
 	// TODO
@@ -74,7 +74,7 @@ ENetBuffer::Archive(EMessage *into, bool deep) const
 
 
 EArchivable*
-ENetBuffer::Instantiate(EMessage *from)
+ENetBuffer::Instantiate(const EMessage *from)
 {
 	if(e_validate_instantiation(from, "ENetBuffer"))
 		return new ENetBuffer(from);

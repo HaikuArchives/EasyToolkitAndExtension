@@ -31,6 +31,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#ifdef _WIN32_WINNT
+#include <userenv.h>
+#endif
 extern HINSTANCE etk_dll_hinstance;
 #endif
 
@@ -53,9 +56,9 @@ e_status_t e_find_directory(e_directory_which which, EPath *path)
 
 #ifdef _WIN32
 	char buffer[E_MAXPATH + 1];
-	bzero(buffer, sizeof(buffer));
 
 	// here we find directory contains libetk.dll
+	bzero(buffer, sizeof(buffer));
 	if(GetModuleFileName((HMODULE)etk_dll_hinstance, buffer, E_MAXPATH) == 0) return E_ERROR;
 	EPath prefixPath;
 	prefixPath.SetTo(buffer);
@@ -63,23 +66,29 @@ e_status_t e_find_directory(e_directory_which which, EPath *path)
 	if(prefixPath.Path() == NULL) return E_ERROR;
 
 	EString homeDir;
-	bzero(buffer, sizeof(buffer));
-	char userName[1025];
-	DWORD userNameLen = (DWORD)sizeof(userName);
-	bzero(userName, sizeof(userName));
-	if(GetUserName(userName, &userNameLen) != 0 && GetWindowsDirectory(buffer, E_MAXPATH) != 0)
+#ifdef _WIN32_WINNT
+	HANDLE hToken = INVALID_HANDLE_VALUE;
+	OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken);
+	if(hToken != INVALID_HANDLE_VALUE)
 	{
-		DWORD systemVer = GetVersion();
-		if(systemVer < 0x80000000 && (systemVer >> 16) >= 0x05) // 2000 or XP
-			homeDir << buffer[0] << ":/Documents and Settings/" << userName;
-		else
-			homeDir << prefixPath.Path() << "/" << userName;
+		DWORD len = E_MAXPATH;
+		bzero(buffer, sizeof(buffer));
+		if(GetUserProfileDirectory(hToken, buffer, &len) != 0) homeDir = buffer;
+		CloseHandle(hToken);
+	}
+#endif
+	if(homeDir.Length() <= 0)
+	{
+		char userName[1025];
+		DWORD userNameLen = (DWORD)sizeof(userName);
+		bzero(userName, sizeof(userName));
+		homeDir << prefixPath.Path() << "/." << (GetUserName(userName, &userNameLen) == 0 ? "user" : userName);
 	}
 
+	bzero(buffer, sizeof(buffer));
 	switch(which)
 	{
 		case E_BOOT_DIRECTORY:
-			bzero(buffer, sizeof(buffer));
 			if(GetWindowsDirectory(buffer, E_MAXPATH) != 0)
 			{
 				buffer[3] = '\0';
@@ -88,7 +97,6 @@ e_status_t e_find_directory(e_directory_which which, EPath *path)
 			break;
 
 		case E_APPS_DIRECTORY:
-			bzero(buffer, sizeof(buffer));
 			if(GetWindowsDirectory(buffer, E_MAXPATH) != 0)
 			{
 				buffer[3] = '\0';
@@ -106,7 +114,6 @@ e_status_t e_find_directory(e_directory_which which, EPath *path)
 			break;
 
 		case E_LIB_DIRECTORY:
-			bzero(buffer, sizeof(buffer));
 			if(!(path->SetTo(prefixPath.Path()) != E_OK ||
 			     path->GetParent(path) != E_OK ||
 			     path->Append("lib", true) != E_OK))
@@ -128,7 +135,6 @@ e_status_t e_find_directory(e_directory_which which, EPath *path)
 			break;
 
 		case E_TEMP_DIRECTORY:
-			bzero(buffer, sizeof(buffer));
 			if(!(GetTempPath(E_MAXPATH, buffer) == 0 || path->SetTo(buffer) != E_OK)) retVal = E_OK;
 			break;
 
@@ -296,5 +302,4 @@ e_status_t e_find_directory(e_directory_which which, EPath *path)
 
 	return retVal;
 }
-
 

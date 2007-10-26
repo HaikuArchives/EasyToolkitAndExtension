@@ -55,37 +55,6 @@ EListView::~EListView()
 }
 
 
-EListView::EListView(EMessage *from)
-	: EView(from), EInvoker(),
-	  fListType(E_SINGLE_SELECTION_LIST), fFirstSelected(-1), fLastSelected(-1), fPos(-1),
-	  fSelectionMessage(NULL)
-{
-}
-
-
-e_status_t
-EListView::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EListView");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EListView::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EListView"))
-		return new EListView(from);
-	return NULL;
-}
-
-
 void
 EListView::MakeFocus(bool focusState)
 {

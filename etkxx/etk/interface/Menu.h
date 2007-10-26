@@ -51,11 +51,6 @@ public:
 	EMenu(const char *title, float width, float height);
 	virtual ~EMenu();
 
-	// Archiving
-	EMenu(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	e_menu_layout		Layout() const;
 
 	bool			AddItem(EMenuItem *item);

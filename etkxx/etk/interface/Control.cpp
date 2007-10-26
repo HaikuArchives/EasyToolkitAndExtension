@@ -50,36 +50,6 @@ EControl::~EControl()
 }
 
 
-EControl::EControl(EMessage *from)
-	: EView(from), EInvoker(), fLabel(NULL), fValue(E_CONTROL_OFF), fFocusChanging(false)
-{
-	// TODO
-}
-
-
-e_status_t
-EControl::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EControl");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EControl::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EControl"))
-		return new EControl(from);
-	return NULL;
-}
-
-
 void
 EControl::SetLabel(const char *label)
 {

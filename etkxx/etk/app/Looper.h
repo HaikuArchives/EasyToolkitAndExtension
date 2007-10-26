@@ -50,9 +50,9 @@ public:
 	virtual ~ELooper();
 
 	// Archiving
-	ELooper(EMessage *from);
+	ELooper(const EMessage *from);
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
+	static EArchivable *Instantiate(const EMessage *from);
 
 	void		AddHandler(EHandler *handler);
 	bool		RemoveHandler(EHandler *handler);

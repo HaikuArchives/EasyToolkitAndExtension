@@ -52,36 +52,6 @@ EStringView::~EStringView()
 }
 
 
-EStringView::EStringView(EMessage *from)
-	: EView(ERect(), NULL, 0, 0), fTextArray(NULL), fAlignment(E_ALIGN_LEFT), fVerticalAlignment(E_ALIGN_TOP)
-{
-	// TODO
-}
-
-
-e_status_t
-EStringView::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EStringView");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EStringView::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EStringView"))
-		return new EStringView(from);
-	return NULL;
-}
-
-
 void
 EStringView::SetText(const char *text)
 {

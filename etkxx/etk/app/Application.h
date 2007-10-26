@@ -48,9 +48,9 @@ public:
 	virtual ~EApplication();
 
 	// Archiving
-	EApplication(EMessage *from);
+	EApplication(const EMessage *from);
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
+	static EArchivable *Instantiate(const EMessage *from);
 
 	const char		*Signature() const;
 

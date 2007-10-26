@@ -37,6 +37,9 @@
 
 #ifdef __cplusplus /* Just for C++ */
 
+class EListView;
+class EOutlineListView;
+
 class _IMPEXP_ETK EListItem : public EArchivable {
 public:
 	EListItem(euint32 outlineLevel = 0, bool expanded = true, euint32 flags = 0);
@@ -107,11 +110,6 @@ class _IMPEXP_ETK EStringItem : public EListItem {
 public:
 	EStringItem(const char *text, euint32 outlineLevel = 0, bool expanded = true);
 	virtual ~EStringItem();
-
-	// Archiving
-	EStringItem(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
 
 	virtual void	SetText(const char *text);
 	const char	*Text() const;

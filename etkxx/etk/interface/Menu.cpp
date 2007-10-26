@@ -115,42 +115,6 @@ EMenu::~EMenu()
 }
 
 
-EMenu::EMenu(EMessage *from)
-	: EView(ERect(0, 0, 10, 10), NULL, E_FOLLOW_NONE, E_WILL_DRAW), fResizeToFit(false), fSuperitem(NULL),
-	  fRadioMode(false), fLabelFromMarked(false),
-	  fSelectedIndex(-1), fTrackingIndex(-1), fMarkedIndex(-1), fShowSubmenuByKeyDown(false)
-{
-	fMargins = ERect(0, 0, 0, 0);
-
-	SetViewColor(e_ui_color(E_MENU_BACKGROUND_COLOR));
-
-	SetLayout(E_ITEMS_IN_MATRIX, 10, 10, false);
-}
-
-
-e_status_t
-EMenu::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EMenu");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EMenu::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EMenu"))
-		return new EMenu(from);
-	return NULL;
-}
-
-
 bool
 EMenu::AddItem(EMenuItem *item)
 {

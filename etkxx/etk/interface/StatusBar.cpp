@@ -42,43 +42,12 @@ EStatusBar::EStatusBar(ERect frame, const char *name, const char *label, const c
 }
 
 
-EStatusBar::EStatusBar(EMessage *from)
-	: EView(from), fLabel(NULL), fTrailingLabel(NULL), fText(NULL), fTrailingText(NULL),
-	  fBarHeight(16), fMaxValue(100), fCurrentValue(0)
-{
-	// TODO
-}
-
-
 EStatusBar::~EStatusBar()
 {
 	if(fLabel) delete[] fLabel;
 	if(fTrailingLabel) delete[] fTrailingLabel;
 	if(fText) delete[] fText;
 	if(fTrailingText) delete[] fTrailingText;
-}
-
-
-e_status_t
-EStatusBar::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EStatusBar");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EStatusBar::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EStatusBar"))
-		return new EStatusBar(from);
-	return NULL;
 }
 
 

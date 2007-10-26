@@ -43,11 +43,6 @@ public:
 		   const char *trailing_label = NULL);
 	virtual ~EStatusBar();
 
-	// Archiving
-	EStatusBar(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual void	SetBarHeight(float height);
 	virtual void	SetText(const char *str);
 	virtual void	SetTrailingText(const char *str);

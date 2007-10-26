@@ -325,7 +325,7 @@ ERenderTriangle::Get(eint32 *y, eint32 *_minX, eint32 *_maxX) const
 
 	if(_minX || _maxX)
 	{
-		eint32 minX = 0, maxX = -1, minX0, maxX0;
+		eint32 minX = 0, maxX = -1;
 
 		if(fFlags != 0x03)
 		{
@@ -344,6 +344,7 @@ ERenderTriangle::Get(eint32 *y, eint32 *_minX, eint32 *_maxX) const
 		}
 		else
 		{
+			eint32 minX0, maxX0;
 			ERenderLine2::Get(NULL, &minX0, &maxX0);
 
 			if(fY < max_c(fY0, fY1))

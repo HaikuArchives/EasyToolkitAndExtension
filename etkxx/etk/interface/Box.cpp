@@ -45,36 +45,6 @@ EBox::~EBox()
 }
 
 
-EBox::EBox(EMessage *from)
-	: EView(ERect(), NULL, 0, 0), fLabelView(NULL), fBorder(E_NO_BORDER), fAlignment(E_ALIGN_LEFT)
-{
-	// TODO
-}
-
-
-e_status_t
-EBox::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EBox");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EBox::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EBox"))
-		return new EBox(from);
-	return NULL;
-}
-
-
 void
 EBox::SetBorder(e_border_style border)
 {

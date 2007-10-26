@@ -41,9 +41,9 @@ public:
 	virtual ~ENetBuffer();
 
 	// Archiving
-	ENetBuffer(EMessage *from);
-	static EArchivable *Instantiate(EMessage *from);
+	ENetBuffer(const EMessage *from);
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
+	static EArchivable *Instantiate(const EMessage *from);
 
 	e_status_t	InitCheck() const;
 

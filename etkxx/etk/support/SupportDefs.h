@@ -121,13 +121,15 @@ typedef	eint8	bool;
 
 
 #ifdef ETK_OS_WIN32
-#ifdef __GNUC__
-#  ifndef _stdcall
-#    define _stdcall  __attribute__((stdcall))
-#  endif /* stdcall */
-#endif /* __GNUC__ */
+#	ifdef __GNUC__
+#		ifndef _stdcall
+#		define _stdcall  __attribute__((stdcall))
+#		endif /* stdcall */
+#	endif /* __GNUC__ */
+#	ifdef _MSC_VER
+#		define _CRT_SECURE_NO_DEPRECATE  1 /* TODO: check me */
+#	endif /* _MSC_VER */
 #endif /* ETK_OS_WIN32 */
-
 
 /* We prefix variable declarations so they can
  * properly get exported in windows dlls or Metrowerks'.
@@ -188,19 +190,19 @@ extern _IMPEXP_ETK const euint16 etk_binary_age;
 	#endif
 	#ifdef PostMessage
 		#undef PostMessage
-	#endif /* PostMessage */
+	#endif
 	#ifdef SendMessage
 		#undef SendMessage
-	#endif /* SendMessage */
+	#endif
 	#ifdef DispatchMessage
 		#undef DispatchMessage
-	#endif /* DispatchMessage */
+	#endif
 	#ifdef CreateWindow
 		#undef CreateWindow
-	#endif /* CreateWindow */
+	#endif
 
 	#if defined(_MSC_VER) && _MSC_VER <= 0x4b0
-	#define for	if (0); else for
+		#define for	if (0); else for
 	#endif
 #endif /* ETK_OS_WIN32 */
 

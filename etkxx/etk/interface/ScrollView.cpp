@@ -90,58 +90,6 @@ EScrollView::~EScrollView()
 }
 
 
-EScrollView::EScrollView(EMessage *from)
-	: EView(from), fBorder(E_NO_BORDER), fAlwaysShowHorizontal(false), fAlwaysShowVertical(false), fTarget(NULL)
-{
-	ERect hR = Bounds();
-	ERect vR = Bounds();
-	hR.top = hR.bottom - E_H_SCROLL_BAR_HEIGHT;
-	hR.right -= E_V_SCROLL_BAR_WIDTH;
-	vR.left = vR.right - E_V_SCROLL_BAR_WIDTH;
-	vR.bottom -= E_H_SCROLL_BAR_HEIGHT;
-
-	fHSB = new EScrollBar(hR, NULL, 0, 0, 0, E_HORIZONTAL);
-	fVSB = new EScrollBar(vR, NULL, 0, 0, 0, E_VERTICAL);
-	fHSB->Hide();
-	fVSB->Hide();
-	AddChild(fHSB);
-	AddChild(fVSB);
-
-	if(fHSB->Parent() != this) {delete fHSB; fHSB = NULL;}
-	if(fVSB->Parent() != this) {delete fVSB; fVSB = NULL;}
-
-	euint32 flags = (Flags() | E_FRAME_EVENTS);
-
-	if(fBorder != E_NO_BORDER)
-		EView::SetFlags(flags | E_WILL_DRAW);
-	else
-		EView::SetFlags(flags & ~E_WILL_DRAW);
-}
-
-
-e_status_t
-EScrollView::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EScrollView");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EScrollView::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EScrollView"))
-		return new EScrollView(from);
-	return NULL;
-}
-
-
 e_status_t
 EScrollView::SetTarget(EView *newTarget)
 {

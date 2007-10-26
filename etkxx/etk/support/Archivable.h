@@ -38,15 +38,20 @@
 class _IMPEXP_ETK EArchivable {
 public:
 	EArchivable();
-	EArchivable(EMessage *from);
+	EArchivable(const EMessage *from);
 	virtual ~EArchivable();
 
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
 
-	static EArchivable *Instantiate(EMessage *from);
+	static EArchivable *Instantiate(const EMessage *from);
 };
 
-_IMPEXP_ETK bool e_validate_instantiation(EMessage *from, const char *class_name);
+
+typedef EArchivable *(*e_instantiation_func)(const EMessage*);
+
+_IMPEXP_ETK bool			e_validate_instantiation(const EMessage *from, const char *class_name);
+_IMPEXP_ETK e_instantiation_func	e_find_instantiation_func(const char *class_name);
+_IMPEXP_ETK e_instantiation_func	e_find_instantiation_func(const EMessage *archive_data);
 
 #endif /* __cplusplus */
 

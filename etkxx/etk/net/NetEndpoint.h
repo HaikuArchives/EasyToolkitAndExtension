@@ -42,9 +42,9 @@ public:
 	virtual ~ENetEndpoint();
 
 	// Archiving
-	ENetEndpoint(EMessage *from);
-	static EArchivable *Instantiate(EMessage *from);
+	ENetEndpoint(const EMessage *from);
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
+	static EArchivable *Instantiate(const EMessage *from);
 
 	e_status_t		InitCheck() const;
 

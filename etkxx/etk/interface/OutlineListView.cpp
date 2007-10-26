@@ -43,35 +43,6 @@ EOutlineListView::~EOutlineListView()
 }
 
 
-EOutlineListView::EOutlineListView(EMessage *from)
-	: EListView(from)
-{
-}
-
-
-e_status_t
-EOutlineListView::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EListView::Archive(into, deep);
-	into->AddString("class", "EOutlineListView");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EOutlineListView::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EOutlineListView"))
-		return new EOutlineListView(from);
-	return NULL;
-}
-
-
 bool
 EOutlineListView::AddUnder(EListItem *item, EListItem *superitem)
 {

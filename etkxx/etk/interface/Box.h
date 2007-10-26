@@ -43,11 +43,6 @@ public:
 	     e_border_style border = E_FANCY_BORDER);
 	virtual ~EBox();
 
-	// Archiving
-	EBox(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual void	SetBorder(e_border_style border);
 	e_border_style	Border() const;
 

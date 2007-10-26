@@ -46,35 +46,6 @@ EMenuBar::~EMenuBar()
 }
 
 
-EMenuBar::EMenuBar(EMessage *from)
-	: EMenu(NULL, E_ITEMS_IN_ROW), fBorder(E_BORDER_FRAME)
-{
-}
-
-
-e_status_t
-EMenuBar::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EMenu::Archive(into, deep);
-	into->AddString("class", "EMenuBar");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EMenuBar::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EMenuBar"))
-		return new EMenuBar(from);
-	return NULL;
-}
-
-
 void
 EMenuBar::MakeFocus(bool state)
 {

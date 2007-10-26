@@ -1,138 +1,214 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="etkxx"
 	ProjectGUID="{A2C7FBA2-9E99-47E8-A6C6-4E5073EAEDDE}"
-	Keyword="Win32Proj">
+	RootNamespace="etkxx"
+	Keyword="Win32Proj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			CharacterSet="0">
+			CharacterSet="0"
+			>
 			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_ENABLE_DEBUG"
-				MinimalRebuild="TRUE"
-				ExceptionHandling="FALSE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="4"
-				CallingConvention="0"/>
+				Name="VCPreBuildEventTool"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCCustomBuildTool"
+			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib msvcrtd.lib advapi32.lib $(NOINHERIT)"
-				OutputFile="$(OutDir)/libetkxx.dll"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
-				IgnoreAllDefaultLibraries="TRUE"
-				IgnoreDefaultLibraryNames=""
-				ModuleDefinitionFile=""
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
-				SubSystem="2"
-				ImportLibrary="$(OutDir)/etkxx.lib"
-				TargetMachine="1"/>
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
 			<Tool
 				Name="VCMIDLTool"
 				AdditionalIncludeDirectories="$(OutDir)/../../../../../"
-				HeaderFileName="$(InputName)_h.h"/>
+				HeaderFileName="$(InputName)_h.h"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCCLCompilerTool"
+				UseUnicodeResponseFiles="false"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_ENABLE_DEBUG"
+				MinimalRebuild="true"
+				ExceptionHandling="0"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+				CallingConvention="0"
+				DisableSpecificWarnings="4819;4996"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="$(NOINHERIT)"
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="true"
+				UseUnicodeResponseFiles="false"
+				AdditionalDependencies="imm32.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib msvcrtd.lib userenv.lib advapi32.lib $(NOINHERIT)"
+				OutputFile="$(OutDir)/libetkxx.dll"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
+				IgnoreAllDefaultLibraries="true"
+				IgnoreDefaultLibraryNames=""
+				ModuleDefinitionFile=""
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
+				SubSystem="2"
+				ImportLibrary="$(OutDir)/etkxx.lib"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCManifestTool"
+				UseUnicodeResponseFiles="false"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			CharacterSet="0">
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="$(OutDir)/../../../../../"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				UseUnicodeResponseFiles="false"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
-				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="TRUE"
+				OmitFramePointers="true"
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_WIN32_WINNT=0x0500;WINVER=0x0500;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
+				StringPooling="true"
+				ExceptionHandling="0"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4819;4996"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="$(NOINHERIT)"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLinkerTool"
-				IgnoreImportLibrary="FALSE"
-				AdditionalDependencies="imm32.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib msvcrt.lib advapi32.lib $(NOINHERIT)"
+				IgnoreImportLibrary="true"
+				UseUnicodeResponseFiles="false"
+				AdditionalDependencies="imm32.lib ws2_32.lib kernel32.lib user32.lib gdi32.lib msvcrt.lib userenv.lib advapi32.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)/libetkxx.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
-				IgnoreAllDefaultLibraries="TRUE"
-				GenerateDebugInformation="FALSE"
+				IgnoreAllDefaultLibraries="true"
+				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				ImportLibrary="$(OutDir)/etkxx.lib"
-				TargetMachine="1"/>
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCMIDLTool"
-				AdditionalIncludeDirectories="$(OutDir)/../../../../../"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCManifestTool"
+				UseUnicodeResponseFiles="false"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCAppVerifierTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCWebDeploymentTool"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -140,685 +216,885 @@
 	<Files>
 		<Filter
 			Name="Source files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
+			>
 			<File
-				RelativePath="..\..\..\etk\ETKBuild.cpp">
+				RelativePath="..\..\..\etk\ETKBuild.cpp"
+				>
 			</File>
 			<Filter
 				Name="support"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\support\Archivable.cpp">
+					RelativePath="..\..\..\etk\support\Archivable.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\ByteOrder.c">
+					RelativePath="..\..\..\etk\support\ByteOrder.c"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\DataIO.cpp">
+					RelativePath="..\..\..\etk\support\DataIO.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\List.cpp">
+					RelativePath="..\..\..\etk\support\List.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\Locker.cpp">
+					RelativePath="..\..\..\etk\support\Locker.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\SimpleLocker.cpp">
+					RelativePath="..\..\..\etk\support\SimpleLocker.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\String.cpp">
+					RelativePath="..\..\..\etk\support\String.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\StringArray.cpp">
+					RelativePath="..\..\..\etk\support\StringArray.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="kernel"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\kernel\Debug.cpp">
+					RelativePath="..\..\..\etk\kernel\Debug.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\win32\etk-area.cpp">
+					RelativePath="..\..\..\etk\kernel\win32\etk-area.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\win32\etk-image.cpp">
+					RelativePath="..\..\..\etk\kernel\win32\etk-image.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\thread\win32\etk-locker.cpp">
+					RelativePath="..\..\..\etk\kernel\thread\win32\etk-locker.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\win32\etk-os.cpp">
+					RelativePath="..\..\..\etk\kernel\win32\etk-os.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\etk-port.cpp">
+					RelativePath="..\..\..\etk\kernel\etk-port.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\thread\win32\etk-semaphore.cpp">
+					RelativePath="..\..\..\etk\kernel\thread\win32\etk-semaphore.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\thread\win32\etk-thread.cpp">
+					RelativePath="..\..\..\etk\kernel\thread\win32\etk-thread.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\win32\etk-timefuncs.cpp">
+					RelativePath="..\..\..\etk\kernel\win32\etk-timefuncs.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\TimeFunctions.cpp">
+					RelativePath="..\..\..\etk\kernel\TimeFunctions.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="interface"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\interface\Alert.cpp">
+					RelativePath="..\..\..\etk\interface\Alert.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Bitmap.cpp">
+					RelativePath="..\..\..\etk\interface\Bitmap.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Box.cpp">
+					RelativePath="..\..\..\etk\interface\Box.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Button.cpp">
+					RelativePath="..\..\..\etk\interface\Button.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\CheckBox.cpp">
+					RelativePath="..\..\..\etk\interface\CheckBox.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ColorControl.cpp">
+					RelativePath="..\..\..\etk\interface\ColorControl.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Control.cpp">
+					RelativePath="..\..\..\etk\interface\Control.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\win32\etk-application.cpp">
+					RelativePath="..\..\..\etk\interface\win32\etk-application.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\win32\etk-drawing.cpp">
+					RelativePath="..\..\..\etk\interface\win32\etk-drawing.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\win32\etk-pixmap.cpp">
+					RelativePath="..\..\..\etk\interface\win32\etk-pixmap.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\win32\etk-win32-font.cpp">
+					RelativePath="..\..\..\etk\interface\win32\etk-win32-font.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\win32\etk-window.cpp">
+					RelativePath="..\..\..\etk\interface\win32\etk-window.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Font.cpp">
+					RelativePath="..\..\..\etk\interface\Font.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\GraphicsDefs.cpp">
+					RelativePath="..\..\..\etk\interface\GraphicsDefs.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\LimitedView.cpp">
+					RelativePath="..\..\..\etk\interface\LimitedView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ListItem.cpp">
+					RelativePath="..\..\..\etk\interface\ListItem.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ListView.cpp">
+					RelativePath="..\..\..\etk\interface\ListView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Menu.cpp">
+					RelativePath="..\..\..\etk\interface\Menu.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\MenuBar.cpp">
+					RelativePath="..\..\..\etk\interface\MenuBar.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\MenuField.cpp">
+					RelativePath="..\..\..\etk\interface\MenuField.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\MenuItem.cpp">
+					RelativePath="..\..\..\etk\interface\MenuItem.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\OutlineListView.cpp">
+					RelativePath="..\..\..\etk\interface\OutlineListView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Point.cpp">
+					RelativePath="..\..\..\etk\interface\Point.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Polygon.cpp">
+					RelativePath="..\..\..\etk\interface\Polygon.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\PopUpMenu.cpp">
+					RelativePath="..\..\..\etk\interface\PopUpMenu.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\RadioButton.cpp">
+					RelativePath="..\..\..\etk\interface\RadioButton.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Rect.cpp">
+					RelativePath="..\..\..\etk\interface\Rect.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Region.cpp">
+					RelativePath="..\..\..\etk\interface\Region.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Screen.cpp">
+					RelativePath="..\..\..\etk\interface\Screen.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ScrollBar.cpp">
+					RelativePath="..\..\..\etk\interface\ScrollBar.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ScrollView.cpp">
+					RelativePath="..\..\..\etk\interface\ScrollView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\StatusBar.cpp">
+					RelativePath="..\..\..\etk\interface\StatusBar.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\StringView.cpp">
+					RelativePath="..\..\..\etk\interface\StringView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TabView.cpp">
+					RelativePath="..\..\..\etk\interface\TabView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TextControl.cpp">
+					RelativePath="..\..\..\etk\interface\TextControl.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TextEditable.cpp">
+					RelativePath="..\..\..\etk\interface\TextEditable.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TextView.cpp">
+					RelativePath="..\..\..\etk\interface\TextView.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Theme.cpp">
+					RelativePath="..\..\..\etk\interface\Theme.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ToolTip.cpp">
+					RelativePath="..\..\..\etk\interface\ToolTip.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\View.cpp">
+					RelativePath="..\..\..\etk\interface\View.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Window.cpp">
+					RelativePath="..\..\..\etk\interface\Window.cpp"
+					>
 				</File>
 				<Filter
 					Name="layout"
-					Filter="">
+					>
 					<File
-						RelativePath="..\..\..\etk\interface\layout\LayoutContainer.cpp">
+						RelativePath="..\..\..\etk\interface\layout\LayoutContainer.cpp"
+						>
 					</File>
 					<File
-						RelativePath="..\..\..\etk\interface\layout\LayoutForm.cpp">
+						RelativePath="..\..\..\etk\interface\layout\LayoutForm.cpp"
+						>
 					</File>
 					<File
-						RelativePath="..\..\..\etk\interface\layout\LayoutItem.cpp">
+						RelativePath="..\..\..\etk\interface\layout\LayoutItem.cpp"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="app"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\app\Application.cpp">
+					RelativePath="..\..\..\etk\app\Application.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Clipboard.cpp">
+					RelativePath="..\..\..\etk\app\Clipboard.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Cursor.cpp">
+					RelativePath="..\..\..\etk\app\Cursor.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Handler.cpp">
+					RelativePath="..\..\..\etk\app\Handler.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Invoker.cpp">
+					RelativePath="..\..\..\etk\app\Invoker.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Looper.cpp">
+					RelativePath="..\..\..\etk\app\Looper.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Message.cpp">
+					RelativePath="..\..\..\etk\app\Message.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\MessageFilter.cpp">
+					RelativePath="..\..\..\etk\app\MessageFilter.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\MessageQueue.cpp">
+					RelativePath="..\..\..\etk\app\MessageQueue.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\MessageRunner.cpp">
+					RelativePath="..\..\..\etk\app\MessageRunner.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Messenger.cpp">
+					RelativePath="..\..\..\etk\app\Messenger.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="add-ons"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\add-ons\theme\DefaultTheme.cpp">
+					RelativePath="..\..\..\etk\add-ons\theme\DefaultTheme.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\add-ons\font\FontEngine.cpp">
+					RelativePath="..\..\..\etk\add-ons\font\FontEngine.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\add-ons\graphics\GraphicsEngine.cpp">
+					RelativePath="..\..\..\etk\add-ons\graphics\GraphicsEngine.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="storage"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\storage\Directory.cpp">
+					RelativePath="..\..\..\etk\storage\Directory.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Entry.cpp">
+					RelativePath="..\..\..\etk\storage\Entry.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\File.cpp">
+					RelativePath="..\..\..\etk\storage\File.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\FilePanel.cpp">
+					RelativePath="..\..\..\etk\storage\FilePanel.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\FindDirectory.cpp">
+					RelativePath="..\..\..\etk\storage\FindDirectory.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Node.cpp">
+					RelativePath="..\..\..\etk\storage\Node.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Path.cpp">
+					RelativePath="..\..\..\etk\storage\Path.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\add-ons\theme\ThemeEngine.cpp">
+					RelativePath="..\..\..\etk\add-ons\theme\ThemeEngine.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Volume.cpp">
+					RelativePath="..\..\..\etk\storage\Volume.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\VolumeRoster.cpp">
+					RelativePath="..\..\..\etk\storage\VolumeRoster.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="render"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\render\ArcGenerator.cpp">
+					RelativePath="..\..\..\etk\render\ArcGenerator.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\render\LineGenerator.cpp">
+					RelativePath="..\..\..\etk\render\LineGenerator.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\render\Pixmap.cpp">
+					RelativePath="..\..\..\etk\render\Pixmap.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\render\Render.cpp">
+					RelativePath="..\..\..\etk\render\Render.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="xml"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\xml\SimpleXmlParser.cpp">
+					RelativePath="..\..\..\etk\xml\SimpleXmlParser.cpp"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="net"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\net\NetAddress.cpp">
+					RelativePath="..\..\..\etk\net\NetAddress.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\net\NetBuffer.cpp">
+					RelativePath="..\..\..\etk\net\NetBuffer.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\net\NetDebug.cpp">
+					RelativePath="..\..\..\etk\net\NetDebug.cpp"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\net\NetEndpoint.cpp">
+					RelativePath="..\..\..\etk\net\NetEndpoint.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Head files"
-			Filter="h;hpp;hxx;hm;inl;inc">
+			Filter="h;hpp;hxx;hm;inl;inc"
+			>
 			<File
-				RelativePath="..\..\..\etk\AppKit.h">
+				RelativePath="..\..\..\etk\AppKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\config.h">
+				RelativePath="..\..\..\etk\config.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\ETK.h">
+				RelativePath="..\..\..\etk\ETK.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\ETKBuild.h">
+				RelativePath="..\..\..\etk\ETKBuild.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\InterfaceKit.h">
+				RelativePath="..\..\..\etk\InterfaceKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\KernelKit.h">
+				RelativePath="..\..\..\etk\KernelKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\interface\LimitedView.h">
+				RelativePath="..\..\..\etk\interface\LimitedView.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\NetKit.h">
+				RelativePath="..\..\..\etk\NetKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\RenderKit.h">
+				RelativePath="..\..\..\etk\RenderKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\StorageKit.h">
+				RelativePath="..\..\..\etk\StorageKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\SupportKit.h">
+				RelativePath="..\..\..\etk\SupportKit.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\..\etk\XmlKit.h">
+				RelativePath="..\..\..\etk\XmlKit.h"
+				>
 			</File>
 			<Filter
 				Name="support"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\support\Archivable.h">
+					RelativePath="..\..\..\etk\support\Archivable.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\Autolock.h">
+					RelativePath="..\..\..\etk\support\Autolock.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\ByteOrder.h">
+					RelativePath="..\..\..\etk\support\ByteOrder.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\ClassInfo.h">
+					RelativePath="..\..\..\etk\support\ClassInfo.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\DataIO.h">
+					RelativePath="..\..\..\etk\support\DataIO.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\Errors.h">
+					RelativePath="..\..\..\etk\support\Errors.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\List.h">
+					RelativePath="..\..\..\etk\support\List.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\Locker.h">
+					RelativePath="..\..\..\etk\support\Locker.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\SimpleLocker.h">
+					RelativePath="..\..\..\etk\support\SimpleLocker.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\String.h">
+					RelativePath="..\..\..\etk\support\String.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\StringArray.h">
+					RelativePath="..\..\..\etk\support\StringArray.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\support\SupportDefs.h">
+					RelativePath="..\..\..\etk\support\SupportDefs.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="kernel"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\kernel\Debug.h">
+					RelativePath="..\..\..\etk\kernel\Debug.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\Kernel.h">
+					RelativePath="..\..\..\etk\kernel\Kernel.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\kernel\OS.h">
+					RelativePath="..\..\..\etk\kernel\OS.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="interface"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\interface\Alert.h">
+					RelativePath="..\..\..\etk\interface\Alert.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Bitmap.h">
+					RelativePath="..\..\..\etk\interface\Bitmap.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Box.h">
+					RelativePath="..\..\..\etk\interface\Box.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Button.h">
+					RelativePath="..\..\..\etk\interface\Button.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\CheckBox.h">
+					RelativePath="..\..\..\etk\interface\CheckBox.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ColorControl.h">
+					RelativePath="..\..\..\etk\interface\ColorControl.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Control.h">
+					RelativePath="..\..\..\etk\interface\Control.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\win32\etk-win32gdi.h">
+					RelativePath="..\..\..\etk\interface\win32\etk-win32gdi.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Font.h">
+					RelativePath="..\..\..\etk\interface\Font.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\GraphicsDefs.h">
+					RelativePath="..\..\..\etk\interface\GraphicsDefs.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Input.h">
+					RelativePath="..\..\..\etk\interface\Input.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\InterfaceDefs.h">
+					RelativePath="..\..\..\etk\interface\InterfaceDefs.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ListItem.h">
+					RelativePath="..\..\..\etk\interface\ListItem.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ListView.h">
+					RelativePath="..\..\..\etk\interface\ListView.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Menu.h">
+					RelativePath="..\..\..\etk\interface\Menu.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\MenuBar.h">
+					RelativePath="..\..\..\etk\interface\MenuBar.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\MenuField.h">
+					RelativePath="..\..\..\etk\interface\MenuField.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\MenuItem.h">
+					RelativePath="..\..\..\etk\interface\MenuItem.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\OutlineListView.h">
+					RelativePath="..\..\..\etk\interface\OutlineListView.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Point.h">
+					RelativePath="..\..\..\etk\interface\Point.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Polygon.h">
+					RelativePath="..\..\..\etk\interface\Polygon.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\PopUpMenu.h">
+					RelativePath="..\..\..\etk\interface\PopUpMenu.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\RadioButton.h">
+					RelativePath="..\..\..\etk\interface\RadioButton.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Rect.h">
+					RelativePath="..\..\..\etk\interface\Rect.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Region.h">
+					RelativePath="..\..\..\etk\interface\Region.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Screen.h">
+					RelativePath="..\..\..\etk\interface\Screen.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ScrollBar.h">
+					RelativePath="..\..\..\etk\interface\ScrollBar.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ScrollView.h">
+					RelativePath="..\..\..\etk\interface\ScrollView.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\StatusBar.h">
+					RelativePath="..\..\..\etk\interface\StatusBar.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\StringView.h">
+					RelativePath="..\..\..\etk\interface\StringView.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TabView.h">
+					RelativePath="..\..\..\etk\interface\TabView.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TextControl.h">
+					RelativePath="..\..\..\etk\interface\TextControl.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TextEditable.h">
+					RelativePath="..\..\..\etk\interface\TextEditable.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\TextView.h">
+					RelativePath="..\..\..\etk\interface\TextView.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ToolTip.h">
+					RelativePath="..\..\..\etk\interface\ToolTip.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\ViewPrivate.h">
+					RelativePath="..\..\..\etk\interface\View.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\View.h">
+					RelativePath="..\..\..\etk\interface\ViewPrivate.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\interface\Window.h">
+					RelativePath="..\..\..\etk\interface\Window.h"
+					>
 				</File>
 				<Filter
 					Name="layout"
-					Filter="">
+					>
 					<File
-						RelativePath="..\..\..\etk\interface\layout\Layout.h">
+						RelativePath="..\..\..\etk\interface\layout\Layout.h"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="app"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\app\AppDefs.h">
+					RelativePath="..\..\..\etk\app\AppDefs.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Application.h">
+					RelativePath="..\..\..\etk\app\Application.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Clipboard.h">
+					RelativePath="..\..\..\etk\app\Clipboard.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Cursor.h">
+					RelativePath="..\..\..\etk\app\Cursor.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Handler.h">
+					RelativePath="..\..\..\etk\app\Handler.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Invoker.h">
+					RelativePath="..\..\..\etk\app\Invoker.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Looper.h">
+					RelativePath="..\..\..\etk\app\Looper.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Message.h">
+					RelativePath="..\..\..\etk\app\Message.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\MessageFilter.h">
+					RelativePath="..\..\..\etk\app\MessageFilter.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\MessageQueue.h">
+					RelativePath="..\..\..\etk\app\MessageQueue.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\MessageRunner.h">
+					RelativePath="..\..\..\etk\app\MessageRunner.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\app\Messenger.h">
+					RelativePath="..\..\..\etk\app\Messenger.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="add-ons"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\add-ons\font\FontEngine.h">
+					RelativePath="..\..\..\etk\add-ons\font\FontEngine.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\add-ons\graphics\GraphicsEngine.h">
+					RelativePath="..\..\..\etk\add-ons\graphics\GraphicsEngine.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\add-ons\theme\ThemeEngine.h">
+					RelativePath="..\..\..\etk\add-ons\theme\ThemeEngine.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="storage"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\storage\Directory.h">
+					RelativePath="..\..\..\etk\storage\Directory.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Entry.h">
+					RelativePath="..\..\..\etk\storage\Entry.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\File.h">
+					RelativePath="..\..\..\etk\storage\File.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\FilePanel.h">
+					RelativePath="..\..\..\etk\storage\FilePanel.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\FindDirectory.h">
+					RelativePath="..\..\..\etk\storage\FindDirectory.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Node.h">
+					RelativePath="..\..\..\etk\storage\Node.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Path.h">
+					RelativePath="..\..\..\etk\storage\Path.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\StorageDefs.h">
+					RelativePath="..\..\..\etk\storage\StorageDefs.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\Volume.h">
+					RelativePath="..\..\..\etk\storage\Volume.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\storage\VolumeRoster.h">
+					RelativePath="..\..\..\etk\storage\VolumeRoster.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="render"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\render\ArcGenerator.h">
+					RelativePath="..\..\..\etk\render\ArcGenerator.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\render\LineGenerator.h">
+					RelativePath="..\..\..\etk\render\LineGenerator.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\render\Pixmap.h">
+					RelativePath="..\..\..\etk\render\Pixmap.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\render\Render.h">
+					RelativePath="..\..\..\etk\render\Render.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="xml"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\xml\SimpleXmlParser.h">
+					RelativePath="..\..\..\etk\xml\SimpleXmlParser.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="net"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\..\etk\net\NetAddress.h">
+					RelativePath="..\..\..\etk\net\NetAddress.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\net\NetBuffer.h">
+					RelativePath="..\..\..\etk\net\NetBuffer.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\net\NetDebug.h">
+					RelativePath="..\..\..\etk\net\NetDebug.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\..\etk\net\NetEndpoint.h">
+					RelativePath="..\..\..\etk\net\NetEndpoint.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+			>
 			<File
-				RelativePath="..\..\..\etk\etkxx.rc">
+				RelativePath="..\..\..\etk\etkxx.rc"
+				>
 			</File>
 		</Filter>
 	</Files>

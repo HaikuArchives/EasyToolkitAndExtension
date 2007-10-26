@@ -93,11 +93,6 @@ public:
 	      euint32 flags);
 	virtual ~EView();
 
-	// Archiving
-	EView(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual void	MessageReceived(EMessage *msg);
 
 	void		AddChild(EView *child, EView *childNextSibling = NULL);

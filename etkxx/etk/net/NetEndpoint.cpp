@@ -95,7 +95,7 @@ ENetEndpoint::~ENetEndpoint()
 }
 
 
-ENetEndpoint::ENetEndpoint(EMessage *from)
+ENetEndpoint::ENetEndpoint(const EMessage *from)
 	: EArchivable(from), fSocket(-1), fBind(false), fNonBlocking(false)
 {
 	// TODO
@@ -117,7 +117,7 @@ ENetEndpoint::Archive(EMessage *into, bool deep) const
 
 
 EArchivable*
-ENetEndpoint::Instantiate(EMessage *from)
+ENetEndpoint::Instantiate(const EMessage *from)
 {
 	if(e_validate_instantiation(from, "ENetEndpoint"))
 		return new ENetEndpoint(from);

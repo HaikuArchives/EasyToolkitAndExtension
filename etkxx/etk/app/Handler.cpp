@@ -504,7 +504,7 @@ EHandler::~EHandler()
 }
 
 
-EHandler::EHandler(EMessage *from)
+EHandler::EHandler(const EMessage *from)
 	: EArchivable(from), fName(NULL), fNextHandler(NULL), fLooper(NULL), forceSetNextHandler(false), fToken(E_MAXUINT64), fObserverList(NULL)
 {
 	EAutolock <ELocker>autolock(etk_handler_operator_locker);
@@ -529,7 +529,7 @@ EHandler::Archive(EMessage *into, bool deep) const
 
 
 EArchivable*
-EHandler::Instantiate(EMessage *from)
+EHandler::Instantiate(const EMessage *from)
 {
 	if(e_validate_instantiation(from, "EHandler"))
 		return new EHandler(from);

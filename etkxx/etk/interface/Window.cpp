@@ -288,37 +288,6 @@ EWindow::~EWindow()
 }
 
 
-EWindow::EWindow(EMessage *from)
-	: ELooper(NULL, E_DISPLAY_PRIORITY)
-{
-	// TODO
-	ETK_ERROR("[INTERFACE]: %s --- Unsupported yet.", __PRETTY_FUNCTION__);
-}
-
-
-e_status_t
-EWindow::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	ELooper::Archive(into, deep);
-	into->AddString("class", "EWindow");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EWindow::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EWindow"))
-		return new EWindow(from);
-	return NULL;
-}
-
-
 void
 EWindow::DispatchMessage(EMessage *msg, EHandler *target)
 {

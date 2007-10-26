@@ -76,7 +76,6 @@ EButton::EButton(ERect <emphasis>frame</emphasis>,
                  EMessage *<emphasis>message</emphasis>,
                  euint32 <emphasis>resizeMode = E_FOLLOW_LEFT | E_FOLLOW_TOP</emphasis>,
                  euint32 <emphasis>flags = E_WILL_DRAW | E_NAVIGABLE</emphasis>)
-EButton::EButton(EMessage *<emphasis>from</emphasis>)
 virtual EButton::~EButton()
 	</programlisting>
 	<itemizedlist>
@@ -99,12 +98,6 @@ virtual EButton::~EButton()
 		<listitem><para><emphasis>flags</emphasis>是视图的事件选择标记。
 			<footnote><para>视图事件选择标记详EView类。</para></footnote>
 		</para></listitem>
-		<listitem><para><emphasis>from</emphasis>是存储EButton类信息的消息。
-			<footnote><para>一般来说，派生自EArchivable的类均可以通过Archive函数把自身信息
-					存入EMessage类型，然后再通过Instantiate函数调用来创建该构件的副本。
-					但是这些操作均与开发库使用的操作系统平台或开发库的完善紧密相关，
-					所以使用这类函数前请仔细查阅相关的ETK++文档。</para></footnote>
-		</para></listitem>
 	</itemizedlist>
 </section>
 </document>
@@ -117,38 +110,8 @@ EButton::EButton(ERect frame, const char *name, const char *label,
 }
 
 
-EButton::EButton(EMessage *from)
-	: EControl(from), fInsided(false), fMousePushed(false), fFocusFlash(0), fRunner(NULL)
-{
-	// TODO
-}
-
-
 EButton::~EButton()
 {
-}
-
-
-e_status_t
-EButton::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EControl::Archive(into, deep);
-	into->AddString("class", "EButton");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EButton::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EButton"))
-		return new EButton(from);
-	return NULL;
 }
 
 

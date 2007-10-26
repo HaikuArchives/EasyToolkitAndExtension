@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,9 +22,9 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * File: ETK.h
- * 
+ *
  * --------------------------------------------------------------------------*/
 
 #include <etk/ETKBuild.h>

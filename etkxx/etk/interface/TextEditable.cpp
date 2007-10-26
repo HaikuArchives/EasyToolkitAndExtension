@@ -66,39 +66,6 @@ ETextEditable::~ETextEditable()
 }
 
 
-ETextEditable::ETextEditable(EMessage *from)
-	: EControl(ERect(), NULL, NULL, NULL, 0, 0),
-	  fText(NULL), fEditable(true), fSelectable(true), fAlignment(E_ALIGN_LEFT), fPosition(0), fSelectStart(-1), fSelectEnd(-1),
-	  fCharWidths(NULL), fCount(0), locationOffset(0), fSelectTracking(-1), fMaxChars(E_MAXINT32), fTypingHidden(0)
-{
-	fMargins = ERect(0, 0, 0, 0);
-	// TODO
-}
-
-
-e_status_t
-ETextEditable::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EControl::Archive(into, deep);
-	into->AddString("class", "ETextEditable");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-ETextEditable::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "ETextEditable"))
-		return new ETextEditable(from);
-	return NULL;
-}
-
-
 void
 ETextEditable::MakeEditable(bool editable)
 {

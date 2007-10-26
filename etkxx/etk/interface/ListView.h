@@ -52,11 +52,6 @@ public:
 		  euint32 flags = E_WILL_DRAW | E_NAVIGABLE | E_FRAME_EVENTS);
 	virtual ~EListView();
 
-	// Archiving
-	EListView(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	virtual bool		AddItem(EListItem *item);
 	virtual bool		AddItem(EListItem *item, eint32 atIndex);
 	virtual bool		RemoveItem(EListItem *item, bool auto_destruct_item = true);

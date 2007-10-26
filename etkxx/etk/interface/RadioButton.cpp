@@ -41,38 +41,8 @@ ERadioButton::ERadioButton(ERect frame, const char *name, const char *label,
 }
 
 
-ERadioButton::ERadioButton(EMessage *from)
-	: EControl(from)
-{
-	// TODO
-}
-
-
 ERadioButton::~ERadioButton()
 {
-}
-
-
-e_status_t
-ERadioButton::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EControl::Archive(into, deep);
-	into->AddString("class", "ERadioButton");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-ERadioButton::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "ERadioButton"))
-		return new ERadioButton(from);
-	return NULL;
 }
 
 

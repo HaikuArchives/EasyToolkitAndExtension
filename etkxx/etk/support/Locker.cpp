@@ -55,7 +55,7 @@ ELocker::Lock()
 void
 ELocker::Unlock()
 {
-	if(!fLocker) return;
+	if(fLocker == NULL) return;
 
 	if(etk_count_locker_locks(fLocker) <= E_INT64_CONSTANT(0))
 	{

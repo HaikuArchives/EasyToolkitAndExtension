@@ -44,11 +44,6 @@ public:
 		   e_menu_layout layout = E_ITEMS_IN_COLUMN);
 	virtual ~EPopUpMenu();
 
-	// Archiving
-	EPopUpMenu(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	// "could_proxy_when_sync" must be "true" when it called synchronously from looper of EApplication!
 	EMenuItem*	Go(EPoint where,
 			   bool delivers_message_when_sync = false,

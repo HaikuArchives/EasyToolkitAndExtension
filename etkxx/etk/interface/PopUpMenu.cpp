@@ -192,35 +192,6 @@ EPopUpMenu::~EPopUpMenu()
 }
 
 
-EPopUpMenu::EPopUpMenu(EMessage *from)
-	: EMenu(NULL, E_ITEMS_IN_COLUMN), fAutoDestruct(false)
-{
-}
-
-
-e_status_t
-EPopUpMenu::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EMenu::Archive(into, deep);
-	into->AddString("class", "EPopUpMenu");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EPopUpMenu::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EPopUpMenu"))
-		return new EPopUpMenu(from);
-	return NULL;
-}
-
-
 void
 EPopUpMenu::MessageReceived(EMessage *msg)
 {

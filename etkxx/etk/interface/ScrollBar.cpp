@@ -60,38 +60,6 @@ EScrollBar::~EScrollBar()
 }
 
 
-EScrollBar::EScrollBar(EMessage *from)
-	: EView(from),
-	  fOrientation(E_HORIZONTAL), fValue(0), fRangeMin(0), fRangeMax(0), fStepSmall(1), fStepLarge(10), fTarget(NULL),
-	  fTracking(false), fTrackingState(0), fRunner(NULL)
-{
-	// TODO
-}
-
-
-e_status_t
-EScrollBar::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EView::Archive(into, deep);
-	into->AddString("class", "EScrollBar");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EScrollBar::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EScrollBar"))
-		return new EScrollBar(from);
-	return NULL;
-}
-
-
 void
 EScrollBar::_SetValue(float value, bool response)
 {

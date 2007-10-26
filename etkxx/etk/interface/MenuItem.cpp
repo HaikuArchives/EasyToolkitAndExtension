@@ -91,37 +91,6 @@ EMenuItem::~EMenuItem()
 }
 
 
-EMenuItem::EMenuItem(EMessage *from)
-	: EArchivable(), EInvoker(),
-	  fShortcut(0), fModifiers(0), fMarked(false), fEnabled(true),
-	  fLabel(NULL), fShortcuts(NULL), fSubmenu(NULL), fMenu(NULL)
-{
-}
-
-
-e_status_t
-EMenuItem::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EArchivable::Archive(into, deep);
-	into->AddString("class", "EMenuItem");
-
-	// TODO
-
-	return E_OK;
-}
-
-
-EArchivable*
-EMenuItem::Instantiate(EMessage *from)
-{
-	if(e_validate_instantiation(from, "EMenuItem"))
-		return new EMenuItem(from);
-	return NULL;
-}
-
-
 void
 EMenuItem::SetLabel(const char *label)
 {

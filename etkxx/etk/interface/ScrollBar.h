@@ -45,11 +45,6 @@ public:
 		   e_orientation direction);
 	virtual ~EScrollBar();
 
-	// Archiving
-	EScrollBar(EMessage *from);
-	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
-	static EArchivable *Instantiate(EMessage *from);
-
 	void		SetValue(float value);
 	float		Value() const;
 	void		SetProportion(float ratio);
