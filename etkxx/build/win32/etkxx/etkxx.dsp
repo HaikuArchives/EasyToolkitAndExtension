@@ -274,6 +274,14 @@ SOURCE=..\..\..\etk\interface\ToolTip.cpp
 SOURCE=..\..\..\etk\interface\Window.cpp
 # End Source File
 # End Group
+# Begin Group "private"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\Token.cpp
+# End Source File
+# End Group
 # Begin Group "support"
 
 # PROP Default_Filter ""
@@ -518,6 +526,14 @@ SOURCE=..\..\..\etk\ETKBuild.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Group "Private"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\Token.h
+# End Source File
+# End Group
 # Begin Group "SupportKit"
 
 # PROP Default_Filter ""

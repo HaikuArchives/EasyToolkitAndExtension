@@ -223,6 +223,13 @@
 				>
 			</File>
 			<Filter
+				Name="private"
+				>
+				<File
+					RelativePath="..\..\..\etk\private\Token.cpp"
+					>
+			</Filter>
+			<Filter
 				Name="support"
 				>
 				<File
@@ -695,6 +702,13 @@
 				RelativePath="..\..\..\etk\XmlKit.h"
 				>
 			</File>
+			<Filter
+				Name="private"
+				>
+				<File
+					RelativePath="..\..\..\etk\private\Token.h"
+					>
+			</Filter>
 			<Filter
 				Name="support"
 				>
