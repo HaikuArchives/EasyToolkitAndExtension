@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -23,33 +23,37 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * File: SimpleLocker.h
- * Description: ESimpleLocker --- locker DO NOT support nested-locking
+ * File: Token.h
  *
  * --------------------------------------------------------------------------*/
 
-#ifndef __ETK_SIMPLE_LOCKER_H__
-#define __ETK_SIMPLE_LOCKER_H__
+#ifndef __ETK_PRIVATE_TOKEN_H__
+#define __ETK_PRIVATE_TOKEN_H__
 
 #include <etk/support/SupportDefs.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
-class _IMPEXP_ETK ESimpleLocker {
-public:
-	ESimpleLocker(bool assert = false);
-	virtual ~ESimpleLocker();
 
-	bool		IsValid() const;
-	bool		Lock();
-	void		Unlock();
+class _IMPEXP_ETK EToken {
+public:
+	EToken(euint64 token);
+	EToken(void *data);
+	virtual ~EToken();
+
+	euint64		Token() const;
+	e_bigtime_t	TimeStamp() const;
+
+	void		*Data() const;
+	void		SetData(void *data);
 
 private:
-	void		*fLocker;
+	bool fOriginal;
+	euint64 fToken;
 };
+
 
 #endif /* __cplusplus */
 
-#endif /* __ETK_SIMPLE_LOCKER_H__ */
-
+#endif /* __ETK_PRIVATE_TOKEN_H__ */
 

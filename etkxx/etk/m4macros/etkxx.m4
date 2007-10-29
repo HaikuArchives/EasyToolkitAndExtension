@@ -4,7 +4,7 @@ dnl Anthony Lee 2004
 dnl AM_PATH_ETKXX([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND [, MODULES]]]])
 dnl Test for ETK++, and define ETKXX_CFLAGS and ETKXX_CXXFLAGS and ETKXX_LIBS
 dnl
-AC_DEFUN(AM_PATH_ETKXX,
+AC_DEFUN([AM_PATH_ETKXX],
 [dnl 
 dnl Get the cflags and libraries from etkxx-config
 dnl

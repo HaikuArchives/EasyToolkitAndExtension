@@ -6,7 +6,7 @@ INCLUDES =	$(ETK_THREAD_CFLAGS) 			\
 		-DETK_COMPILATION 			\
 		@ETK_DEBUG_FLAGS@
 
-SUBDIRS = kernel support storage xml app render interface net add-ons m4macros
+SUBDIRS = private kernel support storage xml app render interface net add-ons m4macros
 
 if ETK_INSTALL_PKG_CONFIG_FILES
 pkgconfigdir = $(libdir)/pkgconfig
@@ -32,6 +32,7 @@ lib_LTLIBRARIES = libetkxx.la
 libetkxx_la_SOURCES = ETKBuild.h ETKBuild.cpp
 
 ETK_OBJECTS =					\
+	private/libetk-private.la		\
 	kernel/libetk-kernel.la			\
 	support/libetk-support.la		\
 	storage/libetk-storage.la		\

@@ -47,6 +47,13 @@ ESimpleLocker::~ESimpleLocker()
 
 
 bool
+ESimpleLocker::IsValid() const
+{
+	return(fLocker != NULL);
+}
+
+
+bool
 ESimpleLocker::Lock()
 {
 	return(fLocker != NULL ? etk_lock_simple_locker(fLocker) : false);
