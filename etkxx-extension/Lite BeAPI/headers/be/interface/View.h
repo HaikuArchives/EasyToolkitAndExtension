@@ -1,4 +1,4 @@
-#include <etkxx.h>
+#include <be/interface/InterfaceDefs.h>
 
 #ifndef __LITE_BEAPI_VIEW_H__
 #define __LITE_BEAPI_VIEW_H__
