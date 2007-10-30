@@ -90,12 +90,6 @@ public:
 
 private:
 	friend class ELooper;
-	friend euint64 etk_get_handler_token(const EHandler *handler);
-	friend void etk_set_handler_token(EHandler *handler, euint64 token);
-	friend ELooper* etk_get_handler_looper(euint64 token);
-	friend euint64 etk_get_ref_looper_token(euint64 token);
-
-	void SetLooper(ELooper *looper);
 
 	char *fName;
 	EHandler *fNextHandler;
@@ -103,10 +97,14 @@ private:
 
 	bool forceSetNextHandler;
 
-	euint64 fToken;
+	void *fToken;
 
 	_EObserverList *fObserverList;
 	EList fFilters;
+
+
+	void SetLooper(ELooper *looper);
+	euint64 Token() const;
 };
 
 #endif /* __cplusplus */
