@@ -126,9 +126,6 @@ typedef	eint8	bool;
 #		define _stdcall  __attribute__((stdcall))
 #		endif /* stdcall */
 #	endif /* __GNUC__ */
-#	ifdef _MSC_VER
-#		define _CRT_SECURE_NO_DEPRECATE  1 /* TODO: check me */
-#	endif /* _MSC_VER */
 #endif /* ETK_OS_WIN32 */
 
 /* We prefix variable declarations so they can
@@ -153,7 +150,7 @@ typedef	eint8	bool;
 
 
 #ifndef _LOCAL
-#  if __GNUC__ >= 3 && __GNUC_MINOR__ >= 3 && __GNUC_PATCHLEVEL__ > 3 && !defined(__MINGW32__)
+#  if (__GNUC__ > 3 || __GNUC__ == 3 && __GNUC_MINOR__ >= 3 && __GNUC_PATCHLEVEL__ > 3) && !defined(__MINGW32__)
 #    define _LOCAL __attribute__((visibility("hidden")))
 #  else
 #    define _LOCAL

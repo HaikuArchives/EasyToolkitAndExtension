@@ -46,7 +46,7 @@
 				UseUnicodeResponseFiles="false"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ETK_COMPILATION;ETK_ENABLE_DEBUG"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE=1;ETK_COMPILATION;ETK_ENABLE_DEBUG"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -145,7 +145,7 @@
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="&quot;$(OutDir)\..\..\..\..\&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_WIN32_WINNT=0x0500;WINVER=0x0500;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_WIN32_WINNT=0x0500;WINVER=0x0500;_CRT_SECURE_NO_DEPRECATE=1;ETK_COMPILATION;ETK_DISABLE_MORE_CHECKS;ETK_DISABLE_CHECKS"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -228,6 +228,7 @@
 				<File
 					RelativePath="..\..\..\etk\private\Token.cpp"
 					>
+				</File>
 			</Filter>
 			<Filter
 				Name="support"
@@ -708,6 +709,7 @@
 				<File
 					RelativePath="..\..\..\etk\private\Token.h"
 					>
+				</File>
 			</Filter>
 			<Filter
 				Name="support"

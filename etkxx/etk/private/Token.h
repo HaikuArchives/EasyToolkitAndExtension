@@ -30,16 +30,18 @@
 #ifndef __ETK_PRIVATE_TOKEN_H__
 #define __ETK_PRIVATE_TOKEN_H__
 
-#include <etk/support/SupportDefs.h>
+#include <etk/support/Locker.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
 
-class _IMPEXP_ETK EToken {
+class ETokensDepot;
+
+
+_LOCAL class EToken {
 public:
-	EToken(euint64 token);
-	EToken(void *data);
-	virtual ~EToken();
+	EToken();
+	~EToken();
 
 	euint64		Token() const;
 	e_bigtime_t	TimeStamp() const;
@@ -48,8 +50,35 @@ public:
 	void		SetData(void *data);
 
 private:
+	friend class ETokensDepot;
+
 	bool fOriginal;
 	euint64 fToken;
+
+	ETokensDepot *fDepot;
+};
+
+
+_LOCAL class ETokensDepot {
+public:
+	ETokensDepot(ELocker *locker = NULL,
+		     bool deconstruct_locker = false);
+	virtual ~ETokensDepot();
+
+	EToken		*CreateToken(void *data = NULL);
+	EToken		*OpenToken(euint64 token);
+
+	ELocker		*Locker() const;
+	bool		Lock();
+	void		Unlock();
+
+private:
+	friend class EToken;
+
+	ELocker *fLocker;
+	bool fDeconstructLocker;
+
+	void *fData;
 };
 
 
