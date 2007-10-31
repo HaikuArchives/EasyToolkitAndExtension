@@ -34,7 +34,7 @@
 #include "View.h"
 
 
-_LOCAL class EViewLayout : public ELayoutItem {
+class _LOCAL EViewLayout : public ELayoutItem {
 public:
 	EViewLayout(EView *view, ERect frame, euint32 resizingMode);
 	virtual ~EViewLayout();

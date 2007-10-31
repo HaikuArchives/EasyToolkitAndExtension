@@ -89,3 +89,10 @@ _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 	return retValue;
 }
 
+
+_IMPEXP_ETK e_bigtime_t etk_system_time(void)
+{
+	// FIXME
+	return(etk_real_time_clock_usecs() - etk_system_boot_time());
+}
+

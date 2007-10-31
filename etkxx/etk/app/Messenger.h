@@ -52,9 +52,11 @@ public:
 	e_status_t	LockTargetWithTimeout(e_bigtime_t timeout) const;
 
 	e_status_t	SendMessage(euint32 command, EHandler *reply_to = NULL) const;
-	e_status_t	SendMessage(const EMessage *a_message, EHandler *reply_to = NULL, e_bigtime_t timeout = E_INFINITE_TIMEOUT) const;
+	e_status_t	SendMessage(const EMessage *a_message, EHandler *reply_to = NULL,
+				    e_bigtime_t timeout = E_INFINITE_TIMEOUT) const;
 	e_status_t	SendMessage(const EMessage *a_message, EMessage *reply_message,
-				    e_bigtime_t sendTimeout = E_INFINITE_TIMEOUT, e_bigtime_t replyTimeout = E_INFINITE_TIMEOUT) const;
+				    e_bigtime_t sendTimeout = E_INFINITE_TIMEOUT,
+				    e_bigtime_t replyTimeout = E_INFINITE_TIMEOUT) const;
 
 	bool		IsValid() const;
 

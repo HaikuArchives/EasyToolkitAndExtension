@@ -67,13 +67,9 @@ _LOCAL ELocker* etk_get_handler_operator_locker()
 }
 
 
-#if 0
 _LOCAL euint64 etk_get_handler_token(const EHandler *handler)
 {
-	if(handler == NULL) return E_MAXUINT64;
-
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-	return handler->Token();
+	return((handler == NULL || handler->fToken == NULL) ? E_MAXUINT64 : handler->fToken->Token());
 }
 
 
@@ -82,50 +78,37 @@ _LOCAL euint64 etk_get_ref_handler_token(const EHandler *handler)
 	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 
 	euint64 token = etk_get_handler_token(handler);
-	if(token == E_MAXUINT64) return E_MAXUINT64;
-
-	if(etk_handlers_list.AttachHandler(token)) return token;
-
-	return E_MAXUINT64;
-}
-
-
-_LOCAL euint64 etk_add_handler(EHandler *handler)
-{
-	if(!handler) return E_MAXUINT64;
-
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-	euint64 token = etk_handlers_list.AddHandler(handler);
-
-	return token;
-}
-
-
-_LOCAL bool etk_remove_handler(EHandler *handler)
-{
-	if(!handler) return false;
-
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-
-	bool retVal = etk_handlers_list.RemoveHandler(handler);
-
-	return retVal;
+	return(handlers_depot.PushToken(token) ? token : E_MAXUINT64);
 }
 
 
 _LOCAL EHandler* etk_get_handler(euint64 token)
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-	EHandler *handler = etk_handlers_list.HandlerAt(token);
+	EHandler *retVal = NULL;
 
-	return handler;
+	EToken *aToken = handlers_depot.OpenToken(token);
+	if(aToken != NULL)
+	{
+		retVal = reinterpret_cast<EHandler*>(aToken->Data());
+		delete aToken;
+	}
+
+	return retVal;
 }
 
 
 _LOCAL e_bigtime_t etk_get_handler_create_time_stamp(euint64 token)
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-	return etk_handlers_list.GetHandlerCreateTimeStamp(token);
+	e_bigtime_t retVal = E_MAXINT64;
+
+	EToken *aToken = handlers_depot.OpenToken(token);
+	if(aToken != NULL)
+	{
+		retVal = aToken->TimeStamp();
+		delete aToken;
+	}
+
+	return retVal;
 }
 
 
@@ -133,12 +116,8 @@ _LOCAL ELooper* etk_get_handler_looper(euint64 token)
 {
 	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 
-	EHandler *handler = etk_handlers_list.HandlerAt(token);
-	if(!handler) return NULL;
-
-	ELooper *looper = handler->fLooper;
-
-	return looper;
+	EHandler *handler = etk_get_handler(token);
+	return(handler == NULL ? NULL : handler->fLooper);
 }
 
 
@@ -146,10 +125,8 @@ _LOCAL euint64 etk_get_ref_looper_token(euint64 token)
 {
 	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 
-	EHandler *handler = etk_handlers_list.HandlerAt(token);
-	if(handler == NULL) return E_MAXUINT64;
-
-	return(etk_get_ref_handler_token(handler->fLooper));
+	EHandler *handler = etk_get_handler(token);
+	return(handler == NULL ? E_MAXUINT64 : etk_get_ref_handler_token(handler->fLooper));
 }
 
 
@@ -159,7 +136,7 @@ _LOCAL e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout)
 
 	etk_handler_operator_locker.Lock();
 	ELooper *looper = etk_get_handler_looper(token);
-	ELooper *looper_proxy = (looper ? looper->_Proxy() : NULL);
+	ELooper *looper_proxy = (looper != NULL ? looper->_Proxy() : NULL);
 	void *locker = ((looper == NULL || looper->fLocker == NULL) ? NULL : etk_clone_locker(looper->fLocker));
 	eint64 locksCount = etk_handler_operator_locker.CountLocks();
 	while(etk_handler_operator_locker.CountLocks() > E_INT64_CONSTANT(0)) etk_handler_operator_locker.Unlock();
@@ -193,8 +170,8 @@ _LOCAL bool etk_is_current_at_looper_thread(euint64 token)
 {
 	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 
-	ELooper *looper = e_cast_as(etk_handlers_list.HandlerAt(token), ELooper);
-	if(!looper) return false;
+	ELooper *looper = e_cast_as(etk_get_handler(token), ELooper);
+	if(looper == NULL) return false;
 
 	bool retVal = (looper->Thread() == etk_get_current_thread_id() ? true : false);
 
@@ -204,33 +181,24 @@ _LOCAL bool etk_is_current_at_looper_thread(euint64 token)
 
 _LOCAL bool etk_ref_handler(euint64 token)
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-
-	bool retVal = etk_handlers_list.AttachHandler(token);
-
-	return retVal;
+	return handlers_depot.PushToken(token);
 }
 
 
-_LOCAL bool etk_unref_handler(euint64 token)
+_LOCAL void etk_unref_handler(euint64 token)
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-
-	bool retVal = etk_handlers_list.DetachHandler(token);
-
-	return retVal;
+	handlers_depot.PopToken(token);
 }
-#endif
 
 
 EHandler::EHandler(const char *name)
 	: EArchivable(),
 	  fName(NULL),
-	  fNextHandler(NULL), fLooper(NULL), forceSetNextHandler(false)
+	  fLooper(NULL),
+	  forceSetNextHandler(false), fNextHandler(NULL)
 {
-	fToken = reinterpret_cast<void*>(handlers_depot.CreateToken(this));
-
-	if(name) fName = EStrdup(name);
+	fName = EStrdup(name);
+	fToken = handlers_depot.CreateToken(reinterpret_cast<void*>(this));
 	fObserverList = new _EObserverList();
 }
 
@@ -244,17 +212,17 @@ EHandler::~EHandler()
 		delete filter;
 	}
 
-	if(fName) delete[] fName;
-	if(fObserverList) delete fObserverList;
-
-	if(fToken != NULL) delete reinterpret_cast<EToken*>(fToken);
+	if(fName != NULL) delete[] fName;
+	if(fToken != NULL) delete fToken;
+	delete fObserverList;
 }
 
 
 EHandler::EHandler(const EMessage *from)
 	: EArchivable(from),
 	  fName(NULL),
-	  fNextHandler(NULL), fLooper(NULL), forceSetNextHandler(false)
+	  fLooper(NULL),
+	  forceSetNextHandler(false), fNextHandler(NULL)
 {
 	ETK_ERROR("[APP]: %s --- unimplemented yet.", __PRETTY_FUNCTION__);
 }
@@ -277,21 +245,15 @@ EHandler::Archive(EMessage *into, bool deep) const
 EArchivable*
 EHandler::Instantiate(const EMessage *from)
 {
-	if(e_validate_instantiation(from, "EHandler"))
-		return new EHandler(from);
-	return NULL;
+	return(e_validate_instantiation(from, "EHandler") == false ? NULL : new EHandler(from));
 }
 
 
 void
 EHandler::SetName(const char *name)
 {
-	if(fName) delete[] fName;
-
-	if(name)
-		fName = EStrdup(name);
-	else
-		fName = NULL;
+	if(fName != NULL) delete[] fName;
+	fName = EStrdup(name);
 }
 
 
@@ -305,7 +267,7 @@ EHandler::Name() const
 void
 EHandler::MessageReceived(EMessage *message)
 {
-	if(fNextHandler) fNextHandler->MessageReceived(message);
+	if(fNextHandler != NULL) fNextHandler->MessageReceived(message);
 }
 
 
@@ -387,13 +349,6 @@ EHandler::SetLooper(ELooper *looper)
 {
 	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 	fLooper = looper;
-}
-
-
-euint64
-EHandler::Token() const
-{
-	return(fToken != NULL ? (reinterpret_cast<EToken*>(fToken))->Token() : E_MAXUINT64);
 }
 
 

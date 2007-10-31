@@ -51,3 +51,10 @@ _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 	get_system_info(&sysInfo);
 	return (e_bigtime_t)sysInfo.boot_time;
 }
+
+
+_IMPEXP_ETK e_bigtime_t etk_system_time(void)
+{
+	return (e_bigtime_t)system_time();
+}
+

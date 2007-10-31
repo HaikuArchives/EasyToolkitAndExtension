@@ -88,7 +88,7 @@ static void etk_dfb_clipboard_changed(EDFBGraphicsEngine *dfbEngine)
 }
 
 
-_LOCAL class EDFBClipboardMessageFilter : public EMessageFilter {
+class _LOCAL EDFBClipboardMessageFilter : public EMessageFilter {
 public:
 	EDFBGraphicsEngine *fEngine;
 

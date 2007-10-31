@@ -1,3 +1,8 @@
+2007-10-30  anthonylee
+	Added ETokensDepot/EToken to reduce memory using.
+	Corrected _LOCAL macro.
+	Replace time functions with macros in "kernel/OS.h".
+
 2007-10-24  anthonylee
 	Fixed for MS VC++ 2005
 	Fixed for gcc 4.x

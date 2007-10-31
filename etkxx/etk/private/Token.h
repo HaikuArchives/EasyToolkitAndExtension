@@ -38,7 +38,7 @@
 class ETokensDepot;
 
 
-_LOCAL class EToken {
+class _LOCAL EToken {
 public:
 	EToken();
 	~EToken();
@@ -48,6 +48,8 @@ public:
 
 	void		*Data() const;
 	void		SetData(void *data);
+
+	ETokensDepot	*Depot() const;
 
 private:
 	friend class ETokensDepot;
@@ -59,7 +61,7 @@ private:
 };
 
 
-_LOCAL class ETokensDepot {
+class _LOCAL ETokensDepot {
 public:
 	ETokensDepot(ELocker *locker = NULL,
 		     bool deconstruct_locker = false);
@@ -67,6 +69,9 @@ public:
 
 	EToken		*CreateToken(void *data = NULL);
 	EToken		*OpenToken(euint64 token);
+
+	bool		PushToken(euint64 token);
+	void		PopToken(euint64 token);
 
 	ELocker		*Locker() const;
 	bool		Lock();

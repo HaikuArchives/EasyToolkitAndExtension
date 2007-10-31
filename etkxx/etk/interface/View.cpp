@@ -44,7 +44,7 @@
 #include "Bitmap.h"
 #include "ViewPrivate.h"
 
-_LOCAL class EViewState {
+class _LOCAL EViewState {
 public:
 	e_drawing_mode		DrawingMode;
 	EPoint			PenLocation;

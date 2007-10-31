@@ -63,7 +63,7 @@
 
 
 #ifdef SIGPIPE
-_LOCAL class ENetEndpointSignalIgnore {
+class _LOCAL ENetEndpointSignalIgnore {
 public:
 	ENetEndpointSignalIgnore()
 	{

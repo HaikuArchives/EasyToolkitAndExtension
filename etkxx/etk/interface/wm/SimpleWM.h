@@ -34,7 +34,7 @@
 
 #ifdef __cplusplus /* Just for C++ */
 
-_LOCAL class ESimpleWM {
+class _LOCAL ESimpleWM {
 public:
 	ESimpleWM();
 	virtual ~ESimpleWM();

@@ -68,7 +68,7 @@ static void etk_x11_clipboard_changed(const char *aStr)
 }
 
 
-_LOCAL class EX11ClipboardMessageFilter : public EMessageFilter {
+class _LOCAL EX11ClipboardMessageFilter : public EMessageFilter {
 public:
 	EXGraphicsEngine *fEngine;
 

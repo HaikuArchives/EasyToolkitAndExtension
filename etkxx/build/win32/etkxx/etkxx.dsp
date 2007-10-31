@@ -357,10 +357,6 @@ SOURCE="..\..\..\etk\kernel\thread\win32\etk-thread.cpp"
 
 SOURCE="..\..\..\etk\kernel\win32\etk-timefuncs.cpp"
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\..\etk\kernel\TimeFunctions.cpp
-# End Source File
 # End Group
 # Begin Group "render"
 

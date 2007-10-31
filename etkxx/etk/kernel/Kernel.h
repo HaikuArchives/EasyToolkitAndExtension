@@ -40,6 +40,7 @@ extern "C" {
 _IMPEXP_ETK euint32	etk_real_time_clock(void);
 _IMPEXP_ETK e_bigtime_t	etk_real_time_clock_usecs(void);
 _IMPEXP_ETK e_bigtime_t	etk_system_boot_time(void); /* system boot time in microseconds */
+_IMPEXP_ETK e_bigtime_t etk_system_time(void); /* time since booting in microseconds */
 
 /* area functions */
 typedef struct etk_area_info {

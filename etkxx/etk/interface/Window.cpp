@@ -45,7 +45,7 @@
 #include "layout/Layout.h"
 
 
-_LOCAL class EWindowLayoutItem : public ELayoutItem {
+class _LOCAL EWindowLayoutItem : public ELayoutItem {
 public:
 	EWindowLayoutItem(ERect frame);
 	virtual ~EWindowLayoutItem();
@@ -54,7 +54,7 @@ public:
 };
 
 
-_LOCAL class EWindowLayoutContainer : public ELayoutContainer {
+class _LOCAL EWindowLayoutContainer : public ELayoutContainer {
 public:
 	EWindowLayoutContainer(EWindow *win, ERect frame);
 	virtual ~EWindowLayoutContainer();

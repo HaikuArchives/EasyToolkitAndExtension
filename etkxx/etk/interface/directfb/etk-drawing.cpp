@@ -32,7 +32,7 @@
 
 #include "etk-dfb.h"
 
-_LOCAL class EDFBRender : public ERender {
+class _LOCAL EDFBRender : public ERender {
 public:
 	EDFBRender();
 

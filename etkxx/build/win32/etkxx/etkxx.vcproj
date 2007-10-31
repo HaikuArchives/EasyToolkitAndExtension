@@ -305,10 +305,6 @@
 					RelativePath="..\..\..\etk\kernel\win32\etk-timefuncs.cpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\..\etk\kernel\TimeFunctions.cpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="interface"

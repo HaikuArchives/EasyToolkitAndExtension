@@ -36,15 +36,16 @@
 #include <etk/app/Messenger.h>
 #include <etk/app/Application.h>
 
+#include <etk/private/Token.h>
+
 #include "AppDefs.h"
 #include "Looper.h"
 
 extern EHandler* etk_get_handler(euint64 token);
 extern ELooper* etk_get_handler_looper(euint64 token);
-extern bool etk_remove_handler(EHandler *handler);
 extern ELocker* etk_get_handler_operator_locker();
 extern bool etk_ref_handler(euint64 token);
-extern bool etk_unref_handler(euint64 token);
+extern void etk_unref_handler(euint64 token);
 extern e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
 extern e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout);
 
@@ -104,7 +105,12 @@ ELooper::~ELooper()
 	if(fThread) etk_delete_thread(fThread);
 
 	sLooperList.RemoveItem(this);
-	etk_remove_handler(this);
+
+	if(EHandler::fToken != NULL)
+	{
+		delete EHandler::fToken;
+		EHandler::fToken = NULL;
+	}
 
 	if(fLocker)
 	{

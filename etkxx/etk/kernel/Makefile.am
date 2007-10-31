@@ -35,7 +35,6 @@ libetk_kernel_la_SOURCES =			\
 			Kernel.h		\
 			Debug.cpp		\
 			Debug.h			\
-			TimeFunctions.cpp	\
 			OS.h			\
 			etk-port.cpp
 

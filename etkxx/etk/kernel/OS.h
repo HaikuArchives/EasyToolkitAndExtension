@@ -32,36 +32,24 @@
 
 #include <etk/support/SupportDefs.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+typedef e_status_t				(*e_thread_func)(void*);
 
-typedef e_status_t (*e_thread_func)(void*);
+#define E_SYSTEM_TIMEBASE			0
+#define E_REAL_TIME_TIMEBASE			1
 
-/* time functions */
-_IMPEXP_ETK e_status_t	e_snooze(e_bigtime_t microseconds);
+#define E_OS_NAME_LENGTH			32
+#define E_INFINITE_TIMEOUT			E_MAXINT64
 
-#define E_SYSTEM_TIMEBASE	(0)
-#define E_REAL_TIME_TIMEBASE	(1)
-_IMPEXP_ETK e_status_t	e_snooze_until(e_bigtime_t time, int timebase);
+#define E_READ_AREA				1
+#define E_WRITE_AREA				2
 
-_IMPEXP_ETK euint32	e_real_time_clock(void);
-_IMPEXP_ETK e_bigtime_t	e_real_time_clock_usecs(void);
-_IMPEXP_ETK e_bigtime_t	e_system_time(void); /* time since booting in microseconds */
-
-#define E_OS_NAME_LENGTH					32
-#define E_INFINITE_TIMEOUT					E_MAXINT64
-
-#define E_READ_AREA						1
-#define E_WRITE_AREA						2
-
-#define E_LOW_PRIORITY						5
-#define E_NORMAL_PRIORITY					10
-#define E_DISPLAY_PRIORITY					15
-#define	E_URGENT_DISPLAY_PRIORITY				20
-#define	E_REAL_TIME_DISPLAY_PRIORITY				100
-#define	E_URGENT_PRIORITY					110
-#define E_REAL_TIME_PRIORITY					120
+#define E_LOW_PRIORITY				5
+#define E_NORMAL_PRIORITY			10
+#define E_DISPLAY_PRIORITY			15
+#define	E_URGENT_DISPLAY_PRIORITY		20
+#define	E_REAL_TIME_DISPLAY_PRIORITY		100
+#define	E_URGENT_PRIORITY			110
+#define E_REAL_TIME_PRIORITY			120
 
 /* flags for semaphore control */
 enum {
@@ -72,10 +60,16 @@ enum {
 	E_ABSOLUTE_TIMEOUT	= 16	/* honor the (absolute) timeout parameter */
 };
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif /* __cplusplus */
+#ifndef __ETK_KERNEL_H__
+#include <etk/kernel/Kernel.h>
+#endif /* __ETK_KERNEL_H__ */
 
+/* time functions */
+#define e_snooze(microseconds)			etk_snooze(microseconds)
+#define e_snooze_until(time, timebase)		etk_snooze_until(time, timebase)
+#define e_real_time_clock()			etk_real_time_clock()
+#define e_real_time_clock_usecs()		etk_real_time_clock_usecs()
+#define e_system_time()				etk_system_time()
 
 #endif /* __ETK_OS_H__ */
 

@@ -32,12 +32,11 @@
 #include <string.h>
 
 #include <etk/kernel/Kernel.h>
+#include <etk/private/Token.h>
 
 #include "Message.h"
 #include "Messenger.h"
 #include "Handler.h"
-
-extern e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
 
 
 EMessage::EMessage()
@@ -2057,6 +2056,15 @@ EMessage::SendReply(const EMessage *message, EHandler *replyHandler, e_bigtime_t
 
 	if(message != NULL)
 	{
+		euint64 replyToken = E_MAXUINT64;
+		e_bigtime_t replyTokenTimeStamp = E_MAXINT64;
+
+		if(!(replyHandler == NULL || replyHandler->fToken == NULL))
+		{
+			replyToken = replyHandler->fToken->Token();
+			replyTokenTimeStamp = replyHandler->fToken->TimeStamp();
+		}
+
 		if(fSource != NULL)
 		{
 			EMessage msg(*message);
@@ -2064,18 +2072,12 @@ EMessage::SendReply(const EMessage *message, EHandler *replyHandler, e_bigtime_t
 			msg.fIsReply = true;
 			msg.fTargetToken = E_MAXUINT64;
 			msg.fTargetTokenTimestamp = E_MAXINT64;
-			msg.fReplyToken = E_MAXUINT64;
-			msg.fReplyTokenTimestamp = E_MAXINT64;
+			msg.fReplyToken = replyToken;
+			msg.fReplyTokenTimestamp = replyTokenTimeStamp;
 			if(msg.fSource != NULL)
 			{
 				etk_delete_port(msg.fSource);
 				msg.fSource = NULL;
-			}
-
-			if(replyHandler != NULL)
-			{
-				msg.fReplyToken = etk_get_handler_token(replyHandler);
-				msg.fReplyTokenTimestamp = etk_get_handler_create_time_stamp(msg.fReplyToken);
 			}
 
 			retVal = (etk_port_count(fSource) > 0 ?
@@ -2090,7 +2092,7 @@ EMessage::SendReply(const EMessage *message, EHandler *replyHandler, e_bigtime_t
 
 				msg.fIsReply = true;
 
-				retVal = msgr._SendMessage(message, etk_get_handler_token(replyHandler), sendTimeout);
+				retVal = msgr._SendMessage(message, replyToken, sendTimeout);
 			}
 		}
 	}

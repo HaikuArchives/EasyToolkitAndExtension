@@ -34,7 +34,7 @@
 extern EHandler* etk_get_handler(euint64 token);
 extern euint64 etk_get_ref_handler_token(const EHandler *handler);
 extern bool etk_ref_handler(euint64 token);
-extern bool etk_unref_handler(euint64 token);
+extern void etk_unref_handler(euint64 token);
 
 typedef struct etk_invoker_notify_state {
 	euint32 kind;

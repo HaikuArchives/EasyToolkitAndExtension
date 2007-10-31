@@ -93,11 +93,11 @@ extern char* etk_win32_convert_active_to_utf8(const char *str, eint32 length);
 }
 #endif
 
-_LOCAL class EFilePanelView;
-_LOCAL class EFilePanelWindow;
+class EFilePanelView;
+class EFilePanelWindow;
 
 
-_LOCAL class EFilePanelLabel : public EStringView {
+class _LOCAL EFilePanelLabel : public EStringView {
 public:
 	EFilePanelLabel(ERect frame, const char *name, const char *text, euint32 resizeMode);
 
@@ -106,7 +106,7 @@ public:
 };
 
 
-_LOCAL class EFilePanelListItem : public EListItem {
+class _LOCAL EFilePanelListItem : public EListItem {
 public:
 	EFilePanelListItem(const char *path, EFilePanelView *panel_view, e_dev_t dev = -1);
 	virtual ~EFilePanelListItem();
@@ -136,7 +136,7 @@ private:
 };
 
 
-_LOCAL class EFilePanelListView : public EListView {
+class _LOCAL EFilePanelListView : public EListView {
 public:
 	EFilePanelListView(ERect frame, const char *name, e_list_view_type type);
 
@@ -149,7 +149,7 @@ public:
 };
 
 
-_LOCAL class EFilePanelTitleView : public EView {
+class _LOCAL EFilePanelTitleView : public EView {
 public:
 	EFilePanelTitleView(ERect parent_bounds);
 
@@ -160,7 +160,7 @@ public:
 };
 
 
-_LOCAL class EFilePanelView : public EView {
+class _LOCAL EFilePanelView : public EView {
 public:
 	EFilePanelView(ERect frame, bool allow_multiple_selection);
 	virtual ~EFilePanelView();
@@ -198,7 +198,7 @@ private:
 };
 
 
-_LOCAL class EFilePanelWindow : public EWindow {
+class _LOCAL EFilePanelWindow : public EWindow {
 public:
 	EFilePanelWindow(EFilePanel *panel,
 			 e_file_panel_mode mode,

@@ -57,7 +57,7 @@ extern bool etk_get_arc_12(EPoint &radius, EPoint &start, EPoint &end, eint32 &x
 	} while(false)
 
 
-_LOCAL class ERenderObject {
+class _LOCAL ERenderObject {
 public:
 	ERenderObject();
 	virtual ~ERenderObject();
@@ -102,7 +102,7 @@ ERenderObject::cmp(const void *objectA, const void *objectB)
 }
 
 
-_LOCAL class ERenderLine : public ERenderObject {
+class _LOCAL ERenderLine : public ERenderObject {
 public:
 	ERenderLine(EPoint start, EPoint end);
 
@@ -173,7 +173,7 @@ ERenderLine::Next()
 }
 
 
-_LOCAL class ERenderLine2 : public ERenderObject {
+class _LOCAL ERenderLine2 : public ERenderObject {
 public:
 	ERenderLine2(EPoint pt0, EPoint pt1, EPoint pt2);
 
@@ -274,7 +274,7 @@ ERenderLine2::Next()
 }
 
 
-_LOCAL class ERenderTriangle : public ERenderLine2 {
+class _LOCAL ERenderTriangle : public ERenderLine2 {
 public:
 	ERenderTriangle(EPoint pt0, EPoint pt1, EPoint pt2, bool stroke_edge);
 

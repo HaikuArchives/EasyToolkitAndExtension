@@ -40,6 +40,7 @@ class ELooper;
 class EMessage;
 class EMessageFilter;
 class EMessenger;
+class EToken;
 class _EObserverList;
 
 #define E_OBSERVE_WHAT_CHANGE		"etk:observe_change_what"
@@ -90,21 +91,22 @@ public:
 
 private:
 	friend class ELooper;
+	friend class EMessage;
 
+	friend euint64 etk_get_handler_token(const EHandler *handler);
+	friend void etk_set_handler_token(EHandler *handler, euint64 token);
+	friend ELooper* etk_get_handler_looper(euint64 token);
+	friend euint64 etk_get_ref_looper_token(euint64 token);
+
+	EToken *fToken;
 	char *fName;
-	EHandler *fNextHandler;
 	ELooper *fLooper;
-
 	bool forceSetNextHandler;
-
-	void *fToken;
-
+	EHandler *fNextHandler;
 	_EObserverList *fObserverList;
 	EList fFilters;
 
-
 	void SetLooper(ELooper *looper);
-	euint64 Token() const;
 };
 
 #endif /* __cplusplus */

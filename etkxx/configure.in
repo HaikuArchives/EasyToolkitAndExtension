@@ -267,7 +267,7 @@ if test "$etk_native_os" = "win32" && test x"$GCC" = xyes; then
 fi
 
 if test "$GCC" = "yes"; then
-	ETK_CFLAGS="$ETK_CFLAGS -Wno-multichar"
+	ETK_CFLAGS="$ETK_CFLAGS -Wno-multichar -fno-exceptions"
 fi
 
 AC_EXEEXT

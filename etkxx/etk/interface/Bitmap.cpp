@@ -36,7 +36,7 @@
 
 #include "Bitmap.h"
 
-_LOCAL class EBitmapWindow : public EWindow {
+class _LOCAL EBitmapWindow : public EWindow {
 public:
 	EBitmapWindow(ERect frame);
 	virtual ~EBitmapWindow();
