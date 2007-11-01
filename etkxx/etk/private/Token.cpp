@@ -144,13 +144,13 @@ ETokensDepotPrivateData::AddToken(void *data)
 void
 ETokensDepotPrivateData::RemoveToken(euint64 token)
 {
-	euint64 index = token / (euint64)(E_MAXINT32 - 1);
+	euint64 index = token >> 32;
 	if(index > (euint64)E_MAXINT32 - 1) return;
 
 	EList *list = (EList*)ItemAt((eint32)index);
 	if(list == NULL) return;
 
-	index = token % (euint64)(E_MAXINT32 - 1);
+	index = token & 0xffffffff;
 	_etk_token_t *aToken = (_etk_token_t*)(list->ItemAt((eint32)index));
 	if(aToken == NULL) return;
 
@@ -179,11 +179,11 @@ ETokensDepotPrivateData::RemoveToken(euint64 token)
 _etk_token_t*
 ETokensDepotPrivateData::TokenAt(euint64 token) const
 {
-	euint64 index = token / (euint64)(E_MAXINT32 - 1);
+	euint64 index = token >> 32;
 	if(index > (euint64)E_MAXINT32 - 1) return NULL;
 
 	EList *list = (EList*)ItemAt((eint32)index);
-	index = token % (euint64)(E_MAXINT32 - 1);
+	index = token & 0xffffffff;
 	return((_etk_token_t*)(list->ItemAt((eint32)index)));
 }
 
