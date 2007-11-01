@@ -50,6 +50,7 @@ public:
 	void		SetData(void *data);
 
 	ETokensDepot	*Depot() const;
+	void		Empty();
 
 private:
 	friend class ETokensDepot;
@@ -68,7 +69,7 @@ public:
 	virtual ~ETokensDepot();
 
 	EToken		*CreateToken(void *data = NULL);
-	EToken		*OpenToken(euint64 token);
+	EToken		*OpenToken(euint64 token, EToken *fetch_token = NULL);
 
 	bool		PushToken(euint64 token);
 	void		PopToken(euint64 token);

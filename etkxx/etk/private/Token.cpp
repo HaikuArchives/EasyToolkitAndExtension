@@ -126,7 +126,10 @@ ETokensDepotPrivateData::AddToken(void *data)
 	{
 		aToken->count = 1;
 		aToken->time_stamp = e_system_time();
-		while(aToken->time_stamp == e_system_time());
+		while(aToken->time_stamp == e_system_time())
+		{
+			// do nothing, waiting till "e_system_time()" changed.
+		}
 		aToken->data = data;
 	}
 	else
@@ -244,19 +247,26 @@ ETokensDepot::CreateToken(void *data)
 
 
 EToken*
-ETokensDepot::OpenToken(euint64 token)
+ETokensDepot::OpenToken(euint64 token, EToken *fetch_token)
 {
 	EToken *aToken = NULL;
 
-	if(Lock())
+	if(fetch_token == NULL || fetch_token->fDepot == NULL)
 	{
-		if((reinterpret_cast<ETokensDepotPrivateData*>(fData))->PushToken(token))
+		if(Lock())
 		{
-			aToken = new EToken();
-			aToken->fToken = token;
-			aToken->fDepot = this;
+			if((reinterpret_cast<ETokensDepotPrivateData*>(fData))->PushToken(token))
+			{
+				aToken = (fetch_token != NULL ? fetch_token : new EToken());
+				aToken->fToken = token;
+				aToken->fDepot = this;
+			}
+			Unlock();
 		}
-		Unlock();
+	}
+	else
+	{
+		ETK_WARNING("[PRIVATE]: %s --- fetch_token->fDepot != NULL\n", __PRETTY_FUNCTION__);
 	}
 
 	return aToken;
@@ -312,18 +322,7 @@ EToken::EToken()
 
 EToken::~EToken()
 {
-	if(fToken != E_MAXUINT64 && fDepot != NULL)
-	{
-		if(fDepot->Lock())
-		{
-			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
-			if(fOriginal)
-				depot_private->RemoveToken(fToken);
-			else
-				depot_private->PopToken(fToken);
-			fDepot->Unlock();
-		}
-	}
+	Empty();
 }
 
 
@@ -393,5 +392,26 @@ ETokensDepot*
 EToken::Depot() const
 {
 	return fDepot;
+}
+
+
+void
+EToken::Empty()
+{
+	if(fToken != E_MAXUINT64 && fDepot != NULL)
+	{
+		if(fDepot->Lock())
+		{
+			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
+			if(fOriginal)
+				depot_private->RemoveToken(fToken);
+			else
+				depot_private->PopToken(fToken);
+			fDepot->Unlock();
+		}
+	}
+
+	fToken = E_MAXUINT64;
+	fDepot = NULL;
 }
 

@@ -33,8 +33,8 @@
 #include <etk/support/SimpleLocker.h>
 
 #define SECS_BETWEEN_EPOCHS	E_INT64_CONSTANT(11644473600)
-#define SECS_TO_100NS		E_INT64_CONSTANT(10000000)
-#define SECS_TO_US		E_INT64_CONSTANT(1000000)
+#define SECS_TO_100NS		10000000
+#define SECS_TO_US		1000000
 
 
 // return the number of microseconds elapsed since 00:00 01 January 1970 UTC (Unix epoch)
@@ -49,7 +49,7 @@ _IMPEXP_ETK e_bigtime_t etk_real_time_clock_usecs(void)
 	// get the full win32 value, in 100-nanoseconds
 	eint64 t = ((eint64)CurrentTime.dwHighDateTime << 32) | ((eint64)CurrentTime.dwLowDateTime);
 	t -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
-	t /= E_INT64_CONSTANT(10);
+	t /= 10;
 
 	return t;
 }
@@ -72,7 +72,7 @@ _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 
 	while(InterlockedExchange(&etk_windows_boot_time_locker, 1) == 1) Sleep(0);
 
-	if(etk_windows_boot_time >= E_INT64_CONSTANT(0))
+	if(etk_windows_boot_time >= 0)
 	{
 		retValue = etk_windows_boot_time;
 	}
@@ -81,7 +81,7 @@ _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 		// TODO: GetTickCount 49.7 days period
 		e_bigtime_t CurrentTime = etk_real_time_clock_usecs(); // in microseconds
 		e_bigtime_t ElapsedTime = (e_bigtime_t)GetTickCount(); // in milliseconds
-		retValue = etk_windows_boot_time = CurrentTime - ElapsedTime * E_INT64_CONSTANT(1000);
+		retValue = etk_windows_boot_time = CurrentTime - ElapsedTime * 1000;
 	}
 
 	InterlockedExchange(&etk_windows_boot_time_locker, 0);
@@ -92,7 +92,15 @@ _IMPEXP_ETK e_bigtime_t etk_system_boot_time(void)
 
 _IMPEXP_ETK e_bigtime_t etk_system_time(void)
 {
-	// FIXME
-	return(etk_real_time_clock_usecs() - etk_system_boot_time());
+	LARGE_INTEGER counter, freq;
+	if(QueryPerformanceCounter(&counter) != 0 && QueryPerformanceFrequency(&freq) != 0)
+	{
+		return((e_bigtime_t)(((double)counter.QuadPart / (double)freq.QuadPart) * 1000000.f));
+	}
+	else
+	{
+		// FIXME
+		return(etk_real_time_clock_usecs() - etk_system_boot_time());
+	}
 }
 
