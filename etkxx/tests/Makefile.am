@@ -4,12 +4,14 @@ INCLUDES = -I$(top_builddir) $(ETK_CFLAGS) $(ETK_THREAD_CFLAGS)
 LIBS = $(top_builddir)/etk/libetkxx.la $(ETK_THREAD_LIBS)
 
 noinst_PROGRAMS =			\
+	time-test			\
 	area-test			\
 	locker-test			\
 	semaphore-test			\
 	semaphore-locking-test		\
 	thread-test			\
 	thread-exit-test		\
+	thread-suspend-test		\
 	string-test			\
 	region-test			\
 	path-test			\
@@ -26,12 +28,14 @@ noinst_PROGRAMS =			\
 	file-test			\
 	net-test
 
+time_test_SOURCES = time-test.c
 area_test_SOURCES = area-test.c
 locker_test_SOURCES = locker-test.c
 semaphore_test_SOURCES = semaphore-test.c
 semaphore_locking_test_SOURCES = semaphore-locking-test.c
 thread_test_SOURCES = thread-test.c
 thread_exit_test_SOURCES = thread-exit-test.c
+thread_suspend_test_SOURCES = thread-suspend-test.cpp
 string_test_SOURCES = string-test.cpp
 region_test_SOURCES = region-test.cpp
 path_test_SOURCES = path-test.cpp
