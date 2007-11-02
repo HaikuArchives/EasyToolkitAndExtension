@@ -322,7 +322,7 @@ EToken::EToken()
 
 EToken::~EToken()
 {
-	Empty();
+	MakeEmpty();
 }
 
 
