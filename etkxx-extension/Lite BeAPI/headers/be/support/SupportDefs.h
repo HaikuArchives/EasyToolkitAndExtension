@@ -13,6 +13,11 @@
 	#define __POWERPC__
 #endif
 
+#define __LITE_BEAPI__
+
+#include <be/support/Errors.h>
+
+
 #ifndef ulong
 #define ulong		unsigned long
 #endif

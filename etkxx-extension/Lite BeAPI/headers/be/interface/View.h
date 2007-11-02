@@ -1,4 +1,6 @@
 #include <be/interface/InterfaceDefs.h>
+#include <be/interface/Rect.h>
+#include <be/app/Handler.h>
 
 #ifndef __LITE_BEAPI_VIEW_H__
 #define __LITE_BEAPI_VIEW_H__

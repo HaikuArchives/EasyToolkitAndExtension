@@ -1,4 +1,5 @@
 #include <be/app/AppDefs.h>
+#include <be/support/Locker.h>
 
 #ifndef __LITE_BEAPI_HANDLER_H__
 #define __LITE_BEAPI_HANDLER_H__

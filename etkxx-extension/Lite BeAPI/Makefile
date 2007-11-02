@@ -6,20 +6,33 @@ LITE_BEAPI_VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 
 HEADERS_SRC_DIR = $(shell pwd)/headers
 
-SUPPORT_KITS =				\
-	be/support/SupportDefs.h
+SUPPORT_KIT =				\
+	be/SupportKit.h			\
+	be/support/Errors.h		\
+	be/support/SupportDefs.h	\
+	be/support/Locker.h
 
-APP_KITS =				\
+APP_KIT =				\
+	be/AppKit.h			\
 	be/app/AppDefs.h		\
 	be/app/Handler.h		\
-	be/app/Looper.h
+	be/app/Looper.h			\
+	be/app/Application.h
 
-INTERFACE_KITS =			\
+INTERFACE_KIT =				\
+	be/InterfaceKit.h		\
+	be/interface/GraphicsDefs.h	\
 	be/interface/InterfaceDefs.h	\
+	be/interface/Point.h		\
+	be/interface/Rect.h		\
 	be/interface/Font.h		\
-	be/interface/View.h
+	be/interface/View.h		\
+	be/interface/Bitmap.h		\
+	be/interface/ScrollBar.h	\
+	be/interface/ScrollView.h	\
+	be/interface/Window.h
 
-HEADERS = $(SUPPORT_KITS) $(APP_KITS) $(INTERFACE_KITS)
+HEADERS = be/BeBuild.h be/Be.h $(SUPPORT_KIT) $(APP_KIT) $(INTERFACE_KIT)
 HEADERS_DIRS = be/support be/app be/interface be
 
 MKDIR ?= mkdir -p
