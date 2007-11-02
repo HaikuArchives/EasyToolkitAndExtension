@@ -396,7 +396,7 @@ EToken::Depot() const
 
 
 void
-EToken::Empty()
+EToken::MakeEmpty()
 {
 	if(fToken != E_MAXUINT64 && fDepot != NULL)
 	{

@@ -50,7 +50,7 @@ public:
 	void		SetData(void *data);
 
 	ETokensDepot	*Depot() const;
-	void		Empty();
+	void		MakeEmpty();
 
 private:
 	friend class ETokensDepot;

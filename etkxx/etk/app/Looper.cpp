@@ -106,11 +106,7 @@ ELooper::~ELooper()
 
 	sLooperList.RemoveItem(this);
 
-	if(EHandler::fToken != NULL)
-	{
-		delete EHandler::fToken;
-		EHandler::fToken = NULL;
-	}
+	if(EHandler::fToken != NULL) EHandler::fToken->MakeEmpty();
 
 	if(fLocker)
 	{
