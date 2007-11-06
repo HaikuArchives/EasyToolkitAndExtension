@@ -1,7 +1,7 @@
-#include <be/interface/GraphicsDefs.h>
-
 #ifndef __LITE_BEAPI_INTERFACE_DEFS_H__
 #define __LITE_BEAPI_INTERFACE_DEFS_H__
+
+#include <be/interface/GraphicsDefs.h>
 
 #define border_style			e_border_style
 #define B_PLAIN_BORDER			E_PLAIN_BORDER

@@ -1,7 +1,7 @@
-#include <be/interface/Point.h>
-
 #ifndef __LITE_BEAPI_RECT_H__
 #define __LITE_BEAPI_RECT_H__
+
+#include <be/interface/Point.h>
 
 #ifdef __cplusplus
 

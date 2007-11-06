@@ -11,6 +11,9 @@
 #include <be/interface/ScrollBar.h>
 #include <be/interface/ScrollView.h>
 #include <be/interface/Window.h>
+#include <be/interface/ListItem.h>
+#include <be/interface/ListView.h>
+#include <be/interface/OutlineListView.h>
 
 #endif /* __LITE_BEAPI_INTERFACE_KIT_H__ */
 

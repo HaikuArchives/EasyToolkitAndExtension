@@ -5,6 +5,9 @@
 #include <be/app/Handler.h>
 #include <be/app/Looper.h>
 #include <be/app/Application.h>
+#include <be/app/Message.h>
+#include <be/app/Messenger.h>
+#include <be/app/Invoker.h>
 
 #endif /* __LITE_BEAPI_APP_KIT_H__ */
 

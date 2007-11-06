@@ -1,7 +1,7 @@
-#include <be/interface/InterfaceDefs.h>
-
 #ifndef __LITE_BEAPI_FONT_H__
 #define __LITE_BEAPI_FONT_H__
+
+#include <be/interface/InterfaceDefs.h>
 
 /* others */
 
@@ -19,6 +19,8 @@
 #define be_plain_font				etk_plain_font
 #define be_bold_font				etk_bold_font
 #define be_fixed_font				etk_fixed_font
+
+namespace Lite_BeAPI {
 
 class BFont : public EFont {
 public:
@@ -136,6 +138,9 @@ inline status_t get_font_style(font_family family, int32 index, font_style *name
 	return B_OK;
 }
 
+} // namespace Lite_BeAPI
+
+using namespace Lite_BeAPI;
 
 #endif /* __cplusplus */
 

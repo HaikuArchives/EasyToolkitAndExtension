@@ -1,8 +1,7 @@
-#include <be/support/SupportDefs.h>
-
 #ifndef __LITE_BEAPI_GRAPHICS_DEFS_H__
 #define __LITE_BEAPI_GRAPHICS_DEFS_H__
 
+#include <be/support/SupportDefs.h>
 
 #define pattern				e_pattern
 #define rgb_color			e_rgb_color

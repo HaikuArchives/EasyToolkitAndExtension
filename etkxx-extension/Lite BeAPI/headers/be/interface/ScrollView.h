@@ -1,9 +1,11 @@
-#include <be/interface/ScrollBar.h>
-
 #ifndef __LITE_BEAPI_SCROLL_VIEW_H__
 #define __LITE_BEAPI_SCROLL_VIEW_H__
 
+#include <be/interface/ScrollBar.h>
+
 #ifdef __cplusplus
+
+namespace Lite_BeAPI {
 
 // class
 class BScrollView : public EScrollView {
@@ -41,6 +43,9 @@ inline BScrollView::~BScrollView()
 {
 }
 
+} // namespace Lite_BeAPI
+
+using namespace Lite_BeAPI;
 
 #endif /* __cplusplus */
 

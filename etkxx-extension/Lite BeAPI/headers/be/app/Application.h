@@ -1,7 +1,7 @@
-#include <be/app/Looper.h>
-
 #ifndef __LITE_BEAPI_APPLICATION_H__
 #define __LITE_BEAPI_APPLICATION_H__
+
+#include <be/app/Looper.h>
 
 #ifdef __cplusplus
 

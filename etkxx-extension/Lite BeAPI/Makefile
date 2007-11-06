@@ -10,14 +10,21 @@ SUPPORT_KIT =				\
 	be/SupportKit.h			\
 	be/support/Errors.h		\
 	be/support/SupportDefs.h	\
-	be/support/Locker.h
+	be/support/ClassInfo.h		\
+	be/support/Debug.h		\
+	be/support/Locker.h		\
+	be/support/List.h		\
+	be/support/String.h
 
 APP_KIT =				\
 	be/AppKit.h			\
 	be/app/AppDefs.h		\
 	be/app/Handler.h		\
 	be/app/Looper.h			\
-	be/app/Application.h
+	be/app/Application.h		\
+	be/app/Message.h		\
+	be/app/Messenger.h		\
+	be/app/Invoker.h
 
 INTERFACE_KIT =				\
 	be/InterfaceKit.h		\
@@ -30,7 +37,10 @@ INTERFACE_KIT =				\
 	be/interface/Bitmap.h		\
 	be/interface/ScrollBar.h	\
 	be/interface/ScrollView.h	\
-	be/interface/Window.h
+	be/interface/Window.h		\
+	be/interface/ListItem.h		\
+	be/interface/ListView.h		\
+	be/interface/OutlineListView.h
 
 HEADERS = be/BeBuild.h be/Be.h $(SUPPORT_KIT) $(APP_KIT) $(INTERFACE_KIT)
 HEADERS_DIRS = be/support be/app be/interface be

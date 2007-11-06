@@ -1,7 +1,7 @@
-#include <be/app/Handler.h>
-
 #ifndef __LITE_BEAPI_LOOPER_H__
 #define __LITE_BEAPI_LOOPER_H__
+
+#include <be/app/Handler.h>
 
 #ifdef __cplusplus
 

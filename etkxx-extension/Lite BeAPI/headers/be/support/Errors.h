@@ -1,7 +1,7 @@
-#include <etkxx.h>
-
 #ifndef __LITE_BEAPI_ERRORS_H__
 #define __LITE_BEAPI_ERRORS_H__
+
+#include <etkxx.h>
 
 /* General Errors */
 #define B_NO_MEMORY		E_NO_MEMORY

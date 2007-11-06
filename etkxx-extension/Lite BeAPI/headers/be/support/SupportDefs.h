@@ -1,7 +1,7 @@
-#include <etkxx.h>
-
 #ifndef __LITE_BEAPI_SUPPORT_DEFS_H__
 #define __LITE_BEAPI_SUPPORT_DEFS_H__
+
+#include <etkxx.h>
 
 #if !(ETK_MAJOR_VERSION > 0 || ETK_MINOR_VERSION > 3 || ETK_MICRO_VERSION >= 4)
 	#error "Lite BeAPI requires ETK++ >= 0.3.4"

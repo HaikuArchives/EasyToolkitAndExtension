@@ -1,7 +1,7 @@
-#include <be/interface/View.h>
-
 #ifndef __LITE_BEAPI_SCROLL_BAR_H__
 #define __LITE_BEAPI_SCROLL_BAR_H__
+
+#include <be/interface/View.h>
 
 #ifdef __cplusplus
 
