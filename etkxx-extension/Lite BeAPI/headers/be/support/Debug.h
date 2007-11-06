@@ -3,6 +3,13 @@
 
 #include <be/support/SupportDefs.h>
 
+#define _debugPrintf	ETK_DEBUG
+
+inline void _debuggerAssert(const char *filename, int lineno, const char *msg)
+{
+	ETK_ERROR("File: %s, Line: %d --- %s", filename, lineno, msg);
+}
+
 #if DEBUG
 	/* TODO */
 #else /* !DEBUG */

@@ -32,6 +32,7 @@ INTERFACE_KIT =				\
 	be/interface/InterfaceDefs.h	\
 	be/interface/Point.h		\
 	be/interface/Rect.h		\
+	be/interface/Region.h		\
 	be/interface/Font.h		\
 	be/interface/View.h		\
 	be/interface/Bitmap.h		\

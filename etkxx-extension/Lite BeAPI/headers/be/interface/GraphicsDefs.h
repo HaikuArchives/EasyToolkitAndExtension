@@ -34,6 +34,9 @@
 #define B_RGB24				E_RGB24
 #define B_RGB24_BIG			E_RGB24_BIG
 
+/* TODO */
+#define B_COLOR_8_BIT			(e_color_space)0xff
+
 
 #endif /* __LITE_BEAPI_GRAPHICS_DEFS_H__ */
 

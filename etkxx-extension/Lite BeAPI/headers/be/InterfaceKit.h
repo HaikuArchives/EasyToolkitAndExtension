@@ -5,6 +5,7 @@
 #include <be/interface/InterfaceDefs.h>
 #include <be/interface/Point.h>
 #include <be/interface/Rect.h>
+#include <be/interface/Region.h>
 #include <be/interface/Font.h>
 #include <be/interface/View.h>
 #include <be/interface/Bitmap.h>
