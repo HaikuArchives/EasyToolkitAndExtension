@@ -35,7 +35,6 @@ inline BScrollView::BScrollView(const char *name,
 		      horizontal, vertical,
 		      border)
 {
-	if(target != NULL) target->MoveTo(B_ORIGIN);
 }
 
 
