@@ -71,7 +71,7 @@
 // but the application still be blocked when quit, thus should be fixed yet...
 // 
 // If you use another graphics-engine (X11,etc.) of ETK++, comment the line below.
-#define RUN_SDL_TASK_FRIST
+#define RUN_SDL_TASK_FIRST
 
 #endif // ETK_OS_BEOS
 
@@ -132,7 +132,7 @@ public:
 
 class TApplication : public EApplication {
 public:
-#ifndef RUN_SDL_TASK_FRIST
+#ifndef RUN_SDL_TASK_FIRST
 	TApplication();
 #else
 	TApplication(void *thread);
@@ -755,7 +755,7 @@ static e_status_t sdl_task(void *arg)
 }
 
 
-#ifndef RUN_SDL_TASK_FRIST
+#ifndef RUN_SDL_TASK_FIRST
 TApplication::TApplication()
 	: EApplication("application/x-vnd.etkxx-render_sample-app")
 {
@@ -862,7 +862,7 @@ TApplication::MessageReceived(EMessage *msg)
 
 int main(int argc, char **argv)
 {
-#ifndef RUN_SDL_TASK_FRIST
+#ifndef RUN_SDL_TASK_FIRST
 	TApplication *myapp = new TApplication();
 #else
 	void *thread = etk_create_thread(sdl_task, E_NORMAL_PRIORITY, NULL, NULL);
