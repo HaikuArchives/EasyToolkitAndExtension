@@ -4,6 +4,7 @@
 #include <be/app/AppDefs.h>
 #include <be/app/Handler.h>
 #include <be/app/Looper.h>
+#include <be/app/Cursor.h>
 #include <be/app/Application.h>
 #include <be/app/Message.h>
 #include <be/app/Messenger.h>

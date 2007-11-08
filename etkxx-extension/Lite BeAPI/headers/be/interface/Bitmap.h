@@ -16,10 +16,14 @@ public:
 		bool need_contiguous = false);
 	virtual ~BBitmap();
 
-	void	SetBits(const void *data,
-			int32 length,
-			int32 offset,
-			color_space cs);
+	void		*Bits() const;
+	void		SetBits(const void *data,
+				int32 length,
+				int32 offset,
+				color_space cs);
+	int32		BitsLength() const;
+	int32		BytesPerRow() const;
+	color_space	ColorSpace() const;
 };
 
 
@@ -48,6 +52,42 @@ BBitmap::SetBits(const void *data, int32 length, int32 offset, color_space cs)
 {
 	// TODO
 	ETK_WARNING("[LITE_BEAPI]: %s --- TODO", __PRETTY_FUNCTION__);
+}
+
+
+inline void*
+BBitmap::Bits() const
+{
+	// TODO
+	ETK_WARNING("[LITE_BEAPI]: %s --- TODO", __PRETTY_FUNCTION__);
+	return NULL;
+}
+
+
+inline int32
+BBitmap::BitsLength() const
+{
+	// TODO
+	ETK_WARNING("[LITE_BEAPI]: %s --- TODO", __PRETTY_FUNCTION__);
+	return 0;
+}
+
+
+inline int32
+BBitmap::BytesPerRow() const
+{
+	// TODO
+	ETK_WARNING("[LITE_BEAPI]: %s --- TODO", __PRETTY_FUNCTION__);
+	return 0;
+}
+
+
+inline color_space
+BBitmap::ColorSpace() const
+{
+	// TODO
+	ETK_WARNING("[LITE_BEAPI]: %s --- TODO", __PRETTY_FUNCTION__);
+	return B_RGB32;
 }
 
 } // namespace Lite_BeAPI

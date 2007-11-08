@@ -8,6 +8,9 @@
 // class
 #define BApplication			EApplication
 
+#define be_app				etk_app
+#define be_app_messenger		etk_app_messenger
+
 #endif /* __cplusplus */
 
 /* others */

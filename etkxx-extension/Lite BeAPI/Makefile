@@ -21,6 +21,7 @@ APP_KIT =				\
 	be/app/AppDefs.h		\
 	be/app/Handler.h		\
 	be/app/Looper.h			\
+	be/app/Cursor.h			\
 	be/app/Application.h		\
 	be/app/Message.h		\
 	be/app/Messenger.h		\

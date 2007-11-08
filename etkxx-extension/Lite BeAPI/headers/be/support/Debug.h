@@ -5,10 +5,16 @@
 
 #define _debugPrintf	ETK_DEBUG
 
+namespace Lite_BeAPI {
+
 inline void _debuggerAssert(const char *filename, int lineno, const char *msg)
 {
 	ETK_ERROR("File: %s, Line: %d --- %s", filename, lineno, msg);
 }
+
+} // namespace Lite_BeAPI
+
+using namespace Lite_BeAPI;
 
 #if DEBUG
 	/* TODO */

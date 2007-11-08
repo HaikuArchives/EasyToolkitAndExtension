@@ -16,9 +16,9 @@
 
 #ifdef __cplusplus
 
-#define be_plain_font				etk_plain_font
-#define be_bold_font				etk_bold_font
-#define be_fixed_font				etk_fixed_font
+#define be_plain_font				(reinterpret_cast<const BFont*>((void*)etk_plain_font))
+#define be_bold_font				(reinterpret_cast<const BFont*>((void*)etk_bold_font))
+#define be_fixed_font				(reinterpret_cast<const BFont*>((void*)etk_fixed_font))
 
 namespace Lite_BeAPI {
 
