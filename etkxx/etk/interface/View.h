@@ -306,7 +306,9 @@ public:
 
 	void		DrawBitmap(const EBitmap *bitmap);
 	void		DrawBitmap(const EBitmap *bitmap, EPoint where);
+	void		DrawBitmap(const EBitmap *bitmap, ERect destRect);
 	void		DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect);
+	void		CopyBits(ERect srcRect, ERect destRect);
 
 	void		Flush() const;
 	void		Sync() const;

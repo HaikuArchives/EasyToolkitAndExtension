@@ -2765,6 +2765,16 @@ EView::DrawBitmap(const EBitmap *bitmap, EPoint where)
 
 
 void
+EView::DrawBitmap(const EBitmap *bitmap, ERect destRect)
+{
+	if(bitmap == NULL) return;
+
+	ERect r = bitmap->Bounds();
+	DrawBitmap(bitmap, r, destRect);
+}
+
+
+void
 EView::DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect)
 {
 	if(bitmap == NULL || bitmap->fPixmap == NULL ||
@@ -2781,6 +2791,13 @@ EView::DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect)
 				   (euint32)srcRect.Width(), (euint32)srcRect.Height(),
 				   (eint32)destRect.left, (eint32)destRect.top,
 				   (euint32)destRect.Width(), (euint32)destRect.Height()) == E_OK) Window()->_Update(updateRect, false);
+}
+
+
+void
+EView::CopyBits(ERect srcRect, ERect destRect)
+{
+	// TODO
 }
 
 
