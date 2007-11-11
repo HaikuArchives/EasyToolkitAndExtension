@@ -475,7 +475,7 @@ EApplication::etk_quit_all_loopers(bool force)
 
 		if(looper->IsDependsOnOthersWhenQuitRequested())
 		{
-			ELooper::sLooperList.SwapItems(index, ELooper::sLooperList.CountItems() - 1);
+			ELooper::sLooperList.MoveItem(index, ELooper::sLooperList.CountItems() - 1);
 			hLocker->Unlock();
 			ETK_DEBUG("[APP]: %s --- Looper depends on others, retry again...", __PRETTY_FUNCTION__);
 			continue;
@@ -483,7 +483,7 @@ EApplication::etk_quit_all_loopers(bool force)
 
 		if(looper->Lock() == false)
 		{
-			ELooper::sLooperList.SwapItems(index, ELooper::sLooperList.CountItems() - 1);
+			ELooper::sLooperList.MoveItem(index, ELooper::sLooperList.CountItems() - 1);
 			hLocker->Unlock();
 			ETK_DEBUG("[APP]: %s --- Lock looper failed, retry again...", __PRETTY_FUNCTION__);
 			e_snooze(5000);
