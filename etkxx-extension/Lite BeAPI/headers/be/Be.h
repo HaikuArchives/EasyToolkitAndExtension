@@ -3,6 +3,7 @@
 
 #include <be/BeBuild.h>
 #include <be/SupportKit.h>
+#include <be/StorageKit.h>
 #include <be/AppKit.h>
 #include <be/InterfaceKit.h>
 

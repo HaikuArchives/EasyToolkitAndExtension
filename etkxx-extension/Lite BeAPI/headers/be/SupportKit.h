@@ -5,6 +5,7 @@
 #include <be/support/SupportDefs.h>
 #include <be/support/ClassInfo.h>
 #include <be/support/Debug.h>
+#include <be/support/Beep.h>
 #include <be/support/Locker.h>
 #include <be/support/List.h>
 #include <be/support/String.h>

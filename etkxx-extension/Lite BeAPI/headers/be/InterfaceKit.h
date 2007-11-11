@@ -15,6 +15,11 @@
 #include <be/interface/ListItem.h>
 #include <be/interface/ListView.h>
 #include <be/interface/OutlineListView.h>
+#include <be/interface/Input.h>
+#include <be/interface/Box.h>
+#include <be/interface/Button.h>
+#include <be/interface/Control.h>
+#include <be/interface/Alert.h>
 
 #endif /* __LITE_BEAPI_INTERFACE_KIT_H__ */
 

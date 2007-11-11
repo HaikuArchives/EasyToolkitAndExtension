@@ -12,9 +12,14 @@ SUPPORT_KIT =				\
 	be/support/SupportDefs.h	\
 	be/support/ClassInfo.h		\
 	be/support/Debug.h		\
+	be/support/Beep.h		\
 	be/support/Locker.h		\
 	be/support/List.h		\
 	be/support/String.h
+
+STORAGE_KIT =				\
+	be/StorageKit.h			\
+	be/storage/StorageDefs.h
 
 APP_KIT =				\
 	be/AppKit.h			\
@@ -24,6 +29,7 @@ APP_KIT =				\
 	be/app/Cursor.h			\
 	be/app/Application.h		\
 	be/app/Message.h		\
+	be/app/MessageFilter.h		\
 	be/app/Messenger.h		\
 	be/app/Invoker.h
 
@@ -42,10 +48,16 @@ INTERFACE_KIT =				\
 	be/interface/Window.h		\
 	be/interface/ListItem.h		\
 	be/interface/ListView.h		\
-	be/interface/OutlineListView.h
+	be/interface/OutlineListView.h	\
+	be/interface/Input.h		\
+	be/interface/Box.h		\
+	be/interface/Button.h		\
+	be/interface/Control.h		\
+	be/interface/Alert.h
 
-HEADERS = be/BeBuild.h be/Be.h $(SUPPORT_KIT) $(APP_KIT) $(INTERFACE_KIT)
-HEADERS_DIRS = be/support be/app be/interface be
+
+HEADERS = be/BeBuild.h be/Be.h $(SUPPORT_KIT) $(STORAGE_KIT) $(APP_KIT) $(INTERFACE_KIT)
+HEADERS_DIRS = be/support be/storage be/app be/interface be
 
 MKDIR ?= mkdir -p
 RMDIR ?= rmdir

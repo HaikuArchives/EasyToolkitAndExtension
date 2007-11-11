@@ -7,6 +7,7 @@
 #include <be/app/Cursor.h>
 #include <be/app/Application.h>
 #include <be/app/Message.h>
+#include <be/app/MessageFilter.h>
 #include <be/app/Messenger.h>
 #include <be/app/Invoker.h>
 
