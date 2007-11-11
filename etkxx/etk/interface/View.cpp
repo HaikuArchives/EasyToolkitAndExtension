@@ -2797,7 +2797,20 @@ EView::DrawBitmap(const EBitmap *bitmap, ERect srcRect, ERect destRect)
 void
 EView::CopyBits(ERect srcRect, ERect destRect)
 {
-	// TODO
+	if(srcRect.IsValid() == false || destRect.IsValid() == false ||
+	   fLayout->VisibleRegion()->Intersects(destRect) == false) return;
+
+	ConvertToWindow(&srcRect);
+	ConvertToWindow(&destRect);
+	ERect updateRect(destRect.InsetByCopy(PenSize() / -2.f, PenSize() / -2.f));
+
+	srcRect.Floor();
+	destRect.Floor();
+	if(Window()->fPixmap->CopyTo(fDC, Window()->fPixmap,
+				     (eint32)srcRect.left, (eint32)srcRect.top,
+				     (euint32)srcRect.Width(), (euint32)srcRect.Height(),
+				     (eint32)destRect.left, (eint32)destRect.top,
+				     (euint32)destRect.Width(), (euint32)destRect.Height()) == E_OK) Window()->_Update(updateRect, false);
 }
 
 
