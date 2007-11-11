@@ -2,6 +2,7 @@
 #define __LITE_BEAPI_LOOPER_H__
 
 #include <be/app/Handler.h>
+#include <be/app/MessageQueue.h>
 
 #ifdef __cplusplus
 

@@ -6,10 +6,15 @@ LITE_BEAPI_VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
 
 HEADERS_SRC_DIR = $(shell pwd)/headers
 
+KERNEL_KIT =				\
+	be/KernelKit.h			\
+	be/kernel/OS.h
+
 SUPPORT_KIT =				\
 	be/SupportKit.h			\
 	be/support/Errors.h		\
 	be/support/SupportDefs.h	\
+	be/support/TypeConstants.h	\
 	be/support/ClassInfo.h		\
 	be/support/Debug.h		\
 	be/support/Beep.h		\
@@ -31,7 +36,9 @@ APP_KIT =				\
 	be/app/Message.h		\
 	be/app/MessageFilter.h		\
 	be/app/Messenger.h		\
-	be/app/Invoker.h
+	be/app/Invoker.h		\
+	be/app/MessageRunner.h		\
+	be/app/MessageQueue.h
 
 INTERFACE_KIT =				\
 	be/InterfaceKit.h		\
@@ -52,12 +59,22 @@ INTERFACE_KIT =				\
 	be/interface/Input.h		\
 	be/interface/Box.h		\
 	be/interface/Button.h		\
+	be/interface/RadioButton.h	\
 	be/interface/Control.h		\
-	be/interface/Alert.h
+	be/interface/Alert.h		\
+	be/interface/CheckBox.h		\
+	be/interface/StringView.h	\
+	be/interface/TextView.h		\
+	be/interface/TextControl.h	\
+	be/interface/Menu.h		\
+	be/interface/MenuItem.h		\
+	be/interface/MenuBar.h		\
+	be/interface/MenuField.h	\
+	be/interface/PopUpMenu.h
 
 
-HEADERS = be/BeBuild.h be/Be.h $(SUPPORT_KIT) $(STORAGE_KIT) $(APP_KIT) $(INTERFACE_KIT)
-HEADERS_DIRS = be/support be/storage be/app be/interface be
+HEADERS = be/BeBuild.h be/Be.h $(KERNEL_KIT) $(SUPPORT_KIT) $(STORAGE_KIT) $(APP_KIT) $(INTERFACE_KIT)
+HEADERS_DIRS = be/kernel be/support be/storage be/app be/interface be
 
 MKDIR ?= mkdir -p
 RMDIR ?= rmdir

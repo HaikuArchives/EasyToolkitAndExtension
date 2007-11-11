@@ -2,6 +2,7 @@
 #define __LITE_BEAPI_H__
 
 #include <be/BeBuild.h>
+#include <be/KernelKit.h>
 #include <be/SupportKit.h>
 #include <be/StorageKit.h>
 #include <be/AppKit.h>

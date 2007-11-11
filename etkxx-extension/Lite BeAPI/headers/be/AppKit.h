@@ -10,6 +10,8 @@
 #include <be/app/MessageFilter.h>
 #include <be/app/Messenger.h>
 #include <be/app/Invoker.h>
+#include <be/app/MessageRunner.h>
+#include <be/app/MessageQueue.h>
 
 #endif /* __LITE_BEAPI_APP_KIT_H__ */
 

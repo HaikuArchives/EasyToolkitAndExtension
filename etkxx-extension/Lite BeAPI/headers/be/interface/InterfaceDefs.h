@@ -12,6 +12,20 @@
 #define B_HORIZONTAL			E_HORIZONTAL
 #define B_VERTICAL			E_VERTICAL
 
+#define alignment			e_alignment
+#define B_ALIGN_LEFT			E_ALIGN_LEFT
+#define B_ALIGN_RIGHT			E_ALIGN_RIGHT
+#define B_ALIGN_CENTER			E_ALIGN_CENTER
+
+#define vertical_alignment		e_vertical_alignment
+#define B_ALIGN_TOP			E_ALIGN_TOP
+#define B_ALIGN_BOTTOM			E_ALIGN_BOTTOM
+#define B_ALIGN_MIDDLE			E_ALIGN_MIDDLE
+
+#define button_width			e_button_width
+#define B_WIDTH_AS_USUAL		E_WIDTH_AS_USUAL
+#define B_WIDTH_FROM_LABEL		E_WIDTH_FROM_LABEL
+
 #define B_SHIFT_KEY			E_SHIFT_KEY
 #define B_COMMAND_KEY			E_COMMAND_KEY
 #define B_CONTROL_KEY			E_CONTROL_KEY

@@ -2,6 +2,7 @@
 #define __LITE_BEAPI_ALERT_H__
 
 #include <be/interface/Window.h>
+#include <be/interface/TextView.h>
 
 #ifdef __cplusplus
 

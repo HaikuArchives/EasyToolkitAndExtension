@@ -3,6 +3,7 @@
 
 #include <be/support/Errors.h>
 #include <be/support/SupportDefs.h>
+#include <be/support/TypeConstants.h>
 #include <be/support/ClassInfo.h>
 #include <be/support/Debug.h>
 #include <be/support/Beep.h>
