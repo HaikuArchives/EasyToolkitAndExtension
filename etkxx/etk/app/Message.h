@@ -224,13 +224,13 @@ public:
 				  EHandler *replyHandler = NULL,
 				  e_bigtime_t sendTimeout = E_INFINITE_TIMEOUT) const;
 
-	/* GetInfo()/__FindData(): likes BMessage */
-	e_status_t	GetInfo(e_type_code type, eint32 index,
-				char **nameFound, e_type_code *typeFound, eint32 *countFound = NULL) const;
-	e_status_t	__FindData(const char *name, e_type_code type, eint32 index,
-				   const void **data, ssize_t *numBytes) const;
-	e_status_t	__FindData(const char *name, e_type_code type,
-				   const void **data, ssize_t *numBytes) const;
+	/* BGetInfo()/BFindData(): likes BMessage::GetInfo()/FindData() */
+	e_status_t	BGetInfo(e_type_code type, eint32 index,
+				 char **nameFound, e_type_code *typeFound, eint32 *countFound = NULL) const;
+	e_status_t	BFindData(const char *name, e_type_code type, eint32 index,
+				  const void **data, ssize_t *numBytes) const;
+	e_status_t	BFindData(const char *name, e_type_code type,
+				  const void **data, ssize_t *numBytes) const;
 
 private:
 	friend class ELooper;
@@ -272,8 +272,8 @@ private:
 
 
 inline e_status_t
-EMessage::GetInfo(e_type_code type, eint32 index,
-		  char **nameFound, e_type_code *typeFound, eint32 *countFound) const
+EMessage::BGetInfo(e_type_code type, eint32 index,
+		   char **nameFound, e_type_code *typeFound, eint32 *countFound) const
 {
 	if(index < 0) return E_BAD_INDEX;
 	eint32 aIndex = index;
@@ -298,8 +298,8 @@ EMessage::GetInfo(e_type_code type, eint32 index,
 
 
 inline e_status_t
-EMessage::__FindData(const char *name, e_type_code type, eint32 index,
-		     const void **data, ssize_t *numBytes) const
+EMessage::BFindData(const char *name, e_type_code type, eint32 index,
+		    const void **data, ssize_t *numBytes) const
 {
 	if(index < 0) return E_BAD_INDEX;
 
@@ -326,10 +326,10 @@ EMessage::__FindData(const char *name, e_type_code type, eint32 index,
 
 
 inline e_status_t
-EMessage::__FindData(const char *name, e_type_code type,
-		   const void **data, ssize_t *numBytes) const
+EMessage::BFindData(const char *name, e_type_code type,
+		    const void **data, ssize_t *numBytes) const
 {
-	return __FindData(name, type, 0, data, numBytes);
+	return BFindData(name, type, 0, data, numBytes);
 }
 
 #endif /* __cplusplus */

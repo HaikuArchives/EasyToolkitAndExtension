@@ -27,8 +27,6 @@
  *
  * --------------------------------------------------------------------------*/
 
-#define __ETK_APPLICATION_COMPILING__
-
 #include <etk/support/Locker.h>
 #include <etk/support/Autolock.h>
 #include <etk/kernel/Kernel.h>

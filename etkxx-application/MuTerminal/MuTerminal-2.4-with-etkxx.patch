@@ -1,6 +1,6 @@
-diff -Nur MuTerm/etc/sample.mp.linux MuTerm_working/etc/sample.mp.linux
+diff -Nur MuTerm/etc/sample.mp.linux MuTerm/etc/sample.mp.linux
 --- MuTerm/etc/sample.mp.linux	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/etc/sample.mp.linux	Fri May 11 23:46:09 2007
++++ MuTerm/etc/sample.mp.linux	Fri May 11 23:46:09 2007
 @@ -0,0 +1,25 @@
 +"Cols" , "80"
 +"Rows" , "25"
@@ -27,9 +27,9 @@ diff -Nur MuTerm/etc/sample.mp.linux MuTerm_working/etc/sample.mp.linux
 +"Drag'n Copy" , "0"
 +"Language" , "English"
 +"Input Method Aware" , "0"
-diff -Nur MuTerm/etc/sample.mp.msys MuTerm_working/etc/sample.mp.msys
+diff -Nur MuTerm/etc/sample.mp.msys MuTerm/etc/sample.mp.msys
 --- MuTerm/etc/sample.mp.msys	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/etc/sample.mp.msys	Fri May 11 12:29:45 2007
++++ MuTerm/etc/sample.mp.msys	Fri May 11 12:29:45 2007
 @@ -0,0 +1,25 @@
 +"Cols" , "80"
 +"Rows" , "25"
@@ -56,9 +56,9 @@ diff -Nur MuTerm/etc/sample.mp.msys MuTerm_working/etc/sample.mp.msys
 +"Drag'n Copy" , "0"
 +"Language" , "English"
 +"Input Method Aware" , "0"
-diff -Nur MuTerm/help/pics/logo.xpm MuTerm_working/help/pics/logo.xpm
+diff -Nur MuTerm/help/pics/logo.xpm MuTerm/help/pics/logo.xpm
 --- MuTerm/help/pics/logo.xpm	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/help/pics/logo.xpm	Wed Aug 29 21:02:14 2007
++++ MuTerm/help/pics/logo.xpm	Wed Aug 29 21:02:14 2007
 @@ -0,0 +1,211 @@
 +/* XPM */
 +static char * logo_xpm[] = {
@@ -271,9 +271,9 @@ diff -Nur MuTerm/help/pics/logo.xpm MuTerm_working/help/pics/logo.xpm
 +"                                                                                                                                                                                                                                                                                                                                ",
 +"                                                                                                                                                                                                                                                                                                                                ",
 +"                                                                                                                                                                                                                                                                                                                                "};
-diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
+diff -Nur MuTerm/src/AboutDlg.cpp MuTerm/src/AboutDlg.cpp
 --- MuTerm/src/AboutDlg.cpp	Sun Jul  1 12:28:10 2001
-+++ MuTerm_working/src/AboutDlg.cpp	Fri Aug 31 00:28:23 2007
++++ MuTerm/src/AboutDlg.cpp	Fri Aug 31 00:28:23 2007
 @@ -16,6 +16,10 @@
   AboutDlg.cpp,v Implementation for MuTerminal About Dialog.
  
@@ -600,9 +600,9 @@ diff -Nur MuTerm/src/AboutDlg.cpp MuTerm_working/src/AboutDlg.cpp
 +#endif
  }
 +
-diff -Nur MuTerm/src/AboutDlg.h MuTerm_working/src/AboutDlg.h
+diff -Nur MuTerm/src/AboutDlg.h MuTerm/src/AboutDlg.h
 --- MuTerm/src/AboutDlg.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/AboutDlg.h	Mon Aug 27 14:24:20 2007
++++ MuTerm/src/AboutDlg.h	Mon Aug 27 14:24:20 2007
 @@ -18,8 +18,12 @@
  #ifndef ABOUTDLG_H_INCLUDED
  #define ABOUTDLG_H_INCLUDED
@@ -616,9 +616,9 @@ diff -Nur MuTerm/src/AboutDlg.h MuTerm_working/src/AboutDlg.h
  
  const ulong MSG_ABOUT_CLOSED = 'msac';
  
-diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm_working/src/AppearPrefView.cpp
+diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm/src/AppearPrefView.cpp
 --- MuTerm/src/AppearPrefView.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/AppearPrefView.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/AppearPrefView.cpp	Fri May 11 12:29:45 2007
 @@ -16,6 +16,7 @@
  
  ***************************************************************************/
@@ -637,9 +637,9 @@ diff -Nur MuTerm/src/AppearPrefView.cpp MuTerm_working/src/AppearPrefView.cpp
  
  #include <stdlib.h>
  
-diff -Nur MuTerm/src/CodeConv.cpp MuTerm_working/src/CodeConv.cpp
+diff -Nur MuTerm/src/CodeConv.cpp MuTerm/src/CodeConv.cpp
 --- MuTerm/src/CodeConv.cpp	Fri Jun  8 21:22:49 2001
-+++ MuTerm_working/src/CodeConv.cpp	Sat May 12 03:52:23 2007
++++ MuTerm/src/CodeConv.cpp	Sat May 12 03:52:23 2007
 @@ -32,16 +32,22 @@
  ************************************************************************/
  
@@ -677,9 +677,9 @@ diff -Nur MuTerm/src/CodeConv.cpp MuTerm_working/src/CodeConv.cpp
  	  if( res == (size_t)(-1) )
  	  {
  	     if (errno == EILSEQ)  //char not defined in code table, or wrong table
-diff -Nur MuTerm/src/CodeConv.h MuTerm_working/src/CodeConv.h
+diff -Nur MuTerm/src/CodeConv.h MuTerm/src/CodeConv.h
 --- MuTerm/src/CodeConv.h	Fri Jun  8 21:18:47 2001
-+++ MuTerm_working/src/CodeConv.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/CodeConv.h	Fri May 11 12:29:45 2007
 @@ -19,9 +19,19 @@
  #ifndef CODECONV_H
  #define CODECONV_H
@@ -700,9 +700,9 @@ diff -Nur MuTerm/src/CodeConv.h MuTerm_working/src/CodeConv.h
  
  #define BEGINS_CHAR(byte) ((byte & 0xc0) >= 0x80)
  
-diff -Nur MuTerm/src/CurPos.h MuTerm_working/src/CurPos.h
+diff -Nur MuTerm/src/CurPos.h MuTerm/src/CurPos.h
 --- MuTerm/src/CurPos.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/CurPos.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/CurPos.h	Fri May 11 12:29:45 2007
 @@ -19,7 +19,11 @@
  #ifndef	CURPOS_H_INCLUDED
  #define	CURPOS_H_INCLUDED
@@ -715,9 +715,9 @@ diff -Nur MuTerm/src/CurPos.h MuTerm_working/src/CurPos.h
  
  class CurPos
  {
-diff -Nur MuTerm/src/LangPrefView.cpp MuTerm_working/src/LangPrefView.cpp
+diff -Nur MuTerm/src/LangPrefView.cpp MuTerm/src/LangPrefView.cpp
 --- MuTerm/src/LangPrefView.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/LangPrefView.cpp	Sat May 12 02:27:51 2007
++++ MuTerm/src/LangPrefView.cpp	Sat May 12 02:27:51 2007
 @@ -16,6 +16,9 @@
  
  ***************************************************************************/
@@ -807,14 +807,14 @@ diff -Nur MuTerm/src/LangPrefView.cpp MuTerm_working/src/LangPrefView.cpp
  }
  ////////////////////////////////////////////////////////////////////////////
  //
-diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm_working/src/Makefile_with_etkxx
+diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm/src/Makefile_with_etkxx
 --- MuTerm/src/Makefile_with_etkxx	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/Makefile_with_etkxx	Fri Aug 31 00:19:12 2007
++++ MuTerm/src/Makefile_with_etkxx	Mon Nov 12 21:33:43 2007
 @@ -0,0 +1,123 @@
 +DEBUG_OPTIONS = -g -Wall
 +OPTIMIZE = -O3
 +
-+MIN_ETKXX_VER = 0.3.3
++MIN_ETKXX_VER = 0.3.4
 +
 +ifeq ($(OSTYPE),msys)
 +PREFIX =
@@ -934,9 +934,9 @@ diff -Nur MuTerm/src/Makefile_with_etkxx MuTerm_working/src/Makefile_with_etkxx
 +.cc.o:
 +	$(CXX) $(CXXFLAGS) -c $< -o $@
 +
-diff -Nur MuTerm/src/MenuUtil.cpp MuTerm_working/src/MenuUtil.cpp
+diff -Nur MuTerm/src/MenuUtil.cpp MuTerm/src/MenuUtil.cpp
 --- MuTerm/src/MenuUtil.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/MenuUtil.cpp	Sat May 12 02:28:54 2007
++++ MuTerm/src/MenuUtil.cpp	Sat May 12 02:28:54 2007
 @@ -16,12 +16,17 @@
  
  ***************************************************************************/
@@ -1031,9 +1031,9 @@ diff -Nur MuTerm/src/MenuUtil.cpp MuTerm_working/src/MenuUtil.cpp
  
    return;
    
-diff -Nur MuTerm/src/MenuUtil.h MuTerm_working/src/MenuUtil.h
+diff -Nur MuTerm/src/MenuUtil.h MuTerm/src/MenuUtil.h
 --- MuTerm/src/MenuUtil.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/MenuUtil.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/MenuUtil.h	Fri May 11 12:29:45 2007
 @@ -19,7 +19,11 @@
  #ifndef MENUUTIL_H_INCLUDED
  #define MENUUTIL_H_INCLUDED
@@ -1046,9 +1046,9 @@ diff -Nur MuTerm/src/MenuUtil.h MuTerm_working/src/MenuUtil.h
  
  #ifdef __cplusplus
  extern "C" {
-diff -Nur MuTerm/src/MousePrefView.cpp MuTerm_working/src/MousePrefView.cpp
+diff -Nur MuTerm/src/MousePrefView.cpp MuTerm/src/MousePrefView.cpp
 --- MuTerm/src/MousePrefView.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/MousePrefView.cpp	Sat May 12 00:28:59 2007
++++ MuTerm/src/MousePrefView.cpp	Sat May 12 00:28:59 2007
 @@ -16,6 +16,10 @@
  
  ***************************************************************************/
@@ -1083,9 +1083,9 @@ diff -Nur MuTerm/src/MousePrefView.cpp MuTerm_working/src/MousePrefView.cpp
    mDragnCopy->SetValue (gTermPref->getInt32 (PREF_DRAGN_COPY));
  }
  ////////////////////////////////////////////////////////////////////////////
-diff -Nur MuTerm/src/MuTerminal.cpp MuTerm_working/src/MuTerminal.cpp
+diff -Nur MuTerm/src/MuTerminal.cpp MuTerm/src/MuTerminal.cpp
 --- MuTerm/src/MuTerminal.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/MuTerminal.cpp	Wed May 16 16:15:53 2007
++++ MuTerm/src/MuTerminal.cpp	Wed May 16 16:15:53 2007
 @@ -32,6 +32,8 @@
  // main (int argc, char **argv)
  //	main routine of MuTerminal.
@@ -1159,9 +1159,9 @@ diff -Nur MuTerm/src/MuTerminal.cpp MuTerm_working/src/MuTerminal.cpp
 +}
 +#endif // _WIN32
 +
-diff -Nur MuTerm/src/PrefDlg.cpp MuTerm_working/src/PrefDlg.cpp
+diff -Nur MuTerm/src/PrefDlg.cpp MuTerm/src/PrefDlg.cpp
 --- MuTerm/src/PrefDlg.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/PrefDlg.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/PrefDlg.cpp	Fri May 11 12:29:45 2007
 @@ -15,6 +15,8 @@
   PrefDlg.cpp,v: Implementation for MuTerminal Preference Dialog.
  
@@ -1318,9 +1318,9 @@ diff -Nur MuTerm/src/PrefDlg.cpp MuTerm_working/src/PrefDlg.cpp
 +  return r;
 +#endif
  }
-diff -Nur MuTerm/src/PrefDlg.h MuTerm_working/src/PrefDlg.h
+diff -Nur MuTerm/src/PrefDlg.h MuTerm/src/PrefDlg.h
 --- MuTerm/src/PrefDlg.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/PrefDlg.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/PrefDlg.h	Fri May 11 12:29:45 2007
 @@ -18,7 +18,12 @@
  #ifndef PREFDLG_H_INCLUDED
  #define PREFDLG_H_INCLUDED
@@ -1334,9 +1334,9 @@ diff -Nur MuTerm/src/PrefDlg.h MuTerm_working/src/PrefDlg.h
  #include "PrefHandler.h"
  
  // local message, so these are in .cpp files....
-diff -Nur MuTerm/src/PrefHandler.cpp MuTerm_working/src/PrefHandler.cpp
+diff -Nur MuTerm/src/PrefHandler.cpp MuTerm/src/PrefHandler.cpp
 --- MuTerm/src/PrefHandler.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/PrefHandler.cpp	Sat May 12 04:08:52 2007
++++ MuTerm/src/PrefHandler.cpp	Sat May 12 04:08:52 2007
 @@ -16,15 +16,22 @@
  
  ***************************************************************************/
@@ -1502,9 +1502,9 @@ diff -Nur MuTerm/src/PrefHandler.cpp MuTerm_working/src/PrefHandler.cpp
  }
  /////////////////////////////////////////////////////////////////////////////
  //
-diff -Nur MuTerm/src/PrefHandler.h MuTerm_working/src/PrefHandler.h
+diff -Nur MuTerm/src/PrefHandler.h MuTerm/src/PrefHandler.h
 --- MuTerm/src/PrefHandler.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/PrefHandler.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/PrefHandler.h	Fri May 11 12:29:45 2007
 @@ -18,10 +18,14 @@
  #ifndef PREFHANDLER_H_INCLUDED
  #define PREFHANDLER_H_INCLUDED
@@ -1520,9 +1520,9 @@ diff -Nur MuTerm/src/PrefHandler.h MuTerm_working/src/PrefHandler.h
  
  struct prefDefaults
  {
-diff -Nur MuTerm/src/PrefView.cpp MuTerm_working/src/PrefView.cpp
+diff -Nur MuTerm/src/PrefView.cpp MuTerm/src/PrefView.cpp
 --- MuTerm/src/PrefView.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/PrefView.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/PrefView.cpp	Fri May 11 12:29:45 2007
 @@ -16,6 +16,7 @@
  
  ***************************************************************************/
@@ -1568,9 +1568,9 @@ diff -Nur MuTerm/src/PrefView.cpp MuTerm_working/src/PrefView.cpp
    AddChild(col);
    return col;
  }
-diff -Nur MuTerm/src/PrefView.h MuTerm_working/src/PrefView.h
+diff -Nur MuTerm/src/PrefView.h MuTerm/src/PrefView.h
 --- MuTerm/src/PrefView.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/PrefView.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/PrefView.h	Fri May 11 12:29:45 2007
 @@ -18,9 +18,14 @@
  
  #ifndef PREFVIEW_H_INCLUDED
@@ -1586,9 +1586,9 @@ diff -Nur MuTerm/src/PrefView.h MuTerm_working/src/PrefView.h
  
  // Interface Element's Coordinate System to BRect.
  #define IERECT(X,Y,W,H)  BRect((X),(Y),(X+W-1),(Y+H-1))
-diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm_working/src/ShellPrefView.cpp
+diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm/src/ShellPrefView.cpp
 --- MuTerm/src/ShellPrefView.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/ShellPrefView.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/ShellPrefView.cpp	Fri May 11 12:29:45 2007
 @@ -16,6 +16,9 @@
  
  ***************************************************************************/
@@ -1611,9 +1611,9 @@ diff -Nur MuTerm/src/ShellPrefView.cpp MuTerm_working/src/ShellPrefView.cpp
  
  #include "ShellPrefView.h"
  #include "PrefHandler.h"
-diff -Nur MuTerm/src/TTextControl.cpp MuTerm_working/src/TTextControl.cpp
+diff -Nur MuTerm/src/TTextControl.cpp MuTerm/src/TTextControl.cpp
 --- MuTerm/src/TTextControl.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/TTextControl.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/TTextControl.cpp	Fri May 11 12:29:45 2007
 @@ -16,7 +16,6 @@
  
  ***************************************************************************/
@@ -1622,9 +1622,9 @@ diff -Nur MuTerm/src/TTextControl.cpp MuTerm_working/src/TTextControl.cpp
  #include "TTextControl.h"
  
  /************************************************************************
-diff -Nur MuTerm/src/TTextControl.h MuTerm_working/src/TTextControl.h
+diff -Nur MuTerm/src/TTextControl.h MuTerm/src/TTextControl.h
 --- MuTerm/src/TTextControl.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/TTextControl.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/TTextControl.h	Fri May 11 12:29:45 2007
 @@ -18,7 +18,12 @@
  
  #ifndef TTEXTCTL_H_INCLUDED
@@ -1638,9 +1638,9 @@ diff -Nur MuTerm/src/TTextControl.h MuTerm_working/src/TTextControl.h
  
  class TTextControl : public BTextControl
  {
-diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
+diff -Nur MuTerm/src/TermApp.cpp MuTerm/src/TermApp.cpp
 --- MuTerm/src/TermApp.cpp	Sun Jul  1 12:27:21 2001
-+++ MuTerm_working/src/TermApp.cpp	Fri Aug 31 00:04:56 2007
++++ MuTerm/src/TermApp.cpp	Fri Aug 31 00:04:56 2007
 @@ -24,6 +24,10 @@
  char *muterm_ver = "2.4";
  char *last_update = "2001/7/1";
@@ -1957,9 +1957,9 @@ diff -Nur MuTerm/src/TermApp.cpp MuTerm_working/src/TermApp.cpp
  }
  
  ////////////////////////////////////////////////////////////////////////////
-diff -Nur MuTerm/src/TermApp.h MuTerm_working/src/TermApp.h
+diff -Nur MuTerm/src/TermApp.h MuTerm/src/TermApp.h
 --- MuTerm/src/TermApp.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/TermApp.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermApp.h	Fri May 11 12:29:45 2007
 @@ -19,8 +19,12 @@
  #ifndef TERMAPP_H
  #define TERMAPP_H
@@ -1973,9 +1973,9 @@ diff -Nur MuTerm/src/TermApp.h MuTerm_working/src/TermApp.h
  
  extern int pfd;
  extern char *ptyname;
-diff -Nur MuTerm/src/TermBaseView.h MuTerm_working/src/TermBaseView.h
+diff -Nur MuTerm/src/TermBaseView.h MuTerm/src/TermBaseView.h
 --- MuTerm/src/TermBaseView.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/TermBaseView.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermBaseView.h	Fri May 11 12:29:45 2007
 @@ -18,7 +18,12 @@
  
  #ifndef TERMBASEVIEW_H_INCLUDED
@@ -1989,9 +1989,9 @@ diff -Nur MuTerm/src/TermBaseView.h MuTerm_working/src/TermBaseView.h
  
  class TermView;
  
-diff -Nur MuTerm/src/TermBuffer.cpp MuTerm_working/src/TermBuffer.cpp
+diff -Nur MuTerm/src/TermBuffer.cpp MuTerm/src/TermBuffer.cpp
 --- MuTerm/src/TermBuffer.cpp	Thu Jun 28 14:50:39 2001
-+++ MuTerm_working/src/TermBuffer.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermBuffer.cpp	Fri May 11 12:29:45 2007
 @@ -81,13 +81,19 @@
  
  ************************************************************************/
@@ -2013,9 +2013,9 @@ diff -Nur MuTerm/src/TermBuffer.cpp MuTerm_working/src/TermBuffer.cpp
  
  #include "TermBuffer.h"
  #include "TermConst.h"
-diff -Nur MuTerm/src/TermBuffer.h MuTerm_working/src/TermBuffer.h
+diff -Nur MuTerm/src/TermBuffer.h MuTerm/src/TermBuffer.h
 --- MuTerm/src/TermBuffer.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/TermBuffer.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermBuffer.h	Fri May 11 12:29:45 2007
 @@ -18,7 +18,12 @@
  #ifndef TERMBUFFER_H_INCLUDED
  #define TERMBUFFER_H_INCLUDED
@@ -2029,9 +2029,9 @@ diff -Nur MuTerm/src/TermBuffer.h MuTerm_working/src/TermBuffer.h
  #include "TermConst.h"
  #include "CurPos.h"
  
-diff -Nur MuTerm/src/TermConst.h MuTerm_working/src/TermConst.h
+diff -Nur MuTerm/src/TermConst.h MuTerm/src/TermConst.h
 --- MuTerm/src/TermConst.h	Thu Jun 28 14:43:48 2001
-+++ MuTerm_working/src/TermConst.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermConst.h	Fri May 11 12:29:45 2007
 @@ -24,6 +24,10 @@
  #define MALLOC_DEBUG
  #endif
@@ -2068,9 +2068,9 @@ diff -Nur MuTerm/src/TermConst.h MuTerm_working/src/TermConst.h
  const char * const TERM_PREF = PREF_FOLDER "setting.mp";
  const char * const LOCALE_FILE_DEFAULT = PREF_FOLDER "menu/en";
  
-diff -Nur MuTerm/src/TermIM.cpp MuTerm_working/src/TermIM.cpp
+diff -Nur MuTerm/src/TermIM.cpp MuTerm/src/TermIM.cpp
 --- MuTerm/src/TermIM.cpp	Fri Jun  8 21:32:57 2001
-+++ MuTerm_working/src/TermIM.cpp	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermIM.cpp	Fri May 11 12:29:45 2007
 @@ -17,18 +17,32 @@
  
  ***************************************************************************/
@@ -2215,9 +2215,9 @@ diff -Nur MuTerm/src/TermIM.cpp MuTerm_working/src/TermIM.cpp
    }
 +#endif
  }
-diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
+diff -Nur MuTerm/src/TermParse.cpp MuTerm/src/TermParse.cpp
 --- MuTerm/src/TermParse.cpp	Thu Jun 28 14:47:13 2001
-+++ MuTerm_working/src/TermParse.cpp	Wed May 16 00:57:33 2007
++++ MuTerm/src/TermParse.cpp	Wed May 16 00:57:33 2007
 @@ -23,12 +23,19 @@
  #include <errno.h>
  #include <stdio.h>
@@ -2489,9 +2489,9 @@ diff -Nur MuTerm/src/TermParse.cpp MuTerm_working/src/TermParse.cpp
    exit_thread (B_OK);
    return B_OK;
  }
-diff -Nur MuTerm/src/TermParse.h MuTerm_working/src/TermParse.h
+diff -Nur MuTerm/src/TermParse.h MuTerm/src/TermParse.h
 --- MuTerm/src/TermParse.h	Fri Jun  8 19:54:00 2001
-+++ MuTerm_working/src/TermParse.h	Mon May 14 12:08:42 2007
++++ MuTerm/src/TermParse.h	Mon May 14 12:08:42 2007
 @@ -19,8 +19,13 @@
  #ifndef TERMPARSE_H
  #define TERMPARSE_H
@@ -2523,9 +2523,9 @@ diff -Nur MuTerm/src/TermParse.h MuTerm_working/src/TermParse.h
  
    // Escape Sequance parse thread.
    static int32 EscParse (void *);
-diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
+diff -Nur MuTerm/src/TermView.cpp MuTerm/src/TermView.cpp
 --- MuTerm/src/TermView.cpp	Sun Jul  1 15:37:51 2001
-+++ MuTerm_working/src/TermView.cpp	Sun May 20 01:18:30 2007
++++ MuTerm/src/TermView.cpp	Sun May 20 01:18:30 2007
 @@ -17,6 +17,7 @@
  
  ***************************************************************************/
@@ -3262,9 +3262,9 @@ diff -Nur MuTerm/src/TermView.cpp MuTerm_working/src/TermView.cpp
  }
  
  
-diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
+diff -Nur MuTerm/src/TermView.h MuTerm/src/TermView.h
 --- MuTerm/src/TermView.h	Mon May 21 23:21:34 2001
-+++ MuTerm_working/src/TermView.h	Thu May 17 16:59:01 2007
++++ MuTerm/src/TermView.h	Thu May 17 16:59:01 2007
 @@ -19,9 +19,14 @@
  #ifndef TERMVIEW_H
  #define TERMVIEW_H
@@ -3338,9 +3338,9 @@ diff -Nur MuTerm/src/TermView.h MuTerm_working/src/TermView.h
    int fQuitting;
  
    // DrawEngine parameter.
-diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
+diff -Nur MuTerm/src/TermWindow.cpp MuTerm/src/TermWindow.cpp
 --- MuTerm/src/TermWindow.cpp	Thu Jun  7 20:29:35 2001
-+++ MuTerm_working/src/TermWindow.cpp	Wed May 16 00:03:17 2007
++++ MuTerm/src/TermWindow.cpp	Wed May 16 00:03:17 2007
 @@ -16,6 +16,7 @@
  
  *****************************************************************************/
@@ -3655,9 +3655,9 @@ diff -Nur MuTerm/src/TermWindow.cpp MuTerm_working/src/TermWindow.cpp
    BPrintJob job("Print"); 
  
    if((! fPrintSettings) && (DoPageSetup() != B_NO_ERROR)) {
-diff -Nur MuTerm/src/TermWindow.h MuTerm_working/src/TermWindow.h
+diff -Nur MuTerm/src/TermWindow.h MuTerm/src/TermWindow.h
 --- MuTerm/src/TermWindow.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/TermWindow.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/TermWindow.h	Fri May 11 12:29:45 2007
 @@ -20,8 +20,12 @@
  #ifndef TERMWIN_H
  #define TERMWIN_H
@@ -3702,9 +3702,9 @@ diff -Nur MuTerm/src/TermWindow.h MuTerm_working/src/TermWindow.h
  
    BMessageRunner *fWindowUpdate;
  
-diff -Nur MuTerm/src/VTKeyTbl.c MuTerm_working/src/VTKeyTbl.c
+diff -Nur MuTerm/src/VTKeyTbl.c MuTerm/src/VTKeyTbl.c
 --- MuTerm/src/VTKeyTbl.c	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/VTKeyTbl.c	Sun May 20 01:19:14 2007
++++ MuTerm/src/VTKeyTbl.c	Sun May 20 01:19:14 2007
 @@ -36,16 +36,16 @@
  
  char *function_key_char_table [] = 
@@ -3734,9 +3734,9 @@ diff -Nur MuTerm/src/VTKeyTbl.c MuTerm_working/src/VTKeyTbl.c
 +"[23~", // F11
 +"[24~", // F12
  };
-diff -Nur MuTerm/src/WelcomeMessage.h MuTerm_working/src/WelcomeMessage.h
+diff -Nur MuTerm/src/WelcomeMessage.h MuTerm/src/WelcomeMessage.h
 --- MuTerm/src/WelcomeMessage.h	Thu Jun 28 15:43:52 2001
-+++ MuTerm_working/src/WelcomeMessage.h	Sat May 12 03:49:05 2007
++++ MuTerm/src/WelcomeMessage.h	Sat May 12 03:49:05 2007
 @@ -21,7 +21,7 @@
  
  #define MUTERM_MESSAGE "[4;34mM[31mu[mTerm"
@@ -3788,17 +3788,12 @@ diff -Nur MuTerm/src/WelcomeMessage.h MuTerm_working/src/WelcomeMessage.h
  
  #endif /* TERMCONST_H_INCLUDED */
  
-diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
+diff -Nur MuTerm/src/etkxx-impl.h MuTerm/src/etkxx-impl.h
 --- MuTerm/src/etkxx-impl.h	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/etkxx-impl.h	Thu Aug 30 23:53:34 2007
-@@ -0,0 +1,213 @@
++++ MuTerm/src/etkxx-impl.h	Mon Nov 12 21:33:22 2007
+@@ -0,0 +1,209 @@
 +#ifndef __ETKXX_IMPL_H__
 +#define __ETKXX_IMPL_H__
-+
-+#ifdef _WIN32
-+#include <winsock2.h>
-+#include <windows.h>
-+#endif
 +
 +#include <etkxx.h>
 +
@@ -3888,7 +3883,8 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
 +#define be_clipboard		(&etk_clipboard)
 +
 +#define BMessage		EMessage
-+#define FindData		__FindData
++#define GetInfo			BGetInfo
++#define FindData		BFindData
 +
 +#define BMessageRunner		EMessageRunner
 +#define BMessenger		EMessenger
@@ -4005,9 +4001,9 @@ diff -Nur MuTerm/src/etkxx-impl.h MuTerm_working/src/etkxx-impl.h
 +
 +#endif /* __ETKXX_IMPL_H__ */
 +
-diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified Chinese
+diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm/src/menu/Simplified Chinese
 --- MuTerm/src/menu/Simplified Chinese	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/menu/Simplified Chinese	Thu May 17 14:45:16 2007
++++ MuTerm/src/menu/Simplified Chinese	Thu May 17 14:45:16 2007
 @@ -0,0 +1,99 @@
 +######### -*- coding:utf-8-unix -*- ###################
 +# Simplified Chinese menu
@@ -4108,9 +4104,9 @@ diff -Nur MuTerm/src/menu/Simplified Chinese MuTerm_working/src/menu/Simplified 
 +"Help File Language",	"ch"
 +
 +# end
-diff -Nur MuTerm/src/menu/Traditional Chinese MuTerm_working/src/menu/Traditional Chinese
+diff -Nur MuTerm/src/menu/Traditional Chinese MuTerm/src/menu/Traditional Chinese
 --- MuTerm/src/menu/Traditional Chinese	Thu Jun 28 13:56:44 2001
-+++ MuTerm_working/src/menu/Traditional Chinese	Wed May 16 00:27:13 2007
++++ MuTerm/src/menu/Traditional Chinese	Wed May 16 00:27:13 2007
 @@ -47,8 +47,8 @@
  ########################################################
  # Appearance panel
@@ -4129,9 +4125,9 @@ diff -Nur MuTerm/src/menu/Traditional Chinese MuTerm_working/src/menu/Traditiona
 -# end
 \ No newline at end of file
 +# end
-diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
+diff -Nur MuTerm/src/spawn.cpp MuTerm/src/spawn.cpp
 --- MuTerm/src/spawn.cpp	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/spawn.cpp	Thu May 17 16:43:28 2007
++++ MuTerm/src/spawn.cpp	Thu May 17 16:43:28 2007
 @@ -16,21 +16,37 @@
  
  */
@@ -4606,9 +4602,9 @@ diff -Nur MuTerm/src/spawn.cpp MuTerm_working/src/spawn.cpp
 +}
 +#endif
  
-diff -Nur MuTerm/src/spawn.h MuTerm_working/src/spawn.h
+diff -Nur MuTerm/src/spawn.h MuTerm/src/spawn.h
 --- MuTerm/src/spawn.h	Sun Apr  2 23:00:00 2000
-+++ MuTerm_working/src/spawn.h	Fri May 11 12:29:45 2007
++++ MuTerm/src/spawn.h	Fri May 11 12:29:45 2007
 @@ -23,15 +23,23 @@
   * allow for mobility of the pty master/slave directories
   */
@@ -4650,9 +4646,9 @@ diff -Nur MuTerm/src/spawn.h MuTerm_working/src/spawn.h
 -
  
  #endif /* SPAWN_H */
-diff -Nur MuTerm/src/win32/MuTerminal.rc MuTerm_working/src/win32/MuTerminal.rc
+diff -Nur MuTerm/src/win32/MuTerminal.rc MuTerm/src/win32/MuTerminal.rc
 --- MuTerm/src/win32/MuTerminal.rc	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/win32/MuTerminal.rc	Sat May 12 06:36:42 2007
++++ MuTerm/src/win32/MuTerminal.rc	Mon Nov 12 21:48:27 2007
 @@ -0,0 +1,34 @@
 +#include <winver.h>
 +
@@ -4666,7 +4662,7 @@ diff -Nur MuTerm/src/win32/MuTerminal.rc MuTerm_working/src/win32/MuTerminal.rc
 + FILEFLAGS 0x0L
 +#endif
 + FILEOS 0x4L
-+ FILETYPE 0x2L
++ FILETYPE 0x1L
 + FILESUBTYPE 0x0L
 +BEGIN
 +    BLOCK "StringFileInfo"
@@ -4688,153 +4684,216 @@ diff -Nur MuTerm/src/win32/MuTerminal.rc MuTerm_working/src/win32/MuTerminal.rc
 +
 +IDI_ICON1 ICON "MuTerminal.ico"
 +
-diff -Nur MuTerm/src/win32/MuTerminal.sln MuTerm_working/src/win32/MuTerminal.sln
+diff -Nur MuTerm/src/win32/MuTerminal.sln MuTerm/src/win32/MuTerminal.sln
 --- MuTerm/src/win32/MuTerminal.sln	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/win32/MuTerminal.sln	Sat May 12 05:53:50 2007
-@@ -0,0 +1,21 @@
-+Microsoft Visual Studio Solution File, Format Version 8.00
++++ MuTerm/src/win32/MuTerminal.sln	Mon Nov 12 21:35:33 2007
+@@ -0,0 +1,19 @@
++Microsoft Visual Studio Solution File, Format Version 9.00
++# Visual C++ Express 2005
 +Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MuTerminal", "MuTerminal.vcproj", "{5C049672-3C3B-40E8-AD4F-A714DE50F405}"
-+	ProjectSection(ProjectDependencies) = postProject
-+	EndProjectSection
 +EndProject
 +Global
-+	GlobalSection(SolutionConfiguration) = preSolution
-+		Debug = Debug
-+		Release = Release
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|Win32 = Debug|Win32
++		Release|Win32 = Release|Win32
 +	EndGlobalSection
-+	GlobalSection(ProjectConfiguration) = postSolution
-+		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Debug.ActiveCfg = Debug|Win32
-+		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Debug.Build.0 = Debug|Win32
-+		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Release.ActiveCfg = Release|Win32
-+		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Release.Build.0 = Release|Win32
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Debug|Win32.ActiveCfg = Debug|Win32
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Debug|Win32.Build.0 = Debug|Win32
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Release|Win32.ActiveCfg = Release|Win32
++		{5C049672-3C3B-40E8-AD4F-A714DE50F405}.Release|Win32.Build.0 = Release|Win32
 +	EndGlobalSection
-+	GlobalSection(ExtensibilityGlobals) = postSolution
-+	EndGlobalSection
-+	GlobalSection(ExtensibilityAddIns) = postSolution
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
 +	EndGlobalSection
 +EndGlobal
-diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal.vcproj
+diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm/src/win32/MuTerminal.vcproj
 --- MuTerm/src/win32/MuTerminal.vcproj	Thu Jan  1 08:00:00 1970
-+++ MuTerm_working/src/win32/MuTerminal.vcproj	Tue May 15 23:24:08 2007
-@@ -0,0 +1,215 @@
++++ MuTerm/src/win32/MuTerminal.vcproj	Mon Nov 12 21:41:42 2007
+@@ -0,0 +1,308 @@
 +﻿<?xml version="1.0" encoding="UTF-8"?>
 +<VisualStudioProject
 +	ProjectType="Visual C++"
-+	Version="7.10"
++	Version="8.00"
 +	Name="MuTerminal"
 +	ProjectGUID="{5C049672-3C3B-40E8-AD4F-A714DE50F405}"
-+	Keyword="Win32Proj">
++	Keyword="Win32Proj"
++	>
 +	<Platforms>
 +		<Platform
-+			Name="Win32"/>
++			Name="Win32"
++		/>
 +	</Platforms>
++	<ToolFiles>
++	</ToolFiles>
 +	<Configurations>
 +		<Configuration
 +			Name="Debug|Win32"
 +			OutputDirectory="Debug"
 +			IntermediateDirectory="Debug"
 +			ConfigurationType="1"
-+			CharacterSet="0">
++			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
++			CharacterSet="0"
++			>
++			<Tool
++				Name="VCPreBuildEventTool"
++			/>
++			<Tool
++				Name="VCCustomBuildTool"
++			/>
++			<Tool
++				Name="VCXMLDataGeneratorTool"
++			/>
++			<Tool
++				Name="VCWebServiceProxyGeneratorTool"
++			/>
++			<Tool
++				Name="VCMIDLTool"
++			/>
 +			<Tool
 +				Name="VCCLCompilerTool"
 +				Optimization="0"
 +				AdditionalIncludeDirectories="..\..\..\etkxx;.\libiconv"
 +				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;USE_ETKXX"
-+				MinimalRebuild="TRUE"
-+				ExceptionHandling="TRUE"
++				MinimalRebuild="true"
++				ExceptionHandling="0"
 +				BasicRuntimeChecks="3"
 +				RuntimeLibrary="1"
-+				RuntimeTypeInfo="TRUE"
++				RuntimeTypeInfo="true"
 +				UsePrecompiledHeader="0"
 +				WarningLevel="3"
-+				Detect64BitPortabilityProblems="FALSE"
-+				DebugInformationFormat="4"/>
++				Detect64BitPortabilityProblems="false"
++				DebugInformationFormat="4"
++			/>
 +			<Tool
-+				Name="VCCustomBuildTool"/>
++				Name="VCManagedResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCPreLinkEventTool"
++			/>
 +			<Tool
 +				Name="VCLinkerTool"
++				IgnoreImportLibrary="true"
 +				AdditionalDependencies="etkxx.lib iconv.lib kernel32.lib user32.lib msvcrtd.lib $(NOINHERIT)"
 +				OutputFile="$(OutDir)/MuTerminal.exe"
 +				LinkIncremental="2"
 +				AdditionalLibraryDirectories="..\..\..\etkxx\build\win32\etkxx\Debug;.\libiconv"
-+				IgnoreAllDefaultLibraries="TRUE"
-+				GenerateDebugInformation="TRUE"
++				IgnoreAllDefaultLibraries="true"
++				GenerateDebugInformation="true"
 +				ProgramDatabaseFile="$(OutDir)/MuTerminal.pdb"
 +				SubSystem="1"
-+				TargetMachine="1"/>
++				TargetMachine="1"
++			/>
 +			<Tool
-+				Name="VCMIDLTool"/>
++				Name="VCALinkTool"
++			/>
 +			<Tool
-+				Name="VCPostBuildEventTool"/>
++				Name="VCManifestTool"
++			/>
 +			<Tool
-+				Name="VCPreBuildEventTool"/>
++				Name="VCXDCMakeTool"
++			/>
 +			<Tool
-+				Name="VCPreLinkEventTool"/>
++				Name="VCBscMakeTool"
++			/>
 +			<Tool
-+				Name="VCResourceCompilerTool"/>
++				Name="VCFxCopTool"
++			/>
 +			<Tool
-+				Name="VCWebServiceProxyGeneratorTool"/>
++				Name="VCAppVerifierTool"
++			/>
 +			<Tool
-+				Name="VCXMLDataGeneratorTool"/>
++				Name="VCWebDeploymentTool"
++			/>
 +			<Tool
-+				Name="VCWebDeploymentTool"/>
-+			<Tool
-+				Name="VCManagedWrapperGeneratorTool"/>
-+			<Tool
-+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
++				Name="VCPostBuildEventTool"
++			/>
 +		</Configuration>
 +		<Configuration
 +			Name="Release|Win32"
 +			OutputDirectory="Release"
 +			IntermediateDirectory="Release"
 +			ConfigurationType="1"
++			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 +			CharacterSet="0"
-+			WholeProgramOptimization="FALSE">
++			>
++			<Tool
++				Name="VCPreBuildEventTool"
++			/>
++			<Tool
++				Name="VCCustomBuildTool"
++			/>
++			<Tool
++				Name="VCXMLDataGeneratorTool"
++			/>
++			<Tool
++				Name="VCWebServiceProxyGeneratorTool"
++			/>
++			<Tool
++				Name="VCMIDLTool"
++			/>
 +			<Tool
 +				Name="VCCLCompilerTool"
 +				AdditionalIncludeDirectories="..\..\..\etkxx;.\libiconv"
 +				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;USE_ETKXX"
-+				ExceptionHandling="TRUE"
++				ExceptionHandling="0"
 +				RuntimeLibrary="0"
-+				RuntimeTypeInfo="TRUE"
++				RuntimeTypeInfo="true"
 +				UsePrecompiledHeader="0"
 +				WarningLevel="3"
-+				Detect64BitPortabilityProblems="FALSE"
-+				DebugInformationFormat="3"/>
++				Detect64BitPortabilityProblems="false"
++				DebugInformationFormat="3"
++			/>
 +			<Tool
-+				Name="VCCustomBuildTool"/>
++				Name="VCManagedResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCResourceCompilerTool"
++			/>
++			<Tool
++				Name="VCPreLinkEventTool"
++			/>
 +			<Tool
 +				Name="VCLinkerTool"
++				IgnoreImportLibrary="true"
 +				AdditionalDependencies="etkxx.lib iconv.lib kernel32.lib user32.lib msvcrt.lib $(NOINHERIT)"
 +				OutputFile="$(OutDir)/MuTerminal.exe"
 +				LinkIncremental="1"
 +				AdditionalLibraryDirectories="..\..\..\etkxx\build\win32\etkxx\Release;.\libiconv"
-+				IgnoreAllDefaultLibraries="TRUE"
-+				GenerateDebugInformation="TRUE"
++				IgnoreAllDefaultLibraries="true"
++				GenerateDebugInformation="true"
 +				SubSystem="1"
 +				OptimizeReferences="2"
 +				EnableCOMDATFolding="2"
-+				TargetMachine="1"/>
++				TargetMachine="1"
++			/>
 +			<Tool
-+				Name="VCMIDLTool"/>
++				Name="VCALinkTool"
++			/>
 +			<Tool
-+				Name="VCPostBuildEventTool"/>
++				Name="VCManifestTool"
++			/>
 +			<Tool
-+				Name="VCPreBuildEventTool"/>
++				Name="VCXDCMakeTool"
++			/>
 +			<Tool
-+				Name="VCPreLinkEventTool"/>
++				Name="VCBscMakeTool"
++			/>
 +			<Tool
-+				Name="VCResourceCompilerTool"/>
++				Name="VCFxCopTool"
++			/>
 +			<Tool
-+				Name="VCWebServiceProxyGeneratorTool"/>
++				Name="VCAppVerifierTool"
++			/>
 +			<Tool
-+				Name="VCXMLDataGeneratorTool"/>
++				Name="VCWebDeploymentTool"
++			/>
 +			<Tool
-+				Name="VCWebDeploymentTool"/>
-+			<Tool
-+				Name="VCManagedWrapperGeneratorTool"/>
-+			<Tool
-+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
++				Name="VCPostBuildEventTool"
++			/>
 +		</Configuration>
 +	</Configurations>
 +	<References>
@@ -4843,92 +4902,139 @@ diff -Nur MuTerm/src/win32/MuTerminal.vcproj MuTerm_working/src/win32/MuTerminal
 +		<Filter
 +			Name="Source files"
 +			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
++			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
++			>
 +			<File
-+				RelativePath="..\AboutDlg.cpp">
++				RelativePath="..\AboutDlg.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\AppearPrefView.cpp">
++				RelativePath="..\AppearPrefView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\CodeConv.cpp">
++				RelativePath="..\CodeConv.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\CurPos.cpp">
++				RelativePath="..\CurPos.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\LangPrefView.cpp">
++				RelativePath="..\LangPrefView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\MenuUtil.cpp">
++				RelativePath="..\MenuUtil.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\MousePrefView.cpp">
++				RelativePath="..\MousePrefView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\MuTerminal.cpp">
++				RelativePath="..\MuTerminal.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\PrefDlg.cpp">
++				RelativePath="..\PrefDlg.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\PrefHandler.cpp">
++				RelativePath="..\PrefHandler.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\PrefView.cpp">
++				RelativePath="..\PrefView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\ShellPrefView.cpp">
++				RelativePath="..\ShellPrefView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\spawn.cpp">
++				RelativePath="..\spawn.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermApp.cpp">
++				RelativePath="..\TermApp.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermBaseView.cpp">
++				RelativePath="..\TermBaseView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermBuffer.cpp">
++				RelativePath="..\TermBuffer.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermIM.cpp">
++				RelativePath="..\TermIM.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermParse.cpp">
++				RelativePath="..\TermParse.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermView.cpp">
++				RelativePath="..\TermView.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TermWindow.cpp">
++				RelativePath="..\TermWindow.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\TTextControl.cpp">
++				RelativePath="..\TTextControl.cpp"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\UTF8WidthTbl.c">
++				RelativePath="..\UTF8WidthTbl.c"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\VTKeyTbl.c">
++				RelativePath="..\VTKeyTbl.c"
++				>
 +			</File>
 +			<File
-+				RelativePath="..\VTPrsTbl.c">
++				RelativePath="..\VTPrsTbl.c"
++				>
 +			</File>
 +		</Filter>
 +		<Filter
 +			Name="Resource files"
 +			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
++			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
++			>
 +			<File
-+				RelativePath=".\MuTerminal.ico">
++				RelativePath=".\MuTerminal.ico"
++				>
 +			</File>
 +			<File
-+				RelativePath=".\MuTerminal.rc">
++				RelativePath=".\MuTerminal.rc"
++				>
 +			</File>
 +		</Filter>
 +	</Files>
 +	<Globals>
 +	</Globals>
 +</VisualStudioProject>
+diff -Nur MuTerm/src/win32/libiconv/COPYING MuTerm/src/win32/libiconv/COPYING
+--- MuTerm/src/win32/libiconv/COPYING	Thu Jan  1 08:00:00 1970
++++ MuTerm/src/win32/libiconv/COPYING	Mon Nov 12 21:51:17 2007
+@@ -0,0 +1,15 @@
++The GNU LIBICONV Library is free software; you can redistribute it
++and/or modify it under the terms of the GNU Library General Public
++License as published by the Free Software Foundation; either version 2
++of the License, or (at your option) any later version.
++
++The GNU LIBICONV Library is distributed in the hope that it will be
++useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++Library General Public License for more details.
++
++You should have received a copy of the GNU Library General Public
++License along with the GNU LIBICONV Library; see the file COPYING.LIB.
++If not, write to the Free Software Foundation, Inc., 59 Temple Place -
++Suite 330, Boston, MA 02111-1307, USA.
++

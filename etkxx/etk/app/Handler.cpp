@@ -61,6 +61,7 @@ private:
 static ELocker etk_handler_operator_locker;
 static ETokensDepot handlers_depot(&etk_handler_operator_locker, false);
 
+
 _LOCAL ELocker* etk_get_handler_operator_locker()
 {
 	return &etk_handler_operator_locker;

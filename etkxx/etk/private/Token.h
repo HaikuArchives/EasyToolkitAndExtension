@@ -45,6 +45,7 @@ public:
 
 	euint64		Token() const;
 	e_bigtime_t	TimeStamp() const;
+	euint64		Vitalities() const;
 
 	void		*Data() const;
 	void		SetData(void *data);

@@ -292,11 +292,11 @@ int main(int argc, char **argv)
 	ETK_OUTPUT("===========================================\n");
 
 	ETK_OUTPUT("\n\n\n");	
-	ETK_OUTPUT("=============== msg->GetInfo ===============\n");
+	ETK_OUTPUT("=============== msg->BGetInfo ===============\n");
 	char *name;
 	euint32 type;
 	eint32 count;
-	for(eint32 i = 0; msg->GetInfo(E_ANY_TYPE, i, &name, &type, &count) == E_OK; i++)
+	for(eint32 i = 0; msg->BGetInfo(E_ANY_TYPE, i, &name, &type, &count) == E_OK; i++)
 	{
 		ETK_OUTPUT("[%I32i]: Name: \"%s\", type: \'%c%c%c%c\', count: %I32i\n",
 			   i, name,

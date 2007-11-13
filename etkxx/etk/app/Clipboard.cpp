@@ -37,7 +37,7 @@
 #include "Application.h"
 
 
-class _ESystemClipboard {
+class _LOCAL _ESystemClipboard {
 public:
 	ESimpleLocker fLocker;
 	EMessage fData;

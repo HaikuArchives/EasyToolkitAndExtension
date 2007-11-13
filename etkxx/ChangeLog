@@ -1,3 +1,8 @@
+2007-11-12  anthonylee
+	Fixed bugs in EApplication::Quit()/ELooper::Quit()/EMenu::~EMenu()
+	Renamed EMessage::GetInfo()/__FindData() to EMessage::BGetInfo()/BFindData()
+	ETokensDepot/EToken aren't ready for be stable yet ...
+
 2007-10-30  anthonylee
 	Added ETokensDepot/EToken to reduce memory using.
 	Corrected _LOCAL macro.

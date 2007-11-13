@@ -40,7 +40,7 @@
 
 class ESubmenuView;
 
-class ESubmenuWindow : public EWindow {
+class _LOCAL ESubmenuWindow : public EWindow {
 public:
 	ESubmenuWindow(EPoint where, EMenu *menu);
 	virtual ~ESubmenuWindow();
@@ -54,6 +54,8 @@ private:
 	friend class ESubmenuView;
 
 	EMenu *fMenu;
+
+	virtual bool IsDependsOnOthersWhenQuitRequested() const;
 };
 
 
@@ -1532,6 +1534,13 @@ ESubmenuWindow::~ESubmenuWindow()
 }
 
 
+bool
+ESubmenuWindow::IsDependsOnOthersWhenQuitRequested() const
+{
+	return true;
+}
+
+
 void
 ESubmenuWindow::DispatchMessage(EMessage *msg, EHandler *target)
 {
@@ -1627,7 +1636,15 @@ EMenu::ClosePopUp()
 
 		RemoveSelf();
 
-		win->PostMessage(E_QUIT_REQUESTED);
+		if(win->Thread() == etk_get_current_thread_id())
+		{
+			win->Lock();
+			win->Quit();
+		}
+		else
+		{
+			win->PostMessage(E_QUIT_REQUESTED);
+		}
 	}
 }
 

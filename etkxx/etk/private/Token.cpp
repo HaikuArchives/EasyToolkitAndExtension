@@ -70,7 +70,7 @@ ETokensDepotPrivateData::~ETokensDepotPrivateData()
 		for(eint32 i = 0; i < list->CountItems(); i++)
 		{
 			_etk_token_t *aToken = (_etk_token_t*)list->ItemAt(i);
-			free(aToken);
+			if(aToken != NULL) free(aToken);
 		}
 		delete list;
 	}
@@ -183,6 +183,8 @@ ETokensDepotPrivateData::TokenAt(euint64 token) const
 	if(index > (euint64)E_MAXINT32 - 1) return NULL;
 
 	EList *list = (EList*)ItemAt((eint32)index);
+	if(list == NULL) return NULL;
+
 	index = token & 0xffffffff;
 	return((_etk_token_t*)(list->ItemAt((eint32)index)));
 }
@@ -266,7 +268,7 @@ ETokensDepot::OpenToken(euint64 token, EToken *fetch_token)
 	}
 	else
 	{
-		ETK_WARNING("[PRIVATE]: %s --- fetch_token->fDepot != NULL\n", __PRETTY_FUNCTION__);
+		ETK_WARNING("[PRIVATE]: %s --- fetch_token isn't empty.\n", __PRETTY_FUNCTION__);
 	}
 
 	return aToken;
@@ -345,6 +347,26 @@ EToken::TimeStamp() const
 			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
 			_etk_token_t *aToken = depot_private->TokenAt(fToken);
 			if(aToken != NULL) retVal = aToken->time_stamp;
+			fDepot->Unlock();
+		}
+	}
+
+	return retVal;
+}
+
+
+euint64
+EToken::Vitalities() const
+{
+	euint64 retVal = 0;
+
+	if(fToken != E_MAXUINT64 && fDepot != NULL)
+	{
+		if(fDepot->Lock())
+		{
+			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
+			_etk_token_t *aToken = depot_private->TokenAt(fToken);
+			if(aToken != NULL) retVal = aToken->count;
 			fDepot->Unlock();
 		}
 	}

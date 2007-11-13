@@ -506,7 +506,7 @@ ELooper::Quit()
 
 	ELocker *hLocker = etk_get_handler_operator_locker();
 	hLocker->Lock();
-	if(etk_get_thread_id(fThread) == etk_get_current_thread_id())
+	if(etk_get_thread_id(fThread) == etk_get_current_thread_id() && Proxy() == this)
 		ETK_ERROR("\n\
 **************************************************************************\n\
 *                           [APP]: ELooper                               *\n\
