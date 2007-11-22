@@ -210,7 +210,7 @@ if test "$ac_cv_pkg_config_valid" != "yes"; then
 	AC_MSG_WARN("
                 pkg-config not found or which version less than 0.14,
 		some checking will ignore now. If something failed,
-		please update you pkg-config.")
+		please update your pkg-config.")
 fi
 AM_CONDITIONAL(ETK_INSTALL_PKG_CONFIG_FILES, [test "$ac_cv_pkg_config_valid" = "yes"])
 
