@@ -35,7 +35,7 @@
 
 
 struct _LOCAL _etk_token_t {
-	euint64 count;
+	euint64 vitalities;
 	e_bigtime_t time_stamp;
 	void *data;
 };
@@ -49,9 +49,6 @@ public:
 	euint64		AddToken(void *data);
 	void		RemoveToken(euint64 token);
 	_etk_token_t	*TokenAt(euint64 token) const;
-
-	bool		PushToken(euint64 token);
-	void		PopToken(euint64 token);
 };
 
 
@@ -70,7 +67,7 @@ ETokensDepotPrivateData::~ETokensDepotPrivateData()
 		for(eint32 i = 0; i < list->CountItems(); i++)
 		{
 			_etk_token_t *aToken = (_etk_token_t*)list->ItemAt(i);
-			if(aToken != NULL) free(aToken);
+			if(aToken != NULL) delete aToken;
 		}
 		delete list;
 	}
@@ -80,11 +77,8 @@ ETokensDepotPrivateData::~ETokensDepotPrivateData()
 euint64
 ETokensDepotPrivateData::AddToken(void *data)
 {
-	_etk_token_t *aToken = (_etk_token_t*)malloc(sizeof(_etk_token_t));
-
-	if(aToken == NULL) return E_MAXUINT64;
-
 	euint64 token = E_MAXUINT64;
+	_etk_token_t *aToken = new _etk_token_t;
 
 	EList *list = NULL;
 	for(eint32 i = 0; i < CountItems(); i++)
@@ -124,7 +118,7 @@ ETokensDepotPrivateData::AddToken(void *data)
 
 	if(token != E_MAXUINT64)
 	{
-		aToken->count = 1;
+		aToken->vitalities = 1;
 		aToken->time_stamp = e_system_time();
 		while(aToken->time_stamp == e_system_time())
 		{
@@ -134,7 +128,7 @@ ETokensDepotPrivateData::AddToken(void *data)
 	}
 	else
 	{
-		free(aToken);
+		delete aToken;
 	}
 
 	return token;
@@ -154,9 +148,9 @@ ETokensDepotPrivateData::RemoveToken(euint64 token)
 	_etk_token_t *aToken = (_etk_token_t*)(list->ItemAt((eint32)index));
 	if(aToken == NULL) return;
 
-	if(aToken->count > 1)
+	if(aToken->vitalities > 1)
 	{
-		aToken->count -= 1;
+		aToken->vitalities -= 1;
 		aToken->data = NULL;
 	}
 	else
@@ -171,7 +165,7 @@ ETokensDepotPrivateData::RemoveToken(euint64 token)
 			while(list->LastItem() == NULL && list->IsEmpty() == false) list->RemoveItem(list->CountItems() - 1);
 			if(list->IsEmpty() && LastItem() == (void*)list) delete	(EList*)RemoveItem(CountItems() - 1);
 		}
-		free(aToken);
+		delete aToken;
 	}
 }
 
@@ -190,28 +184,6 @@ ETokensDepotPrivateData::TokenAt(euint64 token) const
 }
 
 
-bool
-ETokensDepotPrivateData::PushToken(euint64 token)
-{
-	_etk_token_t *aToken = TokenAt(token);
-	if(aToken == NULL || aToken->count == E_MAXUINT64) return false;
-	aToken->count += 1;
-	return true;
-}
-
-
-void
-ETokensDepotPrivateData::PopToken(euint64 token)
-{
-	_etk_token_t *aToken = TokenAt(token);
-	if(!(aToken == NULL || aToken->count == 0))
-	{
-		aToken->count -= 1;
-		if(aToken->count == 0) RemoveToken(token);
-	}
-}
-
-
 ETokensDepot::ETokensDepot(ELocker *locker, bool deconstruct_locker)
 	: fLocker(locker), fDeconstructLocker(deconstruct_locker)
 {
@@ -221,6 +193,7 @@ ETokensDepot::ETokensDepot(ELocker *locker, bool deconstruct_locker)
 
 ETokensDepot::~ETokensDepot()
 {
+	fToken.fDepot = NULL;
 	delete reinterpret_cast<ETokensDepotPrivateData*>(fData);
 	if(fDeconstructLocker && fLocker != NULL) delete fLocker;
 }
@@ -233,12 +206,15 @@ ETokensDepot::CreateToken(void *data)
 
 	if(Lock())
 	{
-		euint64 token = (reinterpret_cast<ETokensDepotPrivateData*>(fData))->AddToken(data);
-		if(token != E_MAXUINT64)
+		ETokensDepotPrivateData *private_data = reinterpret_cast<ETokensDepotPrivateData*>(fData);
+		euint64 token = private_data->AddToken(data);
+		_etk_token_t *_token = private_data->TokenAt(token);
+		if(_token != NULL)
 		{
 			aToken = new EToken();
 			aToken->fOriginal = true;
 			aToken->fToken = token;
+			aToken->fTimeStamp = _token->time_stamp;
 			aToken->fDepot = this;
 		}
 		Unlock();
@@ -257,10 +233,14 @@ ETokensDepot::OpenToken(euint64 token, EToken *fetch_token)
 	{
 		if(Lock())
 		{
-			if((reinterpret_cast<ETokensDepotPrivateData*>(fData))->PushToken(token))
+			ETokensDepotPrivateData *private_data = reinterpret_cast<ETokensDepotPrivateData*>(fData);
+			_etk_token_t *_token = private_data->TokenAt(token);
+			if(!(_token == NULL || _token->vitalities == E_MAXUINT64))
 			{
+				_token->vitalities += 1;
 				aToken = (fetch_token != NULL ? fetch_token : new EToken());
 				aToken->fToken = token;
+				aToken->fTimeStamp = _token->time_stamp;
 				aToken->fDepot = this;
 			}
 			Unlock();
@@ -275,37 +255,37 @@ ETokensDepot::OpenToken(euint64 token, EToken *fetch_token)
 }
 
 
-bool
-ETokensDepot::PushToken(euint64 token)
+EToken*
+ETokensDepot::FetchToken(euint64 token)
 {
-	bool retVal = false;
+	if(fLocker == NULL || fLocker->IsLockedByCurrentThread() == false)
+		ETK_ERROR("[PRIVATE]: %s --- Invalid operation", __PRETTY_FUNCTION__);
 
-	if(Lock())
-	{
-		retVal = (reinterpret_cast<ETokensDepotPrivateData*>(fData))->PushToken(token);
-		Unlock();
-	}
+	ETokensDepotPrivateData *private_data = reinterpret_cast<ETokensDepotPrivateData*>(fData);
+	_etk_token_t *_token = private_data->TokenAt(token);
+	if(_token == NULL) return NULL;
 
-	return retVal;
+	fToken.fToken = token;
+	fToken.fTimeStamp = _token->time_stamp;
+	fToken.fDepot = this;
+
+	return(&fToken);
 }
 
 
 void
-ETokensDepot::PopToken(euint64 token)
+ETokensDepot::SetLocker(ELocker *locker, bool deconstruct_locker)
 {
-	if(Lock())
-	{
-		(reinterpret_cast<ETokensDepotPrivateData*>(fData))->PopToken(token);
-		Unlock();
-	}
+	if(fLocker != NULL && fDeconstructLocker) delete fLocker;
+	fLocker = locker;
+	fDeconstructLocker = deconstruct_locker;
 }
 
 
 bool
 ETokensDepot::Lock()
 {
-	if(fLocker == NULL) return true;
-	return fLocker->Lock();
+	return(fLocker == NULL ? true : fLocker->Lock());
 }
 
 
@@ -317,7 +297,7 @@ ETokensDepot::Unlock()
 
 
 EToken::EToken()
-	: fOriginal(false), fToken(E_MAXUINT64), fDepot(NULL)
+	: fOriginal(false), fToken(E_MAXUINT64), fTimeStamp(E_MAXINT64), fDepot(NULL)
 {
 }
 
@@ -325,6 +305,23 @@ EToken::EToken()
 EToken::~EToken()
 {
 	MakeEmpty();
+}
+
+
+bool
+EToken::IsValid() const
+{
+	bool retVal = false;
+
+	if(!(fToken == E_MAXUINT64 || fDepot == NULL || fDepot->Lock() == false))
+	{
+		ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
+		_etk_token_t *aToken = depot_private->TokenAt(fToken);
+		if(!(aToken == NULL || aToken->time_stamp != fTimeStamp)) retVal = true;
+		fDepot->Unlock();
+	}
+
+	return retVal;
 }
 
 
@@ -338,20 +335,67 @@ EToken::Token() const
 e_bigtime_t
 EToken::TimeStamp() const
 {
-	e_bigtime_t retVal = E_MAXINT64;
+	return fTimeStamp;
+}
 
-	if(fToken != E_MAXUINT64 && fDepot != NULL)
+
+EToken&
+EToken::operator+=(euint64 vitalities)
+{
+	if(fToken == E_MAXUINT64 || fDepot == NULL) ETK_ERROR("[PRIVATE]: %s --- Invalid operation.", __PRETTY_FUNCTION__);
+	if(fDepot->Lock() == false) ETK_ERROR("[PRIVATE]: %s --- Unable to lock depot.", __PRETTY_FUNCTION__);
+	if(IsValid() == false) ETK_ERROR("[PRIVATE]: %s --- Invalid token.", __PRETTY_FUNCTION__);
+
+	ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
+	_etk_token_t *aToken = depot_private->TokenAt(fToken);
+	if(aToken->vitalities > E_MAXUINT64 - vitalities) ETK_ERROR("[PRIVATE]: %s --- Invalid vitalities.", __PRETTY_FUNCTION__);
+	aToken->vitalities += vitalities;
+
+	fDepot->Unlock();
+
+	return *this;
+}
+
+
+EToken&
+EToken::operator-=(euint64 vitalities)
+{
+	if(fToken == E_MAXUINT64 || fDepot == NULL) ETK_ERROR("[PRIVATE]: %s --- Invalid operation.", __PRETTY_FUNCTION__);
+	if(fDepot->Lock() == false) ETK_ERROR("[PRIVATE]: %s --- Unable to lock depot.", __PRETTY_FUNCTION__);
+	if(IsValid() == false) ETK_ERROR("[PRIVATE]: %s --- Invalid token.", __PRETTY_FUNCTION__);
+
+	ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
+	_etk_token_t *aToken = depot_private->TokenAt(fToken);
+	if(aToken->vitalities < vitalities) ETK_ERROR("[PRIVATE]: %s --- Invalid vitalities.", __PRETTY_FUNCTION__);
+	if((aToken->vitalities -= vitalities) == 0)
 	{
-		if(fDepot->Lock())
-		{
-			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
-			_etk_token_t *aToken = depot_private->TokenAt(fToken);
-			if(aToken != NULL) retVal = aToken->time_stamp;
-			fDepot->Unlock();
-		}
+		depot_private->RemoveToken(fToken);
+		fDepot->Unlock();
+		fOriginal = false;
+		fToken = E_MAXUINT64;
+		fTimeStamp = E_MAXINT64;
+		fDepot = NULL;
+	}
+	else
+	{
+		fDepot->Unlock();
 	}
 
-	return retVal;
+	return *this;
+}
+
+
+EToken&
+EToken::operator++()
+{
+	return operator+=(1);
+}
+
+
+EToken&
+EToken::operator--()
+{
+	return operator-=(1);
 }
 
 
@@ -360,15 +404,14 @@ EToken::Vitalities() const
 {
 	euint64 retVal = 0;
 
-	if(fToken != E_MAXUINT64 && fDepot != NULL)
+	if(!(fToken == E_MAXUINT64 || fDepot == NULL || fDepot->Lock() == false))
 	{
-		if(fDepot->Lock())
+		if(IsValid())
 		{
 			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
-			_etk_token_t *aToken = depot_private->TokenAt(fToken);
-			if(aToken != NULL) retVal = aToken->count;
-			fDepot->Unlock();
+			retVal = depot_private->TokenAt(fToken)->vitalities;
 		}
+		fDepot->Unlock();
 	}
 
 	return retVal;
@@ -380,15 +423,14 @@ EToken::Data() const
 {
 	void *retVal = NULL;
 
-	if(fToken != E_MAXUINT64 && fDepot != NULL)
+	if(!(fToken == E_MAXUINT64 || fDepot == NULL || fDepot->Lock() == false))
 	{
-		if(fDepot->Lock())
+		if(IsValid())
 		{
 			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
-			_etk_token_t *aToken = depot_private->TokenAt(fToken);
-			if(aToken != NULL) retVal = aToken->data;
-			fDepot->Unlock();
+			retVal = depot_private->TokenAt(fToken)->data;
 		}
+		fDepot->Unlock();
 	}
 
 	return retVal;
@@ -398,13 +440,13 @@ EToken::Data() const
 void
 EToken::SetData(void *data)
 {
-	if(fOriginal == false || fToken == E_MAXUINT64 || fDepot == NULL) return;
-
-	if(fDepot->Lock())
+	if(!(fOriginal == false || fToken == E_MAXUINT64 || fDepot == NULL || fDepot->Lock() == false))
 	{
-		ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
-		_etk_token_t *aToken = depot_private->TokenAt(fToken);
-		if(aToken != NULL) aToken->data = data;
+		if(IsValid())
+		{
+			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
+			depot_private->TokenAt(fToken)->data = data;
+		}
 		fDepot->Unlock();
 	}
 }
@@ -420,20 +462,22 @@ EToken::Depot() const
 void
 EToken::MakeEmpty()
 {
-	if(fToken != E_MAXUINT64 && fDepot != NULL)
+	if(!(fToken == E_MAXUINT64 || fDepot == NULL || fDepot->Lock() == false))
 	{
-		if(fDepot->Lock())
+		if(IsValid())
 		{
 			ETokensDepotPrivateData *depot_private = reinterpret_cast<ETokensDepotPrivateData*>(fDepot->fData);
 			if(fOriginal)
 				depot_private->RemoveToken(fToken);
 			else
-				depot_private->PopToken(fToken);
-			fDepot->Unlock();
+				operator--();
 		}
+		fDepot->Unlock();
 	}
 
+	fOriginal = false;
 	fToken = E_MAXUINT64;
+	fTimeStamp = E_MAXINT64;
 	fDepot = NULL;
 }
 

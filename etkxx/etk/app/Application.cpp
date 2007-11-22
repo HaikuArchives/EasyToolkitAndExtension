@@ -130,6 +130,9 @@ EApplication::~EApplication()
 		delete tMsgr;
 	}
 	fModalWindows.MakeEmpty();
+
+	etk_clipboard.StopWatching(etk_app_messenger);
+
 	hLocker->Unlock();
 }
 

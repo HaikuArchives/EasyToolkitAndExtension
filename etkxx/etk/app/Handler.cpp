@@ -76,10 +76,19 @@ _LOCAL euint64 etk_get_handler_token(const EHandler *handler)
 
 _LOCAL euint64 etk_get_ref_handler_token(const EHandler *handler)
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
+	euint64 retVal = E_MAXUINT64;
 
-	euint64 token = etk_get_handler_token(handler);
-	return(handlers_depot.PushToken(token) ? token : E_MAXUINT64);
+	EAutolock <ETokensDepot>autolock(handlers_depot);
+
+	EToken *aToken = handlers_depot.FetchToken(etk_get_handler_token(handler));
+	if(aToken != NULL)
+	{
+		euint64 vitalities = aToken->Vitalities();
+		*aToken += 1;
+		if(aToken->Vitalities() != vitalities) retVal = aToken->Token();
+	}
+
+	return retVal;
 }
 
 
@@ -182,13 +191,28 @@ _LOCAL bool etk_is_current_at_looper_thread(euint64 token)
 
 _LOCAL bool etk_ref_handler(euint64 token)
 {
-	return handlers_depot.PushToken(token);
+	bool retVal = false;
+
+	EAutolock <ETokensDepot>autolock(handlers_depot);
+
+	EToken *aToken = handlers_depot.FetchToken(token);
+	if(aToken != NULL)
+	{
+		euint64 vitalities = aToken->Vitalities();
+		aToken->operator++();
+		if(aToken->Vitalities() != vitalities) retVal = true;
+	}
+
+	return retVal;
 }
 
 
 _LOCAL void etk_unref_handler(euint64 token)
 {
-	handlers_depot.PopToken(token);
+	EAutolock <ETokensDepot>autolock(handlers_depot);
+
+	EToken *aToken = handlers_depot.FetchToken(token);
+	if(aToken != NULL) aToken->operator--();
 }
 
 

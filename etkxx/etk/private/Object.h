@@ -23,84 +23,34 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * File: Token.h
+ * File: Object.h
  *
  * --------------------------------------------------------------------------*/
 
-#ifndef __ETK_PRIVATE_TOKEN_H__
-#define __ETK_PRIVATE_TOKEN_H__
+#ifndef __ETK_PRIVATE_OBJECT_H__
+#define __ETK_PRIVATE_OBJECT_H__
 
-#include <etk/support/Locker.h>
+#include <etk/support/SupportDefs.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
-
-class ETokensDepot;
-
-
-class _LOCAL EToken {
+class _LOCAL EObject
+{
 public:
-	EToken();
-	~EToken();
+	EObject();
+	virtual ~EObject();
 
-	bool		IsValid() const;
-	euint64		Token() const;
-	e_bigtime_t	TimeStamp() const;
-
-	EToken		&operator+=(euint64 vitalities);
-	EToken		&operator-=(euint64 vitalities);
-	EToken		&operator++();
-	EToken		&operator--();
+	EObject		&operator+=(euint64 vitalities);
+	EObject		&operator-=(euint64 vitalities);
+	EObject		&operator++();
+	EObject		&operator--();
 	euint64		Vitalities() const;
 
-	void		*Data() const;
-	void		SetData(void *data);
-
-	ETokensDepot	*Depot() const;
-	void		MakeEmpty();
-
 private:
-	friend class ETokensDepot;
-
-	bool fOriginal;
-	euint64 fToken;
-	e_bigtime_t fTimeStamp;
-
-	ETokensDepot *fDepot;
+	euint64 fVitalities;
 };
-
-
-class _LOCAL ETokensDepot {
-public:
-	ETokensDepot(ELocker *locker = NULL,
-		     bool deconstruct_locker = false);
-	virtual ~ETokensDepot();
-
-	// CreateToken : return a new allocated object
-	EToken		*CreateToken(void *data = NULL);
-	// OpenToken : return an allocated object associated with "token" when "fetch_token = NULL"
-	EToken		*OpenToken(euint64 token, EToken *fetch_token = NULL);
-	// FetchToken : return the static object associated with "token", it should be called within Lock()/Unlock()
-	EToken		*FetchToken(euint64 token);
-
-	void		SetLocker(ELocker *locker, bool deconstruct_locker);
-	ELocker		*Locker() const;
-
-	bool		Lock();
-	void		Unlock();
-
-private:
-	friend class EToken;
-
-	ELocker *fLocker;
-	bool fDeconstructLocker;
-	EToken fToken;
-
-	void *fData;
-};
-
 
 #endif /* __cplusplus */
 
-#endif /* __ETK_PRIVATE_TOKEN_H__ */
+#endif /* __ETK_PRIVATE_OBJECT_H__ */
 
