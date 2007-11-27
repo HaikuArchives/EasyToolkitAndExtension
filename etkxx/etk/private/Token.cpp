@@ -92,28 +92,32 @@ ETokensDepotPrivateData::AddToken(void *data)
 		token = ((euint64)i << 32) | (euint64)(list->CountItems() - 1);
 	}
 
-	if(list == NULL && CountItems() < E_MAXINT32 - 1)
+	if(token == E_MAXUINT64)
 	{
-		if(AddItem(list = new EList()) == false || list->AddItem(aToken) == false)
+		if(CountItems() < E_MAXINT32 - 1)
 		{
-			delete list;
+			if(AddItem(list = new EList()) == false || list->AddItem(aToken) == false)
+			{
+				RemoveItem(list);
+				delete list;
+			}
+			else
+			{
+				token = ((euint64)(CountItems() - 1) << 32) | (euint64)(list->CountItems() - 1);
+			}
 		}
-		else
+		else for(eint32 i = 0; i < CountItems(); i++)
 		{
-			token = ((euint64)(CountItems() - 1) << 32) | (euint64)(list->CountItems() - 1);
+			list = (EList*)ItemAt(i);
+			eint32 index = list->IndexOf(NULL);
+			if(index < 0)
+			{
+				list = NULL;
+				continue;
+			}
+			list->ReplaceItem(index, aToken);
+			token = ((euint64)i << 32) | (euint64)index;
 		}
-	}
-	else for(eint32 i = 0; i < CountItems(); i++)
-	{
-		list = (EList*)ItemAt(i);
-		eint32 index = list->IndexOf(NULL);
-		if(index < 0)
-		{
-			list = NULL;
-			continue;
-		}
-		list->ReplaceItem(index, aToken);
-		token = ((euint64)i << 32) | (euint64)index;
 	}
 
 	if(token != E_MAXUINT64)
@@ -163,7 +167,10 @@ ETokensDepotPrivateData::RemoveToken(euint64 token)
 		{
 			list->RemoveItem((eint32)index);
 			while(list->LastItem() == NULL && list->IsEmpty() == false) list->RemoveItem(list->CountItems() - 1);
-			if(list->IsEmpty() && LastItem() == (void*)list) delete	(EList*)RemoveItem(CountItems() - 1);
+			for(; !(list == NULL || LastItem() != (void*)list || list->IsEmpty() == false); list = (EList*)LastItem())
+			{
+				delete (EList*)RemoveItem(CountItems() - 1);
+			}
 		}
 		delete aToken;
 	}

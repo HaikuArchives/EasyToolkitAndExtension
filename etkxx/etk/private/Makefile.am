@@ -15,7 +15,9 @@ libetk_private_la_SOURCES =	\
 		Object.cpp	\
 		Object.h	\
 		Token.cpp	\
-		Token.h
+		Token.h		\
+		Application.cpp	\
+		Application.h
 
 DISTCLEANFILES =	\
 	Makefile.in

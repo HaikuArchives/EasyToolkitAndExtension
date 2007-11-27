@@ -33,6 +33,8 @@
 #include <etk/support/Locker.h>
 #include <etk/kernel/Kernel.h>
 #include <etk/app/Application.h>
+#include <etk/private/Application.h>
+
 
 HINSTANCE etk_dll_hinstance = NULL;
 
@@ -54,6 +56,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 			WSADATA wsaData;
 			WSAStartup(0x202, &wsaData);
 			etk_system_boot_time();
+			EApplicationConnector::Init();
 			break;
 		}
 
@@ -67,6 +70,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 		/* The DLL unmapped from process's address space. Do necessary cleanup */
 		{
 			WSACleanup();
+			EApplicationConnector::Quit();
 			break;
 		}
 

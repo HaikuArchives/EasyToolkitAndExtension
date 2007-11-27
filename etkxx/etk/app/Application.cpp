@@ -132,6 +132,7 @@ EApplication::~EApplication()
 	fModalWindows.MakeEmpty();
 
 	etk_clipboard.StopWatching(etk_app_messenger);
+	etk_app_messenger = EMessenger();
 
 	hLocker->Unlock();
 }

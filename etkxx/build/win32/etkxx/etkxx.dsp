@@ -279,6 +279,18 @@ SOURCE=..\..\..\etk\interface\Window.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\etk\private\Application.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\Memory.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\Object.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\etk\private\Token.cpp
 # End Source File
 # End Group

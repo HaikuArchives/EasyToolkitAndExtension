@@ -226,6 +226,36 @@
 				Name="private"
 				>
 				<File
+					RelativePath="..\..\..\etk\private\Application.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\private\Memory.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\private\Object.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\etk\private\Token.cpp"
 					>
 				</File>
@@ -702,6 +732,18 @@
 			<Filter
 				Name="private"
 				>
+				<File
+					RelativePath="..\..\..\etk\private\Application.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\private\Memory.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\private\Object.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\..\etk\private\Token.h"
 					>
