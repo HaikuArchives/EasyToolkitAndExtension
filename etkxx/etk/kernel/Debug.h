@@ -48,9 +48,9 @@
 #endif
 
 #ifndef __PRETTY_FUNCTION__
-//#ifndef __GNUC__
+#ifndef __GNUC__
 #define __PRETTY_FUNCTION__	__FUNCTION__
-//#endif /* __GNUC__ */
+#endif /* __GNUC__ */
 #endif /* __PRETTY_FUNCTION__ */
 
 #ifdef __cplusplus
@@ -67,7 +67,7 @@ typedef enum etk_debug_level {
 _IMPEXP_ETK void etk_debug_log(etk_debug_level level, const char *format, va_list ap);
 
 #ifndef ETK_DEBUG
-#if defined(ETK_DISABLE_MORE_CHECKS)
+#ifdef ETK_DISABLE_MORE_CHECKS
 #	if __GNUC__ >= 3 || defined(__INTEL_COMPILER)
 #		define ETK_DEBUG(...)				(void)0
 #	else
@@ -87,7 +87,7 @@ _IMPEXP_ETK void ETK_DEBUG(const char *format, ...);
 _IMPEXP_ETK void ETK_OUTPUT(const char *format, ...);
 
 #ifndef ETK_WARNING
-#if defined(ETK_DISABLE_CHECKS)
+#ifdef ETK_DISABLE_CHECKS
 #	if __GNUC__ >= 3 || defined(__INTEL_COMPILER)
 #		define ETK_WARNING(...)				(void)0
 #	else

@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -23,51 +23,32 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * File: MessageQueue.h
- * Description: The first-in/first-out queue of messages for Looper
+ * File: PrivateHandler.h
  *
  * --------------------------------------------------------------------------*/
 
-#ifndef __ETK_MESSAGE_QUEUE_H__
-#define __ETK_MESSAGE_QUEUE_H__
+#ifndef __ETK_PRIVATE_HANDLER_H__
+#define __ETK_PRIVATE_HANDLER_H__
 
-#include <etk/support/List.h>
-#include <etk/app/Message.h>
+#include <etk/support/SupportDefs.h>
+#include <etk/support/Locker.h>
+#include <etk/app/Looper.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
-class _IMPEXP_ETK EMessageQueue {
-public:
-	EMessageQueue();
-	virtual ~EMessageQueue();
-
-	// add "an_event" to the queue and delete it automatically when FAILED
-	bool		AddMessage(EMessage *an_event);
-
-	// remove "an_event" from the queue and delete it automatically when FOUNDED
-	bool		RemoveMessage(EMessage *an_event);
-
-	// return the FIRST message and detach from the queue, you should "delete" by yourself
-	EMessage	*NextMessage();
-
-	EMessage	*FindMessage(eint32 index) const;
-	EMessage	*FindMessage(euint32 what, eint32 fromIndex = 0) const;
-	EMessage	*FindMessage(euint32 what, eint32 fromIndex, eint32 count) const;
-	eint32		IndexOfMessage(EMessage *an_event) const;
-
-	eint32		CountMessages() const;
-	bool		IsEmpty() const;
-
-	bool		Lock();
-	void		Unlock();
-	e_status_t	LockWithTimeout(e_bigtime_t microseconds_timeout);
-
-private:
-	EList fMessagesList;
-	void *fLocker;
-};
+_LOCAL ELocker* etk_get_handler_operator_locker();
+_LOCAL euint64 etk_get_handler_token(const EHandler *handler);
+_LOCAL euint64 etk_get_ref_handler_token(const EHandler *handler);
+_LOCAL EHandler* etk_get_handler(euint64 token);
+_LOCAL e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
+_LOCAL ELooper* etk_get_handler_looper(euint64 token);
+_LOCAL euint64 etk_get_ref_looper_token(euint64 token);
+_LOCAL e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout);
+_LOCAL bool etk_is_current_at_looper_thread(euint64 token);
+_LOCAL bool etk_ref_handler(euint64 token);
+_LOCAL void etk_unref_handler(euint64 token);
 
 #endif /* __cplusplus */
 
-#endif /* __ETK_MESSAGE_QUEUE_H__ */
+#endif /* __ETK_PRIVATE_HANDLER_H__ */
 

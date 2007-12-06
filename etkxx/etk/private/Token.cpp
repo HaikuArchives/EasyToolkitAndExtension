@@ -265,7 +265,7 @@ ETokensDepot::OpenToken(euint64 token, EToken *fetch_token)
 EToken*
 ETokensDepot::FetchToken(euint64 token)
 {
-	if(fLocker == NULL || fLocker->IsLockedByCurrentThread() == false)
+	if(!(fLocker == NULL || fLocker->IsLockedByCurrentThread()))
 		ETK_ERROR("[PRIVATE]: %s --- Invalid operation", __PRETTY_FUNCTION__);
 
 	ETokensDepotPrivateData *private_data = reinterpret_cast<ETokensDepotPrivateData*>(fData);
@@ -286,6 +286,13 @@ ETokensDepot::SetLocker(ELocker *locker, bool deconstruct_locker)
 	if(fLocker != NULL && fDeconstructLocker) delete fLocker;
 	fLocker = locker;
 	fDeconstructLocker = deconstruct_locker;
+}
+
+
+ELocker*
+ETokensDepot::Locker() const
+{
+	return fLocker;
 }
 
 

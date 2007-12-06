@@ -218,4 +218,3 @@ enum {
 
 #endif /* __ETK_SUPPORT_DEFS_H__ */
 
-

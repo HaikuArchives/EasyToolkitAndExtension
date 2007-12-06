@@ -96,5 +96,3 @@ private:
 
 #endif /* __ETK_INVOKER_H__ */
 
-
-

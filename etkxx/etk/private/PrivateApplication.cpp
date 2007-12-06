@@ -23,14 +23,14 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * File: Application.cpp
+ * File: PrivateApplication.cpp
  *
  * --------------------------------------------------------------------------*/
 
 #include <etk/kernel/OS.h>
 #include <etk/support/String.h>
 
-#include "Application.h"
+#include "PrivateApplication.h"
 
 
 EApplicationConnector *etk_app_connector = NULL;
@@ -48,9 +48,13 @@ EApplicationConnector::EApplicationConnector()
 	if((fPort = etk_create_port(10, port_name.String())) == NULL)
 		ETK_ERROR("[PRIVATE]: %s --- Unable to create port.", __PRETTY_FUNCTION__);
 
-	if((fThread = etk_create_thread(this->task, E_NORMAL_PRIORITY, reinterpret_cast<void*>(this), NULL)) == NULL ||
-	    etk_resume_thread(fThread) != E_OK)
+	if((fThread = etk_create_thread(this->task, E_NORMAL_PRIORITY, reinterpret_cast<void*>(this), NULL)) == NULL)
 		ETK_ERROR("[PRIVATE]: %s --- Unable to create thread.", __PRETTY_FUNCTION__);
+
+	fHandlersDepot = new ETokensDepot(new ELocker(), true);
+
+	if(etk_resume_thread(fThread) != E_OK)
+		ETK_ERROR("[PRIVATE]: %s --- Unable to resume thread.", __PRETTY_FUNCTION__);
 }
 
 
@@ -66,6 +70,8 @@ EApplicationConnector::~EApplicationConnector()
 #endif
 
 	etk_delete_port(fPort);
+
+	delete fHandlersDepot;
 }
 
 
@@ -114,6 +120,13 @@ EApplicationConnector::task(void *data)
 }
 
 
+ETokensDepot*
+EApplicationConnector::HandlersDepot() const
+{
+	return fHandlersDepot;
+}
+
+
 void
 EApplicationConnector::Init()
 {
@@ -126,4 +139,20 @@ EApplicationConnector::Quit()
 {
 	delete etk_app_connector;
 }
+
+
+class _LOCAL EApplicationInitializer {
+public:
+	EApplicationInitializer()
+	{
+		EApplicationConnector::Init();
+	}
+
+	~EApplicationInitializer()
+	{
+		EApplicationConnector::Quit();
+	}
+};
+
+static EApplicationInitializer _etk_app_initializer;
 

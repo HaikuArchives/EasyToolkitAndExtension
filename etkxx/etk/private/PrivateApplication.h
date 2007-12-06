@@ -23,7 +23,7 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * File: Application.h
+ * File: PrivateApplication.h
  *
  * --------------------------------------------------------------------------*/
 
@@ -31,6 +31,7 @@
 #define __ETK_PRIVATE_APPLICATION_H__
 
 #include <etk/support/SimpleLocker.h>
+#include <etk/private/Token.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
@@ -43,14 +44,17 @@ public:
 	bool		Lock();
 	void		Unlock();
 
+	ETokensDepot	*HandlersDepot() const;
+
 	static void	Init();
 	static void	Quit();
 
 private:
 	ESimpleLocker fLocker;
 	void *fPort;
-
 	void *fThread;
+	ETokensDepot *fHandlersDepot;
+
 	static e_status_t task(void*);
 };
 

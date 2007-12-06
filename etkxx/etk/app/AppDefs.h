@@ -93,4 +93,3 @@ enum {
 
 #endif /* __ETK_APPDEFS_H__ */
 
-

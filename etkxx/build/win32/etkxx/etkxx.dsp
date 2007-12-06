@@ -279,7 +279,11 @@ SOURCE=..\..\..\etk\interface\Window.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\etk\private\Application.cpp
+SOURCE=..\..\..\etk\private\PrivateApplication.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\PrivateHandler.cpp
 # End Source File
 # Begin Source File
 
@@ -540,6 +544,22 @@ SOURCE=..\..\..\etk\ETKBuild.cpp
 # Begin Source File
 
 SOURCE=..\..\..\etk\private\Token.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\Memory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\Object.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\PrivateApplication.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\PrivateHandler.h
 # End Source File
 # End Group
 # Begin Group "SupportKit"

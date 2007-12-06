@@ -32,9 +32,9 @@
 #include <etk/support/List.h>
 #include <etk/support/Locker.h>
 #include <etk/support/Autolock.h>
-#include <etk/support/ClassInfo.h>
 
-#include <etk/private/Token.h>
+#include <etk/private/PrivateApplication.h>
+#include <etk/private/PrivateHandler.h>
 
 #include "Handler.h"
 #include "Looper.h"
@@ -42,7 +42,7 @@
 #include "MessageFilter.h"
 
 
-class _EObserverList {
+class _LOCAL _EObserverList {
 public:
 	_EObserverList();
 	~_EObserverList();
@@ -58,198 +58,40 @@ private:
 };
 
 
-static ELocker etk_handler_operator_locker;
-static ETokensDepot handlers_depot(&etk_handler_operator_locker, false);
-
-
-_LOCAL ELocker* etk_get_handler_operator_locker()
-{
-	return &etk_handler_operator_locker;
-}
-
-
-_LOCAL euint64 etk_get_handler_token(const EHandler *handler)
-{
-	return((handler == NULL || handler->fToken == NULL) ? E_MAXUINT64 : handler->fToken->Token());
-}
-
-
-_LOCAL euint64 etk_get_ref_handler_token(const EHandler *handler)
-{
-	euint64 retVal = E_MAXUINT64;
-
-	EAutolock <ETokensDepot>autolock(handlers_depot);
-
-	EToken *aToken = handlers_depot.FetchToken(etk_get_handler_token(handler));
-	if(aToken != NULL)
-	{
-		euint64 vitalities = aToken->Vitalities();
-		*aToken += 1;
-		if(aToken->Vitalities() != vitalities) retVal = aToken->Token();
-	}
-
-	return retVal;
-}
-
-
-_LOCAL EHandler* etk_get_handler(euint64 token)
-{
-	EHandler *retVal = NULL;
-
-	EToken *aToken = handlers_depot.OpenToken(token);
-	if(aToken != NULL)
-	{
-		retVal = reinterpret_cast<EHandler*>(aToken->Data());
-		delete aToken;
-	}
-
-	return retVal;
-}
-
-
-_LOCAL e_bigtime_t etk_get_handler_create_time_stamp(euint64 token)
-{
-	e_bigtime_t retVal = E_MAXINT64;
-
-	EToken *aToken = handlers_depot.OpenToken(token);
-	if(aToken != NULL)
-	{
-		retVal = aToken->TimeStamp();
-		delete aToken;
-	}
-
-	return retVal;
-}
-
-
-_LOCAL ELooper* etk_get_handler_looper(euint64 token)
-{
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-
-	EHandler *handler = etk_get_handler(token);
-	return(handler == NULL ? NULL : handler->fLooper);
-}
-
-
-_LOCAL euint64 etk_get_ref_looper_token(euint64 token)
-{
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-
-	EHandler *handler = etk_get_handler(token);
-	return(handler == NULL ? E_MAXUINT64 : etk_get_ref_handler_token(handler->fLooper));
-}
-
-
-_LOCAL e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout)
-{
-	e_status_t retVal = E_ERROR;
-
-	etk_handler_operator_locker.Lock();
-	ELooper *looper = etk_get_handler_looper(token);
-	ELooper *looper_proxy = (looper != NULL ? looper->_Proxy() : NULL);
-	void *locker = ((looper == NULL || looper->fLocker == NULL) ? NULL : etk_clone_locker(looper->fLocker));
-	eint64 locksCount = etk_handler_operator_locker.CountLocks();
-	while(etk_handler_operator_locker.CountLocks() > E_INT64_CONSTANT(0)) etk_handler_operator_locker.Unlock();
-
-	if(locker)
-	{
-		if((retVal = etk_lock_locker_etc(locker, E_TIMEOUT, timeout)) == E_OK)
-		{
-			etk_handler_operator_locker.Lock();
-
-			if(looper != etk_get_handler_looper(token) || looper_proxy != looper->_Proxy()) retVal = E_ERROR;
-
-			if(locksCount > E_INT64_CONSTANT(1))
-				locksCount--;
-			else
-				etk_handler_operator_locker.Unlock();
-
-			if(retVal != E_OK) etk_unlock_locker(locker);
-		}
-
-		etk_delete_locker(locker);
-	}
-
-	while(locksCount > E_INT64_CONSTANT(1)) {etk_handler_operator_locker.Lock(); locksCount--;}
-
-	return retVal;
-}
-
-
-_LOCAL bool etk_is_current_at_looper_thread(euint64 token)
-{
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-
-	ELooper *looper = e_cast_as(etk_get_handler(token), ELooper);
-	if(looper == NULL) return false;
-
-	bool retVal = (looper->Thread() == etk_get_current_thread_id() ? true : false);
-
-	return retVal;
-}
-
-
-_LOCAL bool etk_ref_handler(euint64 token)
-{
-	bool retVal = false;
-
-	EAutolock <ETokensDepot>autolock(handlers_depot);
-
-	EToken *aToken = handlers_depot.FetchToken(token);
-	if(aToken != NULL)
-	{
-		euint64 vitalities = aToken->Vitalities();
-		aToken->operator++();
-		if(aToken->Vitalities() != vitalities) retVal = true;
-	}
-
-	return retVal;
-}
-
-
-_LOCAL void etk_unref_handler(euint64 token)
-{
-	EAutolock <ETokensDepot>autolock(handlers_depot);
-
-	EToken *aToken = handlers_depot.FetchToken(token);
-	if(aToken != NULL) aToken->operator--();
-}
-
-
 EHandler::EHandler(const char *name)
 	: EArchivable(),
-	  fName(NULL),
 	  fLooper(NULL),
-	  forceSetNextHandler(false), fNextHandler(NULL)
+	  fPrevHandler(NULL), fNextHandler(NULL),
+	  fObserverList(NULL), fFilters(NULL)
 {
 	fName = EStrdup(name);
-	fToken = handlers_depot.CreateToken(reinterpret_cast<void*>(this));
-	fObserverList = new _EObserverList();
+	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
+	fObserverList = reinterpret_cast<void*>(new _EObserverList());
 }
 
 
 EHandler::~EHandler()
 {
-	while(fFilters.CountItems() > 0)
-	{
-		EMessageFilter *filter = (EMessageFilter*)fFilters.ItemAt(0);
-		EHandler::RemoveFilter(filter);
-		delete filter;
-	}
+	EHandler::SetFilterList(NULL);
 
 	if(fName != NULL) delete[] fName;
 	if(fToken != NULL) delete fToken;
-	delete fObserverList;
+	if(fObserverList != NULL) delete reinterpret_cast<_EObserverList*>(fObserverList);
 }
 
 
 EHandler::EHandler(const EMessage *from)
 	: EArchivable(from),
-	  fName(NULL),
 	  fLooper(NULL),
-	  forceSetNextHandler(false), fNextHandler(NULL)
+	  fPrevHandler(NULL), fNextHandler(NULL),
+	  fObserverList(NULL), fFilters(NULL)
 {
-	ETK_ERROR("[APP]: %s --- unimplemented yet.", __PRETTY_FUNCTION__);
+	const char *name = NULL;
+	if(from != NULL) from->FindString("_name", &name);
+
+	fName = EStrdup(name);
+	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
+	fObserverList = reinterpret_cast<void*>(new _EObserverList());
 }
 
 
@@ -260,8 +102,7 @@ EHandler::Archive(EMessage *into, bool deep) const
 
 	EArchivable::Archive(into, deep);
 	into->AddString("class", "EHandler");
-
-	// TODO
+	into->AddString("_name", fName);
 
 	return E_OK;
 }
@@ -292,65 +133,55 @@ EHandler::Name() const
 void
 EHandler::MessageReceived(EMessage *message)
 {
-	if(fNextHandler != NULL) fNextHandler->MessageReceived(message);
+	if(fNextHandler != NULL && fNextHandler != fLooper) fNextHandler->MessageReceived(message);
 }
 
 
 void
 EHandler::SetNextHandler(EHandler *handler)
 {
-	if(handler == this || fLooper == NULL || fNextHandler == handler)
-	{
-		if(handler == this) ETK_WARNING("[APP]: %s --- next-handler is this-handler.", __PRETTY_FUNCTION__);
-		else if(fLooper == NULL) ETK_WARNING("[APP]: %s --- this-handler didn't belong to looper.", __PRETTY_FUNCTION__);
-		else ETK_WARNING("[APP]: %s --- next-handler already be the next handler of this-handler.", __PRETTY_FUNCTION__);
-		return;
-	}
+	if(fLooper == NULL || handler == this || fNextHandler == handler) return;
 
-	if(forceSetNextHandler)
+	if(handler == NULL) ETK_ERROR("[APP]: %s --- Invalid operation", __PRETTY_FUNCTION__);
+
+	if(handler == fLooper)
 	{
+		// Before:	fLooper ... fPrevHandler, this, fNextHandler ...
+		// After:	fLooper ... fPrevHandler, fNextHandler ... this
+		fPrevHandler->fNextHandler = fNextHandler;
+		fNextHandler->fPrevHandler = fPrevHandler;
+		fLooper->fPrevHandler->fNextHandler = this;
+		fPrevHandler = fLooper->fPrevHandler;
+		fNextHandler = fLooper;
+	}
+	else if(handler != NULL)
+	{
+		if(handler->fLooper != fLooper) return;
+
+		EHandler *last_handler = handler;
+		while(!(last_handler->fNextHandler == fLooper ||
+		        last_handler->fNextHandler == this)) last_handler = last_handler->fNextHandler;
+
+		fNextHandler->fPrevHandler = last_handler;
+		last_handler->fNextHandler = fNextHandler;
+
+		if(last_handler->fNextHandler == fLooper)
+		{
+			// Before:	fLooper ... this, fNextHandler ... handler ... last_handler
+			// After:	fLooper ... this, handler ... last_handler, fNextHandler ...
+			handler->fPrevHandler->fNextHandler = fLooper;
+			fLooper->fPrevHandler = handler->fPrevHandler;
+		}
+		else // last_handler->fNextHandler == this
+		{
+			// Before:	fLooper ... handler ... last_handler, this, fNextHandler ...
+			// After:	fLooper ... this, handler ... last_handler, fNextHandler ...
+			handler->fPrevHandler->fNextHandler = this;
+			fPrevHandler = handler->fPrevHandler;
+		}
+
+		handler->fPrevHandler = this;
 		fNextHandler = handler;
-		forceSetNextHandler = false;
-	}
-	else
-	{
-		if(handler == NULL || handler == fLooper)
-		{
-			ETK_WARNING("[APP]: %s --- next-handler can't be NULL or looper it belong to.", __PRETTY_FUNCTION__);
-		}
-		else if(handler->fLooper != fLooper)
-		{
-			ETK_WARNING("[APP]: %s --- this-handler and next-handler didn't belong to the same looper.", __PRETTY_FUNCTION__);
-		}
-		else
-		{
-			// reorder
-			eint32 handlerIndex = fLooper->fHandlers.IndexOf(handler);
-			eint32 selfIndex = fLooper->fHandlers.IndexOf(this);
-
-			if(handlerIndex < 0 || selfIndex < 0 || handlerIndex == selfIndex) return;
-
-			if(handlerIndex - 1 != selfIndex)
-			{
-				EHandler *handlerPrevHandler = (EHandler*)(fLooper->fHandlers.ItemAt(handlerIndex - 1));
-				EHandler *handlerNextHandler = (EHandler*)(fLooper->fHandlers.ItemAt(handlerIndex + 1));
-				eint32 toIndex = handlerIndex < selfIndex ? selfIndex : selfIndex + 1;
-				if(!(fLooper->fHandlers.MoveItem(handlerIndex, toIndex))) return;
-
-				if(handlerPrevHandler)
-				{
-					handlerPrevHandler->forceSetNextHandler = true;
-					handlerPrevHandler->SetNextHandler(handlerNextHandler);
-					if(handlerPrevHandler->forceSetNextHandler)
-					{
-						handlerPrevHandler->fNextHandler = handlerNextHandler;
-						handlerPrevHandler->forceSetNextHandler = false;
-					}
-				}
-			}
-		
-			fNextHandler = handler;
-		}
 	}
 }
 
@@ -369,14 +200,6 @@ EHandler::Looper() const
 }
 
 
-void
-EHandler::SetLooper(ELooper *looper)
-{
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
-	fLooper = looper;
-}
-
-
 bool
 EHandler::LockLooper()
 {
@@ -387,7 +210,6 @@ EHandler::LockLooper()
 e_status_t
 EHandler::LockLooperWithTimeout(e_bigtime_t microseconds_timeout)
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 	return(fLooper ? fLooper->LockWithTimeout(microseconds_timeout) : E_ERROR);
 }
 
@@ -395,7 +217,6 @@ EHandler::LockLooperWithTimeout(e_bigtime_t microseconds_timeout)
 void
 EHandler::UnlockLooper()
 {
-	EAutolock <ELocker>autolock(etk_handler_operator_locker);
 	if(fLooper) fLooper->Unlock();
 }
 
@@ -761,8 +582,8 @@ _EObserverList::IsWatched(euint32 what) const
 e_status_t
 EHandler::StartWatching(EMessenger msgr, euint32 what)
 {
-	if(!fObserverList) return E_ERROR;
-	return fObserverList->StartWatching(msgr, what);
+	if(fObserverList == NULL) return E_ERROR;
+	return reinterpret_cast<_EObserverList*>(fObserverList)->StartWatching(msgr, what);
 }
 
 
@@ -776,8 +597,8 @@ EHandler::StartWatchingAll(EMessenger msgr)
 e_status_t
 EHandler::StopWatching(EMessenger msgr, euint32 what)
 {
-	if(!fObserverList) return E_ERROR;
-	return fObserverList->StopWatching(msgr, what);
+	if(fObserverList == NULL) return E_ERROR;
+	return reinterpret_cast<_EObserverList*>(fObserverList)->StopWatching(msgr, what);
 }
 
 
@@ -835,8 +656,8 @@ EHandler::StopWatchingAll(EHandler *handler)
 void
 EHandler::SendNotices(euint32 what, const EMessage *_msg_)
 {
-	if(!fObserverList) return;
-	EList *msgrsList = fObserverList->GetObservers(what);
+	if(fObserverList == NULL) return;
+	EList *msgrsList = reinterpret_cast<_EObserverList*>(fObserverList)->GetObservers(what);
 	if(!msgrsList) return;
 
 	EMessage msg(E_OBSERVER_NOTICE_CHANGE);
@@ -875,17 +696,19 @@ EHandler::SendNotices(euint32 what, const EMessage *_msg_)
 bool
 EHandler::IsWatched(euint32 what) const
 {
-	if(!fObserverList) return false;
-	return fObserverList->IsWatched(what);
+	if(fObserverList == NULL) return false;
+	return reinterpret_cast<_EObserverList*>(fObserverList)->IsWatched(what);
 }
 
 
 bool
 EHandler::AddFilter(EMessageFilter *filter)
 {
-	if(filter == NULL || filter->fHandler != NULL || fFilters.AddItem(filter) == false) return false;
+	if(filter == NULL || filter->fHandler != NULL) return false;
+	if(fFilters == NULL) fFilters = new EList();
+	if(fFilters->AddItem(filter) == false) return false;
 	filter->fHandler = this;
-	filter->fLooper = Looper();
+	filter->fLooper = fLooper;
 	return true;
 }
 
@@ -893,7 +716,7 @@ EHandler::AddFilter(EMessageFilter *filter)
 bool
 EHandler::RemoveFilter(EMessageFilter *filter)
 {
-	if(filter == NULL || filter->fHandler != this || fFilters.RemoveItem(filter) == false) return false;
+	if(fFilters == NULL || filter == NULL || filter->fHandler != this || fFilters->RemoveItem(filter) == false) return false;
 	filter->fHandler = NULL;
 	filter->fLooper = NULL;
 	return true;
@@ -903,18 +726,25 @@ EHandler::RemoveFilter(EMessageFilter *filter)
 const EList*
 EHandler::FilterList() const
 {
-	return(&fFilters);
+	return fFilters;
 }
 
 
 bool
 EHandler::SetFilterList(const EList *filterList)
 {
-	while(fFilters.CountItems() > 0)
+	if(fFilters != NULL)
 	{
-		EMessageFilter *filter = (EMessageFilter*)fFilters.ItemAt(0);
-		EHandler::RemoveFilter(filter);
-		delete filter;
+		for(eint32 i = 0; i < fFilters->CountItems(); i++)
+		{
+			EMessageFilter *filter = (EMessageFilter*)fFilters->ItemAt(i);
+			filter->fHandler = NULL;
+			filter->fLooper = NULL;
+			delete filter;
+		}
+
+		delete fFilters;
+		fFilters = NULL;
 	}
 
 	if(filterList == NULL) return true;

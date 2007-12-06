@@ -30,9 +30,10 @@
 #include <etk/kernel/Kernel.h>
 #include <etk/support/Locker.h>
 
+#include <etk/private/PrivateHandler.h>
+
 #include "MessageQueue.h"
 
-extern ELocker* etk_get_handler_operator_locker();
 
 EMessageQueue::EMessageQueue()
 	: fLocker(NULL)

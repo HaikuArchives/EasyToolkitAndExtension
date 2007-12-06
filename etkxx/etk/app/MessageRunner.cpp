@@ -28,10 +28,12 @@
  * --------------------------------------------------------------------------*/
 
 #include <etk/kernel/Kernel.h>
-#include <etk/app/Application.h>
 #include <etk/support/Locker.h>
 #include <etk/support/Autolock.h>
 
+#include <etk/private/PrivateHandler.h>
+
+#include "Application.h"
 #include "MessageRunner.h"
 
 extern ELocker* etk_get_handler_operator_locker();

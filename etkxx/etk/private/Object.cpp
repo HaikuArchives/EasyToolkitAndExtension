@@ -77,3 +77,10 @@ EObject::Vitalities() const
 	return fVitalities;
 }
 
+
+void etk_delete_object(void *object)
+{
+	EObject *obj = reinterpret_cast<EObject*>(object);
+	if(obj != NULL) delete obj;
+}
+

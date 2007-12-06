@@ -34,17 +34,9 @@
 #include <etk/support/Locker.h>
 #include <etk/support/Autolock.h>
 
-#include "Messenger.h"
+#include <etk/private/PrivateHandler.h>
 
-extern EHandler* etk_get_handler(euint64 token);
-extern ELooper* etk_get_handler_looper(euint64 token);
-extern bool etk_ref_handler(euint64 token);
-extern void etk_unref_handler(euint64 token);
-extern bool etk_is_current_at_looper_thread(euint64 token);
-extern euint64 etk_get_ref_handler_token(const EHandler *handler);
-extern e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
-extern ELocker* etk_get_handler_operator_locker();
-extern euint64 etk_get_ref_looper_token(euint64 token);
+#include "Messenger.h"
 
 
 EMessenger::EMessenger()

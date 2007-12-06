@@ -48,7 +48,7 @@ EArchivable::~EArchivable()
 e_status_t
 EArchivable::Archive(EMessage *into, bool deep) const
 {
-	if(!into) return E_ERROR;
+	if(into == NULL) return E_ERROR;
 	into->AddString("class", "EArchivable");
 	return E_OK;
 }
@@ -70,7 +70,7 @@ _IMPEXP_ETK bool e_validate_instantiation(const EMessage *from, const char *clas
 	for(eint32 i = 0; i < items; i++)
 	{
 		const char *_class_name = NULL;
-		if(from->FindString("class", i, &_class_name) == false) continue;
+		from->FindString("class", i, &_class_name);
 		if(_class_name == NULL) continue;
 
 		if(strlen(_class_name) != strlen(class_name)) continue;

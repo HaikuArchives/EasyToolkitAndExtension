@@ -72,4 +72,3 @@ private:
 
 #endif /* __ETK_AUTOLOCK_H__ */
 
-

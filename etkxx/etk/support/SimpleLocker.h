@@ -52,4 +52,3 @@ private:
 
 #endif /* __ETK_SIMPLE_LOCKER_H__ */
 
-

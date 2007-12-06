@@ -57,4 +57,3 @@ _IMPEXP_ETK e_instantiation_func	e_find_instantiation_func(const EMessage *archi
 
 #endif /* __ETK_ARCHIVABLE_H__ */
 
-

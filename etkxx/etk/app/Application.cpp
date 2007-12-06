@@ -35,6 +35,8 @@
 #include <etk/storage/FindDirectory.h>
 #include <etk/storage/Directory.h>
 
+#include <etk/private/PrivateHandler.h>
+
 #include "Application.h"
 #include "Clipboard.h"
 
@@ -48,7 +50,6 @@ _IMPEXP_ETK const ECursor *E_CURSOR_SYSTEM_DEFAULT = &_E_CURSOR_SYSTEM_DEFAULT;
 EList EApplication::sRunnerList;
 e_bigtime_t EApplication::sRunnerMinimumInterval = E_INT64_CONSTANT(0);
 
-extern ELocker* etk_get_handler_operator_locker();
 extern bool etk_font_init(void);
 extern void etk_font_cancel(void);
 extern bool etk_font_lock(void);

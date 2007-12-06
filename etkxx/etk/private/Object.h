@@ -50,6 +50,8 @@ private:
 	euint64 fVitalities;
 };
 
+_LOCAL void etk_delete_object(void *object);
+
 #endif /* __cplusplus */
 
 #endif /* __ETK_PRIVATE_OBJECT_H__ */

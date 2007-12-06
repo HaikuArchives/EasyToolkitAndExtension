@@ -33,27 +33,21 @@
 #include <etk/support/Locker.h>
 #include <etk/support/Autolock.h>
 #include <etk/support/ClassInfo.h>
-#include <etk/app/Messenger.h>
-#include <etk/app/Application.h>
 
 #include <etk/private/Token.h>
+#include <etk/private/PrivateHandler.h>
 
 #include "AppDefs.h"
+#include "Application.h"
+#include "Messenger.h"
 #include "Looper.h"
 
-extern EHandler* etk_get_handler(euint64 token);
-extern ELooper* etk_get_handler_looper(euint64 token);
-extern ELocker* etk_get_handler_operator_locker();
-extern bool etk_ref_handler(euint64 token);
-extern void etk_unref_handler(euint64 token);
-extern e_bigtime_t etk_get_handler_create_time_stamp(euint64 token);
-extern e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout);
 
 EList ELooper::sLooperList;
 
 
 ELooper::ELooper(const char *name, eint32 priority)
-	: EHandler(name), fDeconstructing(false), fProxy(NULL), fPreferredHandler(NULL), fLocker(NULL), fLocksCount(E_INT64_CONSTANT(0)), fThread(NULL), fSem(NULL), fMessageQueue(NULL), fCurrentMessage(NULL), fThreadExited(NULL)
+	: EHandler(name), fDeconstructing(false), fProxy(NULL), fHandlersCount(1), fPreferredHandler(NULL), fLocker(NULL), fLocksCount(E_INT64_CONSTANT(0)), fThread(NULL), fSem(NULL), fMessageQueue(NULL), fCurrentMessage(NULL), fThreadExited(NULL)
 {
 	ELocker *hLocker = etk_get_handler_operator_locker();
 	EAutolock <ELocker>autolock(hLocker);
@@ -61,7 +55,8 @@ ELooper::ELooper(const char *name, eint32 priority)
 	if((fLocker = etk_create_locker()) == NULL)
 		ETK_ERROR("[APP]: %s --- Unable to create locker for looper.", __PRETTY_FUNCTION__);
 
-	AddHandler(this);
+	fPrevHandler = fNextHandler = this;
+	fLooper = this;
 
 	fMessageQueue = new EMessageQueue();
 	if(fMessageQueue) fSem = etk_create_sem(E_INT64_CONSTANT(0), NULL);
@@ -74,11 +69,7 @@ ELooper::ELooper(const char *name, eint32 priority)
 
 ELooper::~ELooper()
 {
-	if(CountHandlers() > 1)
-	{
-		ETK_WARNING("[APP]: %s --- It's some handlers in the loop, memory would leak.", __PRETTY_FUNCTION__);
-		while(HandlerAt(1) == this ? RemoveHandler(HandlerAt(0)) : RemoveHandler(HandlerAt(1)));
-	}
+	for(EHandler *handler = HandlerAt(1); RemoveHandler(handler); handler = HandlerAt(1)) delete handler;
 
 	if(fProxy) ProxyBy(NULL);
 	while(fClients.CountItems() > 0)
@@ -117,7 +108,7 @@ ELooper::~ELooper()
 
 
 ELooper::ELooper(const EMessage *from)
-	: EHandler(from), fDeconstructing(false), fProxy(NULL), fThreadPriority(E_NORMAL_PRIORITY), fPreferredHandler(NULL), fLocker(NULL), fLocksCount(E_INT64_CONSTANT(0)), fThread(NULL), fSem(NULL), fMessageQueue(NULL), fCurrentMessage(NULL), fThreadExited(NULL)
+	: EHandler(from), fDeconstructing(false), fProxy(NULL), fThreadPriority(E_NORMAL_PRIORITY), fHandlersCount(1), fPreferredHandler(NULL), fLocker(NULL), fLocksCount(E_INT64_CONSTANT(0)), fThread(NULL), fSem(NULL), fMessageQueue(NULL), fCurrentMessage(NULL), fThreadExited(NULL)
 {
 	ELocker *hLocker = etk_get_handler_operator_locker();
 	EAutolock <ELocker>autolock(hLocker);
@@ -125,7 +116,8 @@ ELooper::ELooper(const EMessage *from)
 	if((fLocker = etk_create_locker()) == NULL)
 		ETK_ERROR("[APP]: %s --- Unable to create locker for looper.", __PRETTY_FUNCTION__);
 
-	AddHandler(this);
+	fPrevHandler = fNextHandler = this;
+	fLooper = this;
 
 	fMessageQueue = new EMessageQueue();
 	if(fMessageQueue) fSem = etk_create_sem(E_INT64_CONSTANT(0), NULL);
@@ -160,102 +152,75 @@ ELooper::Instantiate(const EMessage *from)
 void
 ELooper::AddHandler(EHandler *handler)
 {
-	if(!handler || handler->Looper() != NULL) return;
-	EHandler *lastHandler = (EHandler*)fHandlers.LastItem();
+	if(handler == NULL || handler->fLooper != NULL || fHandlersCount == E_MAXINT32) return;
 
-	if(!fHandlers.AddItem(handler)) return;
+	handler->fLooper = this;
 
-	handler->SetLooper(this);
+	fPrevHandler->fNextHandler = handler;
+	handler->fPrevHandler = fPrevHandler;
+	handler->fNextHandler = this;
 
-	if(handler != this)
-	{
-		handler->forceSetNextHandler = true;
-		handler->SetNextHandler(this);
-		if(handler->forceSetNextHandler)
-		{
-			handler->fNextHandler = this;
-			handler->forceSetNextHandler = false;
-		}
-	}
-
-	if(lastHandler)
-	{
-		lastHandler->forceSetNextHandler = true;
-		lastHandler->SetNextHandler(handler);
-		if(lastHandler->forceSetNextHandler)
-		{
-			lastHandler->fNextHandler = handler;
-			lastHandler->forceSetNextHandler = false;
-		}
-	}
+	fHandlersCount += 1;
+	handler->SetNextHandler(this);
 }
 
 
 bool
 ELooper::RemoveHandler(EHandler *handler)
 {
-	if(!handler || handler == this) return false;
-	if(handler->Looper() != this) return false;
+	if(handler == NULL || handler == this) return false;
+	if(handler->fLooper != this) return false;
 
-	eint32 index = fHandlers.IndexOf(handler);
-	if(index < 0) return false;
+	handler->fPrevHandler->fNextHandler = handler->fNextHandler;
+	handler->fNextHandler->fPrevHandler = handler->fPrevHandler;
+	handler->fPrevHandler = handler->fNextHandler = NULL;
 
-	EHandler *prevHandler = (EHandler*)fHandlers.ItemAt(index - 1);
+	fHandlersCount -= 1;
 
-	if(fHandlers.RemoveItem(index) != NULL) // removed
-	{
-		EHandler *nextHandler = handler->NextHandler();
+	handler->fLooper = NULL;
+	handler->SetNextHandler(NULL);
 
-		handler->forceSetNextHandler = true;
-		handler->SetNextHandler(NULL);
-		if(handler->forceSetNextHandler)
-		{
-			handler->fNextHandler = NULL;
-			handler->forceSetNextHandler = false;
-		}
-		handler->SetLooper(NULL);
-
-		if(!(prevHandler == this && nextHandler == this) && prevHandler)
-		{
-			prevHandler->forceSetNextHandler = true;
-			prevHandler->SetNextHandler(nextHandler);
-			if(prevHandler->forceSetNextHandler)
-			{
-				prevHandler->fNextHandler = nextHandler;
-				prevHandler->forceSetNextHandler = false;
-			}
-		}
-
-		if(fPreferredHandler == handler) fPreferredHandler = NULL;
-
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 
 eint32
 ELooper::CountHandlers() const
 {
-	return fHandlers.CountItems();
+	return fHandlersCount;
 }
 
 
 EHandler*
 ELooper::HandlerAt(eint32 index) const
 {
-	return (EHandler*)fHandlers.ItemAt(index);
+	if(index >= fHandlersCount) return NULL;
+
+	if(index == 0) return const_cast<EHandler*>(e_cast_as(this, const EHandler));
+	if(index == 1) return fNextHandler;
+	if(index == fHandlersCount - 1) return fPrevHandler;
+
+	EHandler *handler = fNextHandler;
+	while(index-- > 1) handler = handler->fNextHandler;
+	return handler;
 }
 
 
 eint32
 ELooper::IndexOf(EHandler *handler) const
 {
-	if(!handler) return -1;
-	if(handler->Looper() != this) return -1;
+	if(handler == NULL || handler->fLooper != this) return -1;
 
-	return fHandlers.IndexOf(handler);
+	eint32 index = 0;
+
+	const EHandler *found = this;
+	while(found != handler)
+	{
+		found = found->fNextHandler;
+		index++;
+	}
+
+	return index;
 }
 
 
@@ -925,7 +890,7 @@ ELooper::_FilterAndDispatchMessage(EMessage *msg, EHandler *_target)
 	e_filter_result status = E_DISPATCH_MESSAGE;
 	EHandler *handler = _target;
 
-	if(!(msg->what == E_QUIT_REQUESTED || msg->what == _QUIT_))
+	if(msg->what != _QUIT_) // (!(msg->what == E_QUIT_REQUESTED || msg->what == _QUIT_))
 	{
 		for(eint32 i = 0; i < fCommonFilters.CountItems(); i++)
 		{
@@ -934,11 +899,11 @@ ELooper::_FilterAndDispatchMessage(EMessage *msg, EHandler *_target)
 		}
 
 		EHandler *target = (handler == NULL ? fPreferredHandler : handler);
-		if(status != E_SKIP_MESSAGE && target != NULL)
+		if(!(status == E_SKIP_MESSAGE || target == NULL || target->fFilters == NULL))
 		{
-			for(eint32 i = 0; i < target->fFilters.CountItems(); i++)
+			for(eint32 i = 0; i < target->fFilters->CountItems(); i++)
 			{
-				EMessageFilter *filter = (EMessageFilter*)target->fFilters.ItemAt(i);
+				EMessageFilter *filter = (EMessageFilter*)target->fFilters->ItemAt(i);
 				if((status = filter->doFilter(msg, &handler)) == E_SKIP_MESSAGE) break;
 			}
 		}

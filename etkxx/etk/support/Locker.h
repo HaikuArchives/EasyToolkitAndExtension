@@ -59,4 +59,3 @@ private:
 
 #endif /* __ETK_LOCKER_H__ */
 
-

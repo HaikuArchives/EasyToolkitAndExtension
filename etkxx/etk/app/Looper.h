@@ -139,7 +139,7 @@ private:
 
 	eint32 fThreadPriority;
 
-	EList fHandlers;
+	eint32 fHandlersCount;
 	EHandler *fPreferredHandler;
 
 	void *fLocker;
@@ -175,5 +175,4 @@ private:
 #endif /* __cplusplus */
 
 #endif /* __ETK_LOOPER_H__ */
-
 

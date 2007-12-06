@@ -9,15 +9,17 @@ INCLUDES =	$(ETK_THREAD_CFLAGS) 			\
 
 noinst_LTLIBRARIES = libetk-private.la
 
-libetk_private_la_SOURCES =	\
-		Memory.cpp	\
-		Memory.h	\
-		Object.cpp	\
-		Object.h	\
-		Token.cpp	\
-		Token.h		\
-		Application.cpp	\
-		Application.h
+libetk_private_la_SOURCES =		\
+		Memory.cpp		\
+		Memory.h		\
+		Object.cpp		\
+		Object.h		\
+		Token.cpp		\
+		Token.h			\
+		PrivateApplication.cpp	\
+		PrivateApplication.h	\
+		PrivateHandler.cpp	\
+		PrivateHandler.h
 
 DISTCLEANFILES =	\
 	Makefile.in
