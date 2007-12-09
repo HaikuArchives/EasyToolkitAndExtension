@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -39,6 +39,7 @@ typedef eint32	e_status_t;
 typedef eint64	e_bigtime_t;
 typedef eint64	e_thread_id;
 typedef euint32	e_type_code;
+typedef euint32	e_perform_code;
 
 enum {
 	E_ANY_TYPE 				= 'ANYT',
@@ -110,15 +111,13 @@ typedef	eint8	bool;
 	#endif
 #endif /* !__cplusplus */
 
-
 #ifndef NULL
 #  ifdef __cplusplus
 #    define NULL        (0L)
 #  else /* !__cplusplus */
-#    define NULL        ((void*) 0)
+#    define NULL        ((void*)0)
 #  endif /* !__cplusplus */
 #endif
-
 
 #ifdef ETK_OS_WIN32
 #	ifdef __GNUC__
@@ -157,13 +156,11 @@ typedef	eint8	bool;
 #  endif
 #endif /* _LOCAL */
 
-
 #ifdef ETK_COMPILATION
 	#define _IMPEXP_ETK _EXPORT
 #else /* !ETK_COMPILATION */
 	#define _IMPEXP_ETK _IMPORT
 #endif /* ETK_COMPILATION */
-
 
 #ifdef __cplusplus
 extern "C" {

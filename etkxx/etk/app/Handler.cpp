@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -42,15 +42,16 @@
 #include "MessageFilter.h"
 
 
-class _LOCAL _EObserverList {
+class _LOCAL EObserverList {
 public:
-	_EObserverList();
-	~_EObserverList();
+	EObserverList();
+	~EObserverList();
 
-	e_status_t StartWatching(EMessenger msgr, euint32 what);
-	e_status_t StopWatching(EMessenger msgr, euint32 what);
-	EList* GetObservers(euint32 what);
+	e_status_t AddWatching(EMessenger msgr, euint32 what);
+	e_status_t RemoveWatching(EMessenger msgr, euint32 what);
 	bool IsWatched(euint32 what) const;
+
+	EList* GetObserverList(euint32 what);
 
 private:
 	EList fListWatching;
@@ -66,17 +67,19 @@ EHandler::EHandler(const char *name)
 {
 	fName = EStrdup(name);
 	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
-	fObserverList = reinterpret_cast<void*>(new _EObserverList());
 }
 
 
 EHandler::~EHandler()
 {
-	EHandler::SetFilterList(NULL);
-
 	if(fName != NULL) delete[] fName;
 	if(fToken != NULL) delete fToken;
-	if(fObserverList != NULL) delete reinterpret_cast<_EObserverList*>(fObserverList);
+	if(fObserverList != NULL) delete reinterpret_cast<EObserverList*>(fObserverList);
+	if(fFilters != NULL)
+	{
+		EHandler::SetFilterList(NULL);
+		delete fFilters;
+	}
 }
 
 
@@ -91,7 +94,6 @@ EHandler::EHandler(const EMessage *from)
 
 	fName = EStrdup(name);
 	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
-	fObserverList = reinterpret_cast<void*>(new _EObserverList());
 }
 
 
@@ -133,6 +135,14 @@ EHandler::Name() const
 void
 EHandler::MessageReceived(EMessage *message)
 {
+	if(message == NULL) return;
+
+#ifdef ETK_BIG_ENDIAN
+	if((message->what & 0xff) == '_') return;
+#else
+	if(((message->what >> 24) & 0xff) == '_') return;
+#endif
+
 	if(fNextHandler != NULL && fNextHandler != fLooper) fNextHandler->MessageReceived(message);
 }
 
@@ -151,8 +161,15 @@ EHandler::SetNextHandler(EHandler *handler)
 		fPrevHandler->fNextHandler = fNextHandler;
 		fNextHandler->fPrevHandler = fPrevHandler;
 		fLooper->fPrevHandler->fNextHandler = this;
+
+		EHandler *save_handler = fPrevHandler;
+
 		fPrevHandler = fLooper->fPrevHandler;
 		fNextHandler = fLooper;
+
+		// call virtual function
+		fPrevHandler->SetNextHandler(fPrevHandler->fNextHandler);
+		save_handler->SetNextHandler(save_handler->fNextHandler);
 	}
 	else if(handler != NULL)
 	{
@@ -180,8 +197,14 @@ EHandler::SetNextHandler(EHandler *handler)
 			fPrevHandler = handler->fPrevHandler;
 		}
 
+		EHandler *save_handler = handler->fPrevHandler;
+
 		handler->fPrevHandler = this;
 		fNextHandler = handler;
+
+		// call virtual function
+		last_handler->SetNextHandler(last_handler->fNextHandler);
+		save_handler->SetNextHandler(save_handler->fNextHandler);
 	}
 }
 
@@ -210,7 +233,8 @@ EHandler::LockLooper()
 e_status_t
 EHandler::LockLooperWithTimeout(e_bigtime_t microseconds_timeout)
 {
-	return(fLooper ? fLooper->LockWithTimeout(microseconds_timeout) : E_ERROR);
+	EAutolock <ELocker>autolock(etk_get_handler_operator_locker());
+	return(fLooper == NULL ? E_BAD_VALUE : fLooper->LockWithTimeout(microseconds_timeout));
 }
 
 
@@ -221,281 +245,212 @@ EHandler::UnlockLooper()
 }
 
 
-typedef struct _etk_watching_info_ {
-	EMessenger msgr;
-	EList whatsList;
+class _LOCAL EWatchingInfo {
+private:
+	EMessenger fMessenger;
+	EList fWhats;
 
-	_etk_watching_info_(EMessenger _msgr_)
+public:
+	EWatchingInfo(EMessenger msgr)
+		: fMessenger(msgr)
 	{
-		msgr = _msgr_;
 	}
 
-	~_etk_watching_info_()
+	~EWatchingInfo()
 	{
-		if(!whatsList.IsEmpty())
-		{
-			for(eint32 i = 0; i < whatsList.CountItems(); i++)
-			{
-				euint32 *what = (euint32*)whatsList.ItemAt(i);
-				if(what) delete what;
-			}
-			whatsList.MakeEmpty();
-		}
 	}
 
 	bool IsValid() const
 	{
-		return msgr.IsValid();
+		return fMessenger.IsValid();
 	}
 
-	bool IsSameMessenger(EMessenger _msgr_) const
+	EMessenger *Messenger() const
 	{
-		return(msgr == _msgr_);
+		return const_cast<EMessenger*>(&fMessenger);
 	}
 
-	bool AddWhat(euint32 _what_)
+	bool IsSameMessenger(EMessenger msgr) const
 	{
-		if(_what_ == E_OBSERVER_OBSERVE_ALL || !msgr.IsValid()) return false;
-		euint32 *what = new euint32;
-		if(!what) return false;
-		*what = _what_;
-		if(!whatsList.AddItem((void*)what))
+		return(fMessenger == msgr);
+	}
+
+	bool AddWhat(euint32 what)
+	{
+		if(what == E_OBSERVER_OBSERVE_ALL) return false;
+		return fWhats.AddItem(reinterpret_cast<void*>(what));
+	}
+
+	bool RemoveWhat(euint32 what)
+	{
+		if(what == E_OBSERVER_OBSERVE_ALL) return false;
+
+		eint32 save_count = fWhats.CountItems();
+
+		for(eint32 i = 0; i < fWhats.CountItems(); i++)
 		{
-			delete what;
-			return false;
-		}
-		return true;
-	}
-
-	bool RemoveWhat(euint32 _what_)
-	{
-		if(_what_ == E_OBSERVER_OBSERVE_ALL || !msgr.IsValid()) return false;
-		for(eint32 i = 0; i < whatsList.CountItems(); i++)
-		{
-			euint32 *what = (euint32*)whatsList.ItemAt(i);
-			if(!what) continue;
-			if(*what == _what_)
+			if(reinterpret_cast<euint32>(fWhats.ItemAt(i)) == what)
 			{
-				if((what = (euint32*)whatsList.RemoveItem(i)) != NULL)
-				{
-					delete what;
-					return true;
-				}
-
+				fWhats.RemoveItem(i);
 				break;
 			}
 		}
-		return false;
+
+		return(save_count > fWhats.CountItems());
 	}
 
-	bool HasWhat(euint32 _what_)
+	bool HasWhat(euint32 what)
 	{
-		if(_what_ == E_OBSERVER_OBSERVE_ALL || !msgr.IsValid()) return false;
-		for(eint32 i = 0; i < whatsList.CountItems(); i++)
+		if(what == E_OBSERVER_OBSERVE_ALL) return false;
+
+		for(eint32 i = 0; i < fWhats.CountItems(); i++)
 		{
-			euint32 *what = (euint32*)whatsList.ItemAt(i);
-			if(!what) continue;
-			if(*what == _what_) return true;
+			if(reinterpret_cast<euint32>(fWhats.ItemAt(i)) == what) return true;
 		}
 		return false;
 	}
 
 	eint32 CountWhats() const
 	{
-		return whatsList.CountItems();
+		return fWhats.CountItems();
 	}
 
 	void MakeEmpty()
 	{
-		if(!whatsList.IsEmpty())
-		{
-			for(eint32 i = 0; i < whatsList.CountItems(); i++)
-			{
-				euint32 *what = (euint32*)whatsList.ItemAt(i);
-				if(what) delete what;
-			}
-			whatsList.MakeEmpty();
-		}
+		fWhats.MakeEmpty();
 	}
-} _etk_watching_info_;
+};
 
 
-_EObserverList::_EObserverList()
+EObserverList::EObserverList()
 {
 }
 
 
-_EObserverList::~_EObserverList()
+EObserverList::~EObserverList()
 {
-	if(!fListWatching.IsEmpty())
+	for(eint32 i = 0; i < fListWatching.CountItems(); i++)
 	{
-		for(eint32 i = 0; i < fListWatching.CountItems(); i++)
-		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatching.ItemAt(i);
-			if(aInfo) delete aInfo;
-		}
-		fListWatching.MakeEmpty();
+		delete (EWatchingInfo*)fListWatching.ItemAt(i);
 	}
 
-	if(!fListWatchingAll.IsEmpty())
+	for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
 	{
-		for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
-		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatchingAll.ItemAt(i);
-			if(aInfo) delete aInfo;
-		}
-		fListWatchingAll.MakeEmpty();
+		delete (EWatchingInfo*)fListWatchingAll.ItemAt(i);
 	}
 }
 
 
 e_status_t
-_EObserverList::StartWatching(EMessenger _msgr_, euint32 what)
+EObserverList::AddWatching(EMessenger msgr, euint32 what)
 {
-	if(!_msgr_.IsValid()) return E_BAD_HANDLER;
+	if(msgr.IsValid() == false) return E_BAD_HANDLER;
 
-	_etk_watching_info_ *info = NULL;
+	EWatchingInfo *info = NULL;
+	eint32 index_single = -1, index_all = -1;
 
-	eint32 msgrIndex = -1;
 	for(eint32 i = 0; i < fListWatching.CountItems(); i++)
 	{
-		_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatching.ItemAt(i);
-		if(!aInfo) continue;
-		if(aInfo->IsSameMessenger(_msgr_))
+		if(((EWatchingInfo*)fListWatching.ItemAt(i))->IsSameMessenger(msgr))
 		{
-			msgrIndex = i;
+			index_single = i;
 			break;
 		}
 	}
-
-	eint32 msgrAllIndex = -1;
 	for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
 	{
-		_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatchingAll.ItemAt(i);
-		if(!aInfo) continue;
-		if(aInfo->IsSameMessenger(_msgr_))
+		if(((EWatchingInfo*)fListWatchingAll.ItemAt(i))->IsSameMessenger(msgr))
 		{
-			msgrAllIndex = i;
+			index_all = i;
 			break;
 		}
 	}
 
 	if(what == E_OBSERVER_OBSERVE_ALL)
 	{
-		if(msgrIndex >= 0)
+		if(index_all < 0)
 		{
-			if((info = (_etk_watching_info_*)fListWatching.RemoveItem(msgrIndex)) == NULL) return E_ERROR;
-			delete info;
-		}
-
-		info = (_etk_watching_info_*)fListWatchingAll.ItemAt(msgrAllIndex);
-
-		if(!info)
-		{
-			info = new _etk_watching_info_(_msgr_);
-			if(!info || !info->IsValid() || !fListWatchingAll.AddItem((void*)info))
+			if(fListWatchingAll.AddItem(info = new EWatchingInfo(msgr)) == false)
 			{
-				if(info) delete info;
+				delete info;
 				return E_ERROR;
 			}
 		}
 		else
 		{
-			info->MakeEmpty();
+			((EWatchingInfo*)fListWatchingAll.ItemAt(index_all))->MakeEmpty();
 		}
 
+		if(index_single >= 0)
+			delete (EWatchingInfo*)fListWatching.RemoveItem(index_single);
+
 		return E_OK;
 	}
-	else if(msgrAllIndex >= 0)
+	else if(index_all >= 0)
 	{
-		info = (_etk_watching_info_*)fListWatchingAll.ItemAt(msgrAllIndex);
-		info->RemoveWhat(what);
+		((EWatchingInfo*)fListWatchingAll.ItemAt(index_all))->RemoveWhat(what);
 		return E_OK;
 	}
 
-	info = (_etk_watching_info_*)fListWatching.ItemAt(msgrIndex);
-
-	if(!info)
+	if((info = (EWatchingInfo*)fListWatching.ItemAt(index_single)) == NULL)
 	{
-		info = new _etk_watching_info_(_msgr_);
-		if(!info || !info->IsValid() || !info->AddWhat(what) || !fListWatching.AddItem((void*)info))
+		if(fListWatching.AddItem(info = new EWatchingInfo(msgr)) == false)
 		{
-			if(info) delete info;
+			delete info;
 			return E_ERROR;
 		}
 		return E_OK;
 	}
-
-	if(info->HasWhat(what)) return E_OK;
-	return(info->AddWhat(what) ? E_OK : E_ERROR);
+	else
+	{
+		return((info->HasWhat(what) || info->AddWhat(what)) ? E_OK : E_ERROR);
+	}
 }
 
 
 e_status_t
-_EObserverList::StopWatching(EMessenger _msgr_, euint32 what)
+EObserverList::RemoveWatching(EMessenger msgr, euint32 what)
 {
-	if(!_msgr_.IsValid()) return E_BAD_HANDLER;
+	if(msgr.IsValid() == false) return E_BAD_HANDLER;
 
-	_etk_watching_info_ *info = NULL;
+	EWatchingInfo *info = NULL;
+	eint32 index_single = -1, index_all = -1;
 
-	eint32 msgrIndex = -1;
 	for(eint32 i = 0; i < fListWatching.CountItems(); i++)
 	{
-		_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatching.ItemAt(i);
-		if(!aInfo) continue;
-		if(aInfo->IsSameMessenger(_msgr_))
+		if(((EWatchingInfo*)fListWatching.ItemAt(i))->IsSameMessenger(msgr))
 		{
-			msgrIndex = i;
+			index_single = i;
 			break;
 		}
 	}
-
-	eint32 msgrAllIndex = -1;
-	if(msgrIndex >= 0) for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
+	for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
 	{
-		_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatchingAll.ItemAt(i);
-		if(!aInfo) continue;
-		if(aInfo->IsSameMessenger(_msgr_))
+		if(((EWatchingInfo*)fListWatchingAll.ItemAt(i))->IsSameMessenger(msgr))
 		{
-			msgrAllIndex = i;
+			index_all = i;
 			break;
 		}
 	}
 
 	if(what == E_OBSERVER_OBSERVE_ALL)
 	{
-		if(msgrIndex >= 0)
-		{
-			if((info = (_etk_watching_info_*)fListWatching.RemoveItem(msgrIndex)) == NULL) return E_ERROR;
-			delete info;
-		}
-		else if(msgrAllIndex >= 0)
-		{
-			if((info = (_etk_watching_info_*)fListWatchingAll.RemoveItem(msgrAllIndex)) == NULL) return E_ERROR;
-			delete info;
-		}
-
-		return E_OK;
+		if(index_single >= 0) delete (EWatchingInfo*)fListWatching.RemoveItem(index_single);
+		if(index_all >= 0) delete (EWatchingInfo*)fListWatchingAll.RemoveItem(index_all);
 	}
-
-	if(msgrAllIndex >= 0)
+	else
 	{
-		info = (_etk_watching_info_*)fListWatchingAll.ItemAt(msgrAllIndex);
-		if(!info->HasWhat(what)) return(info->AddWhat(what) ? E_OK : E_ERROR);
-
-		return E_OK;
-	}
-
-	info = (_etk_watching_info_*)fListWatching.ItemAt(msgrIndex);
-
-	if(!info || !info->HasWhat(what)) return E_OK;
-
-	if(!info->RemoveWhat(what)) return E_ERROR;
-
-	if(info->CountWhats() <= 0)
-	{
-		if(!fListWatching.RemoveItem(info)) return E_ERROR;
-		delete info;
+		if(index_all >= 0)
+		{
+			info = (EWatchingInfo*)fListWatchingAll.ItemAt(index_all);
+			if(!(info->HasWhat(what) || info->AddWhat(what))) return E_ERROR;
+		}
+		if(index_single >= 0)
+		{
+			info = (EWatchingInfo*)fListWatching.ItemAt(index_single);
+			info->RemoveWhat(what);
+			if(info->CountWhats() <= 0) delete (EWatchingInfo*)fListWatching.RemoveItem(index_single);
+		}
 	}
 
 	return E_OK;
@@ -503,87 +458,67 @@ _EObserverList::StopWatching(EMessenger _msgr_, euint32 what)
 
 
 EList*
-_EObserverList::GetObservers(euint32 what)
+EObserverList::GetObserverList(euint32 what)
 {
-	EList *retList = new EList();
-	if(!retList) return NULL;
+	EList *list = new EList();
 
 	if(what == E_OBSERVER_OBSERVE_ALL)
 	{
 		for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
-		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatchingAll.ItemAt(i);
-			if(!aInfo) continue;
-			retList->AddItem((void*)(&(aInfo->msgr)));
-		}
+			list->AddItem(((EWatchingInfo*)fListWatchingAll.ItemAt(i))->Messenger());
 
 		for(eint32 i = 0; i < fListWatching.CountItems(); i++)
-		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatching.ItemAt(i);
-			if(!aInfo) continue;
-			retList->AddItem((void*)(&(aInfo->msgr)));
-		}
+			list->AddItem(((EWatchingInfo*)fListWatching.ItemAt(i))->Messenger());
 	}
 	else
 	{
 		for(eint32 i = 0; i < fListWatching.CountItems(); i++)
 		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatching.ItemAt(i);
-			if(!aInfo) continue;
-			if(aInfo->HasWhat(what)) retList->AddItem((void*)(&(aInfo->msgr)));
+			EWatchingInfo *aInfo = (EWatchingInfo*)fListWatching.ItemAt(i);
+			if(aInfo->HasWhat(what)) list->AddItem(aInfo->Messenger());
 		}
 
 		for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
 		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatchingAll.ItemAt(i);
-			if(!aInfo) continue;
-			if(!aInfo->HasWhat(what)) retList->AddItem((void*)(&(aInfo->msgr)));
+			EWatchingInfo *aInfo = (EWatchingInfo*)fListWatchingAll.ItemAt(i);
+			if(aInfo->HasWhat(what) == false) list->AddItem(aInfo->Messenger());
 		}
 	}
 
-	if(retList->IsEmpty())
+	if(list->IsEmpty())
 	{
-		delete retList;
-		retList = NULL;
+		delete list;
+		list = NULL;
 	}
 
-	return retList;
+	return list;
 }
 
 
 bool
-_EObserverList::IsWatched(euint32 what) const
+EObserverList::IsWatched(euint32 what) const
 {
-	if(what == E_OBSERVER_OBSERVE_ALL)
-	{
-		return(!fListWatching.IsEmpty() || !fListWatchingAll.IsEmpty());
-	}
-	else
-	{
-		for(eint32 i = 0; i < fListWatching.CountItems(); i++)
-		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatching.ItemAt(i);
-			if(!aInfo) continue;
-			if(aInfo->HasWhat(what)) return true;
-		}
+	if(what == E_OBSERVER_OBSERVE_ALL) return(fListWatching.IsEmpty() == false || fListWatchingAll.IsEmpty() == false);
 
-		for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
-		{
-			_etk_watching_info_ *aInfo = (_etk_watching_info_*)fListWatchingAll.ItemAt(i);
-			if(!aInfo) continue;
-			if(!aInfo->HasWhat(what)) return true;
-		}
+	for(eint32 i = 0; i < fListWatching.CountItems(); i++)
+	{
+		if(((EWatchingInfo*)fListWatching.ItemAt(i))->HasWhat(what)) return true;
 	}
 
-	return false;
+	eint32 exclude_times = 0;
+	for(eint32 i = 0; i < fListWatchingAll.CountItems(); i++)
+	{
+		if(((EWatchingInfo*)fListWatchingAll.ItemAt(i))->HasWhat(what)) exclude_times++;
+	}
+	return(exclude_times != fListWatchingAll.CountItems());
 }
 
 
 e_status_t
 EHandler::StartWatching(EMessenger msgr, euint32 what)
 {
-	if(fObserverList == NULL) return E_ERROR;
-	return reinterpret_cast<_EObserverList*>(fObserverList)->StartWatching(msgr, what);
+	if(fObserverList == NULL) fObserverList = reinterpret_cast<void*>(new EObserverList());
+	return reinterpret_cast<EObserverList*>(fObserverList)->AddWatching(msgr, what);
 }
 
 
@@ -598,7 +533,7 @@ e_status_t
 EHandler::StopWatching(EMessenger msgr, euint32 what)
 {
 	if(fObserverList == NULL) return E_ERROR;
-	return reinterpret_cast<_EObserverList*>(fObserverList)->StopWatching(msgr, what);
+	return reinterpret_cast<EObserverList*>(fObserverList)->RemoveWatching(msgr, what);
 }
 
 
@@ -654,27 +589,27 @@ EHandler::StopWatchingAll(EHandler *handler)
 
 
 void
-EHandler::SendNotices(euint32 what, const EMessage *_msg_)
+EHandler::SendNotices(euint32 what, const EMessage *message)
 {
 	if(fObserverList == NULL) return;
-	EList *msgrsList = reinterpret_cast<_EObserverList*>(fObserverList)->GetObservers(what);
-	if(!msgrsList) return;
+
+	EList *msgrsList = reinterpret_cast<EObserverList*>(fObserverList)->GetObserverList(what);
+	if(msgrsList == NULL) return;
 
 	EMessage msg(E_OBSERVER_NOTICE_CHANGE);
-	if(_msg_)
+	if(message != NULL)
 	{
-		msg = *_msg_;
+		msg = *message;
 		msg.what = E_OBSERVER_NOTICE_CHANGE;
-		msg.AddInt32(E_OBSERVE_ORIGINAL_WHAT, _msg_->what);
+		msg.AddInt32(E_OBSERVE_ORIGINAL_WHAT, message->what);
 	}
 	msg.AddInt32(E_OBSERVE_WHAT_CHANGE, what);
 
 	for(eint32 i = 0; i < msgrsList->CountItems(); i++)
 	{
 		EMessenger *aMsgr = (EMessenger*)msgrsList->ItemAt(i);
-		if(!aMsgr) continue;
 
-		if(aMsgr->SendMessage(&msg, (EHandler*)NULL, 20000) != E_OK)
+		if(aMsgr->SendMessage(&msg, (EHandler*)NULL, 50000) != E_OK)
 		{
 			if(aMsgr->IsTargetLocal())
 			{
@@ -697,7 +632,7 @@ bool
 EHandler::IsWatched(euint32 what) const
 {
 	if(fObserverList == NULL) return false;
-	return reinterpret_cast<_EObserverList*>(fObserverList)->IsWatched(what);
+	return reinterpret_cast<EObserverList*>(fObserverList)->IsWatched(what);
 }
 
 
@@ -708,7 +643,6 @@ EHandler::AddFilter(EMessageFilter *filter)
 	if(fFilters == NULL) fFilters = new EList();
 	if(fFilters->AddItem(filter) == false) return false;
 	filter->fHandler = this;
-	filter->fLooper = fLooper;
 	return true;
 }
 
@@ -718,7 +652,6 @@ EHandler::RemoveFilter(EMessageFilter *filter)
 {
 	if(fFilters == NULL || filter == NULL || filter->fHandler != this || fFilters->RemoveItem(filter) == false) return false;
 	filter->fHandler = NULL;
-	filter->fLooper = NULL;
 	return true;
 }
 
@@ -735,20 +668,50 @@ EHandler::SetFilterList(const EList *filterList)
 {
 	if(fFilters != NULL)
 	{
+		// Here we delete all filters without calling "RemoveFilter",
+		// if you care about this, you should inherit this function.
 		for(eint32 i = 0; i < fFilters->CountItems(); i++)
 		{
 			EMessageFilter *filter = (EMessageFilter*)fFilters->ItemAt(i);
 			filter->fHandler = NULL;
-			filter->fLooper = NULL;
 			delete filter;
 		}
 
-		delete fFilters;
-		fFilters = NULL;
+		fFilters->MakeEmpty();
 	}
 
-	if(filterList == NULL) return true;
-	for(eint32 i = 0; i < filterList->CountItems(); i++) EHandler::AddFilter((EMessageFilter*)filterList->ItemAt(i));
+	if(filterList != NULL)
+	{
+		for(eint32 i = 0; i < filterList->CountItems(); i++) AddFilter((EMessageFilter*)filterList->ItemAt(i));
+	}
+
 	return true;
+}
+
+
+EHandler*
+EHandler::ResolveSpecifier(EMessage *msg, eint32 index, EMessage *specifier, eint32 what, const char *property)
+{
+	// TODO
+	ETK_WARNING("[APP]: %s --- TODO", __PRETTY_FUNCTION__);
+	return NULL;
+}
+
+
+e_status_t
+EHandler::GetSupportedSuites(EMessage *data)
+{
+	// TODO
+	ETK_WARNING("[APP]: %s --- TODO", __PRETTY_FUNCTION__);
+	return E_ERROR;
+}
+
+
+e_status_t
+EHandler::Perform(e_perform_code d, void *arg)
+{
+	// TODO
+	ETK_WARNING("[APP]: %s --- TODO", __PRETTY_FUNCTION__);
+	return E_ERROR;
 }
 

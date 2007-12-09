@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -31,7 +31,6 @@
 #ifndef __ETK_MESSAGE_QUEUE_H__
 #define __ETK_MESSAGE_QUEUE_H__
 
-#include <etk/support/List.h>
 #include <etk/app/Message.h>
 
 #ifdef __cplusplus /* Just for C++ */

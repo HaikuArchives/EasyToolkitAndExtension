@@ -111,37 +111,34 @@ euint64 etk_get_ref_looper_token(euint64 token)
 
 e_status_t etk_lock_looper_of_handler(euint64 token, e_bigtime_t timeout)
 {
-	e_status_t retVal = E_ERROR;
-
 	ELocker *handlers_locker = etk_get_handler_operator_locker();
 
 	handlers_locker->Lock();
+
 	ELooper *looper = etk_get_handler_looper(token);
 	ELooper *looper_proxy = (looper != NULL ? looper->_Proxy() : NULL);
 	void *locker = ((looper == NULL || looper->fLocker == NULL) ? NULL : etk_clone_locker(looper->fLocker));
-	eint64 locksCount = handlers_locker->CountLocks();
-	while(handlers_locker->CountLocks() > 0) handlers_locker->Unlock();
 
-	if(locker != NULL)
+	if(locker == NULL)
 	{
-		if((retVal = etk_lock_locker_etc(locker, E_TIMEOUT, timeout)) == E_OK)
-		{
-			handlers_locker->Lock();
-
-			if(looper != etk_get_handler_looper(token) || looper_proxy != looper->_Proxy()) retVal = E_ERROR;
-
-			if(locksCount > 1)
-				locksCount--;
-			else
-				handlers_locker->Unlock();
-
-			if(retVal != E_OK) etk_unlock_locker(locker);
-		}
-
-		etk_delete_locker(locker);
+		handlers_locker->Unlock();
+		return E_BAD_VALUE;
 	}
 
-	while(locksCount-- > 1) handlers_locker->Lock();
+	eint64 save_count = handlers_locker->CountLocks();
+	while(handlers_locker->CountLocks() > 0) handlers_locker->Unlock();
+
+	e_status_t retVal = etk_lock_locker_etc(locker, E_TIMEOUT, timeout);
+	if(retVal == E_OK)
+	{
+		handlers_locker->Lock();
+		if(looper != etk_get_handler_looper(token) || looper_proxy != looper->_Proxy()) retVal = E_MISMATCHED_VALUES;
+		if(save_count-- == 1) handlers_locker->Unlock();
+		if(retVal != E_OK) etk_unlock_locker(locker);
+	}
+	etk_delete_locker(locker);
+
+	while(save_count-- > 1) handlers_locker->Lock();
 
 	return retVal;
 }

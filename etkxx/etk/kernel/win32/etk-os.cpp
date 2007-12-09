@@ -29,19 +29,17 @@
 
 #include <windows.h>
 
-#include <etk/support/Locker.h>
 #include <etk/kernel/Kernel.h>
-#include <etk/app/Application.h>
+#include <etk/support/String.h>
+
+#include <etk/private/PrivateApplication.h>
 
 
 HINSTANCE etk_dll_hinstance = NULL;
 
 
 extern "C" {
-BOOL WINAPI
-DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
-	DWORD fdwReason,     /* reason for calling functionm */
-	LPVOID lpvReserved   /* reserved */)
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	etk_dll_hinstance = hinstDLL;
 
@@ -54,6 +52,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 			WSADATA wsaData;
 			WSAStartup(0x202, &wsaData);
 			etk_system_boot_time();
+			EApplicationConnector::Init();
 			break;
 		}
 
@@ -66,6 +65,7 @@ DllMain(HINSTANCE hinstDLL,  /* handle to DLL module */
 		case DLL_PROCESS_DETACH:
 		/* The DLL unmapped from process's address space. Do necessary cleanup */
 		{
+			EApplicationConnector::Quit();
 			WSACleanup();
 			break;
 		}

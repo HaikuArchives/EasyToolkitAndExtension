@@ -20,7 +20,7 @@ VS_VERSION_INFO VERSIONINFO
 	VALUE "FileDescription", "The Easy Toolkit for C++ programing"
 	VALUE "FileVersion", "@ETK_VERSION@"
 	VALUE "InternalName", "libetkxx-@LT_CURRENT_MINUS_AGE@"
-	VALUE "LegalCopyright", "Copyright (C) 2004-2006 Anthony Lee"
+	VALUE "LegalCopyright", "Copyright (C) 2004-2007 Anthony Lee"
 	VALUE "OriginalFilename", "libetkxx-@LT_CURRENT_MINUS_AGE@.dll"
 	VALUE "ProductName", "ETK++"
 	VALUE "ProductVersion", "@ETK_VERSION@"

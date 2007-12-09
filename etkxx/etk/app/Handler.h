@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -56,37 +56,48 @@ public:
 	virtual e_status_t Archive(EMessage *into, bool deep = true) const;
 	static EArchivable *Instantiate(const EMessage *from);
 
-	void		SetName(const char *name);
-	const char	*Name() const;
+	void			SetName(const char *name);
+	const char		*Name() const;
 
-	virtual void	MessageReceived(EMessage *message);
+	virtual void		MessageReceived(EMessage *message);
 
-	ELooper		*Looper() const;
+	ELooper			*Looper() const;
 
-	virtual void	SetNextHandler(EHandler *handler);
-	EHandler	*NextHandler() const;
+	virtual void		SetNextHandler(EHandler *handler);
+	EHandler		*NextHandler() const;
 
-	bool		LockLooper();
-	e_status_t	LockLooperWithTimeout(e_bigtime_t microseconds_timeout);
-	void		UnlockLooper();
+	bool			LockLooper();
+	e_status_t		LockLooperWithTimeout(e_bigtime_t microseconds_timeout);
+	void			UnlockLooper();
 
-	e_status_t	StartWatching(EMessenger msgr, euint32 what);
-	e_status_t	StartWatchingAll(EMessenger msgr);
-	e_status_t	StopWatching(EMessenger msgr, euint32 what);
-	e_status_t	StopWatchingAll(EMessenger msgr);
+	// Observer calls
+	e_status_t		StartWatching(EMessenger msgr, euint32 what);
+	e_status_t		StartWatchingAll(EMessenger msgr);
+	e_status_t		StopWatching(EMessenger msgr, euint32 what);
+	e_status_t		StopWatchingAll(EMessenger msgr);
 
-	e_status_t	StartWatching(EHandler *handler, euint32 what);
-	e_status_t	StartWatchingAll(EHandler *handler);
-	e_status_t	StopWatching(EHandler *handler, euint32 what);
-	e_status_t	StopWatchingAll(EHandler *handler);
+	e_status_t		StartWatching(EHandler *handler, euint32 what);
+	e_status_t		StartWatchingAll(EHandler *handler);
+	e_status_t		StopWatching(EHandler *handler, euint32 what);
+	e_status_t		StopWatchingAll(EHandler *handler);
 
-	virtual void	SendNotices(euint32 what, const EMessage *msg = NULL);
-	bool		IsWatched(euint32 what = E_OBSERVER_OBSERVE_ALL) const;
+	// Notifier calls
+	virtual void		SendNotices(euint32 what, const EMessage *msg = NULL);
+	bool			IsWatched(euint32 what = E_OBSERVER_OBSERVE_ALL) const;
 
-	virtual bool	AddFilter(EMessageFilter *filter);
-	virtual bool	RemoveFilter(EMessageFilter *filter);
-	virtual bool	SetFilterList(const EList *filterList);
-	const EList	*FilterList() const;
+	// Message Filtering
+	virtual bool		AddFilter(EMessageFilter *filter);
+	virtual bool		RemoveFilter(EMessageFilter *filter);
+	virtual bool		SetFilterList(const EList *filterList);
+	const EList		*FilterList() const;
+
+	// Scripting
+	virtual EHandler	*ResolveSpecifier(EMessage *msg, eint32 index, EMessage *specifier,
+						  eint32 what, const char *property);
+	virtual e_status_t	GetSupportedSuites(EMessage *data);
+
+	// Reserved
+	virtual e_status_t	Perform(e_perform_code d, void *arg);
 
 private:
 	friend class ELooper;

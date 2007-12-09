@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -25,7 +25,7 @@
  *
  * File: MessageFilter.h
  * Description: Filter message before ELooper::DispatchMessage
- * Warning: ignore E_QUIT_REQUESTED & _QUIT_
+ * Warning: ignore _QUIT_
  *
  * --------------------------------------------------------------------------*/
 
@@ -40,15 +40,15 @@ typedef enum e_filter_result {
 } e_filter_result;
 
 typedef enum e_message_delivery {
-	E_ANY_DELIVERY,
-	E_DROPPED_DELIVERY,
-	E_PROGRAMMED_DELIVERY
+	E_DROPPED_DELIVERY	=	0x1,
+	E_PROGRAMMED_DELIVERY	=	0x2,
+	E_ANY_DELIVERY		=	0xff
 } e_message_delivery;
 
 typedef enum e_message_source {
-	E_ANY_SOURCE,
-	E_REMOTE_SOURCE,
-	E_LOCAL_SOURCE
+	E_LOCAL_SOURCE		=	0x1,
+	E_REMOTE_SOURCE		=	0x2,
+	E_ANY_SOURCE		=	0xff
 } e_message_source;
 
 #ifdef __cplusplus /* Just for C++ */
@@ -90,7 +90,6 @@ private:
 	e_message_source fSource;
 	e_filter_hook fFilterHook;
 
-	ELooper *fLooper;
 	EHandler *fHandler;
 
 	e_filter_result doFilter(EMessage *message, EHandler **target);

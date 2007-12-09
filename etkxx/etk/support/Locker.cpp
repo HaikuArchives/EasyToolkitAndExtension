@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -41,7 +41,7 @@ ELocker::ELocker()
 
 ELocker::~ELocker()
 {
-	if(fLocker) etk_delete_locker(fLocker);
+	if(fLocker != NULL) etk_delete_locker(fLocker);
 }
 
 
@@ -55,9 +55,7 @@ ELocker::Lock()
 void
 ELocker::Unlock()
 {
-	if(fLocker == NULL) return;
-
-	if(etk_count_locker_locks(fLocker) <= E_INT64_CONSTANT(0))
+	if(etk_count_locker_locks(fLocker) <= 0)
 	{
 		ETK_WARNING("[SUPPORT]: %s -- Locker didn't locked by current thread.", __PRETTY_FUNCTION__);
 		return;
@@ -84,6 +82,6 @@ ELocker::CountLocks() const
 bool
 ELocker::IsLockedByCurrentThread() const
 {
-	return(etk_count_locker_locks(fLocker) > E_INT64_CONSTANT(0));
+	return(etk_count_locker_locks(fLocker) > 0);
 }
 

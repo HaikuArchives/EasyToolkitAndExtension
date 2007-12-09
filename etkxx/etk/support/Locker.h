@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -45,8 +45,8 @@ public:
 	e_status_t	LockWithTimeout(e_bigtime_t microseconds);
 
 	// CountLocks():
-	// 	return count of locks when locked by current thread,
-	// 	return less than 0 when locked by other thread or invalid,
+	// 	return positive number when locked by current thread,
+	// 	return negative number when locked by other thread or invalid,
 	// 	return 0 when it isn't locked or valid.
 	eint64		CountLocks() const;
 	bool		IsLockedByCurrentThread() const;

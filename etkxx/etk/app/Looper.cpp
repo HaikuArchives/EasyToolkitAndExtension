@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -1118,7 +1118,6 @@ ELooper::AddCommonFilter(EMessageFilter *filter)
 {
 	if(filter == NULL || filter->fHandler != NULL || fCommonFilters.AddItem(filter) == false) return false;
 	filter->fHandler = this;
-	filter->fLooper = this;
 	return true;
 }
 
@@ -1128,7 +1127,6 @@ ELooper::RemoveCommonFilter(EMessageFilter *filter)
 {
 	if(filter == NULL || filter->fHandler != this || fCommonFilters.RemoveItem(filter) == false) return false;
 	filter->fHandler = NULL;
-	filter->fLooper = NULL;
 	return true;
 }
 
@@ -1150,8 +1148,11 @@ ELooper::SetCommonFilterList(const EList *filterList)
 		delete filter;
 	}
 
-	if(filterList == NULL) return true;
-	for(eint32 i = 0; i < filterList->CountItems(); i++) ELooper::AddCommonFilter((EMessageFilter*)filterList->ItemAt(i));
+	if(filterList != NULL)
+	{
+		for(eint32 i = 0; i < filterList->CountItems(); i++) AddCommonFilter((EMessageFilter*)filterList->ItemAt(i));
+	}
+
 	return true;
 }
 

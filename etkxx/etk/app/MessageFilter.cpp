@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
  *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -33,7 +33,7 @@
 
 
 EMessageFilter::EMessageFilter(e_message_delivery delivery, e_message_source source, euint32 command, e_filter_hook filter)
-	: fFiltersAny(false), fLooper(NULL), fHandler(NULL)
+	: fFiltersAny(false), fHandler(NULL)
 {
 	fDelivery = delivery;
 	fSource = source;
@@ -43,7 +43,7 @@ EMessageFilter::EMessageFilter(e_message_delivery delivery, e_message_source sou
 
 
 EMessageFilter::EMessageFilter(e_message_delivery delivery, e_message_source source, e_filter_hook filter)
-	: fCommand(0), fFiltersAny(true), fLooper(NULL), fHandler(NULL)
+	: fCommand(0), fFiltersAny(true), fHandler(NULL)
 {
 	fDelivery = delivery;
 	fSource = source;
@@ -52,7 +52,7 @@ EMessageFilter::EMessageFilter(e_message_delivery delivery, e_message_source sou
 
 
 EMessageFilter::EMessageFilter(euint32 command, e_filter_hook filter)
-	: fFiltersAny(false), fDelivery(E_ANY_DELIVERY), fSource(E_ANY_SOURCE), fLooper(NULL), fHandler(NULL)
+	: fFiltersAny(false), fDelivery(E_ANY_DELIVERY), fSource(E_ANY_SOURCE), fHandler(NULL)
 {
 	fCommand = command;
 	fFilterHook = filter;
@@ -60,7 +60,7 @@ EMessageFilter::EMessageFilter(euint32 command, e_filter_hook filter)
 
 
 EMessageFilter::EMessageFilter(const EMessageFilter &filter)
-	: fLooper(NULL), fHandler(NULL)
+	: fHandler(NULL)
 {
 	fCommand = filter.fCommand;
 	fFiltersAny = filter.fFiltersAny;
@@ -71,7 +71,7 @@ EMessageFilter::EMessageFilter(const EMessageFilter &filter)
 
 
 EMessageFilter::EMessageFilter(const EMessageFilter *filter)
-	: fLooper(NULL), fHandler(NULL)
+	: fHandler(NULL)
 {
 	fCommand = (filter ? 0 : filter->fCommand);
 	fFiltersAny = (filter ? true : filter->fFiltersAny);
@@ -87,7 +87,8 @@ EMessageFilter::~EMessageFilter()
 
 	if(fHandler != NULL)
 	{
-		if(fHandler->EHandler::RemoveFilter(this) == false && fLooper != NULL) fLooper->ELooper::RemoveCommonFilter(this);
+		if(fHandler->EHandler::RemoveFilter(this) == false &&
+		   fHandler->Looper() != NULL) fHandler->Looper()->ELooper::RemoveCommonFilter(this);
 	}
 }
 
@@ -163,6 +164,7 @@ EMessageFilter::FiltersAnyCommand() const
 ELooper*
 EMessageFilter::Looper() const
 {
-	return fLooper;
+	if(fHandler == NULL) return NULL;
+	return fHandler->Looper();
 }
 

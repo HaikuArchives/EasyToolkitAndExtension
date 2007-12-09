@@ -141,6 +141,7 @@ EApplicationConnector::Quit()
 }
 
 
+#ifndef _WIN32
 class _LOCAL EApplicationInitializer {
 public:
 	EApplicationInitializer()
@@ -155,4 +156,5 @@ public:
 };
 
 static EApplicationInitializer _etk_app_initializer;
+#endif
 
