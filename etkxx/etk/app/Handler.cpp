@@ -47,202 +47,15 @@ public:
 	EObserverList();
 	~EObserverList();
 
-	e_status_t AddWatching(EMessenger msgr, euint32 what);
-	e_status_t RemoveWatching(EMessenger msgr, euint32 what);
-	bool IsWatched(euint32 what) const;
-
-	EList* GetObserverList(euint32 what);
+	e_status_t	AddWatching(EMessenger msgr, euint32 what);
+	e_status_t	RemoveWatching(EMessenger msgr, euint32 what);
+	bool		IsWatched(euint32 what) const;
+	EList		*GetObserverList(euint32 what) const;
 
 private:
 	EList fListWatching;
 	EList fListWatchingAll;
 };
-
-
-EHandler::EHandler(const char *name)
-	: EArchivable(),
-	  fLooper(NULL),
-	  fPrevHandler(NULL), fNextHandler(NULL),
-	  fObserverList(NULL), fFilters(NULL)
-{
-	fName = EStrdup(name);
-	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
-}
-
-
-EHandler::~EHandler()
-{
-	if(fName != NULL) delete[] fName;
-	if(fToken != NULL) delete fToken;
-	if(fObserverList != NULL) delete reinterpret_cast<EObserverList*>(fObserverList);
-	if(fFilters != NULL)
-	{
-		EHandler::SetFilterList(NULL);
-		delete fFilters;
-	}
-}
-
-
-EHandler::EHandler(const EMessage *from)
-	: EArchivable(from),
-	  fLooper(NULL),
-	  fPrevHandler(NULL), fNextHandler(NULL),
-	  fObserverList(NULL), fFilters(NULL)
-{
-	const char *name = NULL;
-	if(from != NULL) from->FindString("_name", &name);
-
-	fName = EStrdup(name);
-	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
-}
-
-
-e_status_t
-EHandler::Archive(EMessage *into, bool deep) const
-{
-	if(!into) return E_ERROR;
-
-	EArchivable::Archive(into, deep);
-	into->AddString("class", "EHandler");
-	into->AddString("_name", fName);
-
-	return E_OK;
-}
-
-
-EArchivable*
-EHandler::Instantiate(const EMessage *from)
-{
-	return(e_validate_instantiation(from, "EHandler") == false ? NULL : new EHandler(from));
-}
-
-
-void
-EHandler::SetName(const char *name)
-{
-	if(fName != NULL) delete[] fName;
-	fName = EStrdup(name);
-}
-
-
-const char*
-EHandler::Name() const
-{
-	return fName;
-}
-
-
-void
-EHandler::MessageReceived(EMessage *message)
-{
-	if(message == NULL) return;
-
-#ifdef ETK_BIG_ENDIAN
-	if((message->what & 0xff) == '_') return;
-#else
-	if(((message->what >> 24) & 0xff) == '_') return;
-#endif
-
-	if(fNextHandler != NULL && fNextHandler != fLooper) fNextHandler->MessageReceived(message);
-}
-
-
-void
-EHandler::SetNextHandler(EHandler *handler)
-{
-	if(fLooper == NULL || handler == this || fNextHandler == handler) return;
-
-	if(handler == NULL) ETK_ERROR("[APP]: %s --- Invalid operation", __PRETTY_FUNCTION__);
-
-	if(handler == fLooper)
-	{
-		// Before:	fLooper ... fPrevHandler, this, fNextHandler ...
-		// After:	fLooper ... fPrevHandler, fNextHandler ... this
-		fPrevHandler->fNextHandler = fNextHandler;
-		fNextHandler->fPrevHandler = fPrevHandler;
-		fLooper->fPrevHandler->fNextHandler = this;
-
-		EHandler *save_handler = fPrevHandler;
-
-		fPrevHandler = fLooper->fPrevHandler;
-		fNextHandler = fLooper;
-
-		// call virtual function
-		fPrevHandler->SetNextHandler(fPrevHandler->fNextHandler);
-		save_handler->SetNextHandler(save_handler->fNextHandler);
-	}
-	else if(handler != NULL)
-	{
-		if(handler->fLooper != fLooper) return;
-
-		EHandler *last_handler = handler;
-		while(!(last_handler->fNextHandler == fLooper ||
-		        last_handler->fNextHandler == this)) last_handler = last_handler->fNextHandler;
-
-		fNextHandler->fPrevHandler = last_handler;
-		last_handler->fNextHandler = fNextHandler;
-
-		if(last_handler->fNextHandler == fLooper)
-		{
-			// Before:	fLooper ... this, fNextHandler ... handler ... last_handler
-			// After:	fLooper ... this, handler ... last_handler, fNextHandler ...
-			handler->fPrevHandler->fNextHandler = fLooper;
-			fLooper->fPrevHandler = handler->fPrevHandler;
-		}
-		else // last_handler->fNextHandler == this
-		{
-			// Before:	fLooper ... handler ... last_handler, this, fNextHandler ...
-			// After:	fLooper ... this, handler ... last_handler, fNextHandler ...
-			handler->fPrevHandler->fNextHandler = this;
-			fPrevHandler = handler->fPrevHandler;
-		}
-
-		EHandler *save_handler = handler->fPrevHandler;
-
-		handler->fPrevHandler = this;
-		fNextHandler = handler;
-
-		// call virtual function
-		last_handler->SetNextHandler(last_handler->fNextHandler);
-		save_handler->SetNextHandler(save_handler->fNextHandler);
-	}
-}
-
-
-EHandler*
-EHandler::NextHandler() const
-{
-	return fNextHandler;
-}
-
-
-ELooper*
-EHandler::Looper() const
-{
-	return fLooper;
-}
-
-
-bool
-EHandler::LockLooper()
-{
-	return(LockLooperWithTimeout(E_INFINITE_TIMEOUT) == E_OK);
-}
-
-
-e_status_t
-EHandler::LockLooperWithTimeout(e_bigtime_t microseconds_timeout)
-{
-	EAutolock <ELocker>autolock(etk_get_handler_operator_locker());
-	return(fLooper == NULL ? E_BAD_VALUE : fLooper->LockWithTimeout(microseconds_timeout));
-}
-
-
-void
-EHandler::UnlockLooper()
-{
-	if(fLooper) fLooper->Unlock();
-}
 
 
 class _LOCAL EWatchingInfo {
@@ -299,7 +112,7 @@ public:
 		return(save_count > fWhats.CountItems());
 	}
 
-	bool HasWhat(euint32 what)
+	bool HasWhat(euint32 what) const
 	{
 		if(what == E_OBSERVER_OBSERVE_ALL) return false;
 
@@ -458,7 +271,7 @@ EObserverList::RemoveWatching(EMessenger msgr, euint32 what)
 
 
 EList*
-EObserverList::GetObserverList(euint32 what)
+EObserverList::GetObserverList(euint32 what) const
 {
 	EList *list = new EList();
 
@@ -511,6 +324,190 @@ EObserverList::IsWatched(euint32 what) const
 		if(((EWatchingInfo*)fListWatchingAll.ItemAt(i))->HasWhat(what)) exclude_times++;
 	}
 	return(exclude_times != fListWatchingAll.CountItems());
+}
+
+
+EHandler::EHandler(const char *name)
+	: EArchivable(),
+	  fLooper(NULL),
+	  fPrevHandler(NULL), fNextHandler(NULL),
+	  fObserverList(NULL), fFilters(NULL)
+{
+	fName = EStrdup(name);
+	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
+}
+
+
+EHandler::~EHandler()
+{
+	if(fName != NULL) delete[] fName;
+	if(fToken != NULL) delete fToken;
+	if(fObserverList != NULL) delete reinterpret_cast<EObserverList*>(fObserverList);
+	if(fFilters != NULL)
+	{
+		EHandler::SetFilterList(NULL);
+		delete fFilters;
+	}
+}
+
+
+EHandler::EHandler(const EMessage *from)
+	: EArchivable(from),
+	  fLooper(NULL),
+	  fPrevHandler(NULL), fNextHandler(NULL),
+	  fObserverList(NULL), fFilters(NULL)
+{
+	const char *name = NULL;
+	if(from != NULL) from->FindString("_name", &name);
+
+	fName = EStrdup(name);
+	fToken = etk_app_connector->HandlersDepot()->CreateToken(reinterpret_cast<void*>(this));
+}
+
+
+e_status_t
+EHandler::Archive(EMessage *into, bool deep) const
+{
+	if(!into) return E_ERROR;
+
+	EArchivable::Archive(into, deep);
+	into->AddString("class", "EHandler");
+	into->AddString("_name", fName);
+
+	return E_OK;
+}
+
+
+EArchivable*
+EHandler::Instantiate(const EMessage *from)
+{
+	return(e_validate_instantiation(from, "EHandler") == false ? NULL : new EHandler(from));
+}
+
+
+void
+EHandler::SetName(const char *name)
+{
+	if(fName != NULL) delete[] fName;
+	fName = EStrdup(name);
+}
+
+
+const char*
+EHandler::Name() const
+{
+	return fName;
+}
+
+
+void
+EHandler::MessageReceived(EMessage *message)
+{
+	if(message == NULL || fNextHandler == NULL || fNextHandler == fLooper) return;
+#ifdef ETK_BIG_ENDIAN
+	if((message->what & 0xff) == '_') return;
+#else
+	if(((message->what >> 24) & 0xff) == '_') return;
+#endif
+	fNextHandler->MessageReceived(message);
+}
+
+
+void
+EHandler::SetNextHandler(EHandler *handler)
+{
+	if(fLooper == NULL || handler == this || fNextHandler == handler) return;
+
+	if(handler == NULL) ETK_ERROR("[APP]: %s --- Invalid operation", __PRETTY_FUNCTION__);
+
+	if(handler == fLooper)
+	{
+		// Before:	fLooper ... fPrevHandler, this, fNextHandler ...
+		// After:	fLooper ... fPrevHandler, fNextHandler ... this
+		fPrevHandler->fNextHandler = fNextHandler;
+		fNextHandler->fPrevHandler = fPrevHandler;
+		fLooper->fPrevHandler->fNextHandler = this;
+
+		EHandler *save_handler = fPrevHandler;
+
+		fPrevHandler = fLooper->fPrevHandler;
+		fNextHandler = fLooper;
+
+		// call virtual function
+		fPrevHandler->SetNextHandler(fPrevHandler->fNextHandler);
+		save_handler->SetNextHandler(save_handler->fNextHandler);
+	}
+	else if(handler != NULL)
+	{
+		if(handler->fLooper != fLooper) return;
+
+		EHandler *last_handler = handler;
+		while(!(last_handler->fNextHandler == fLooper ||
+		        last_handler->fNextHandler == this)) last_handler = last_handler->fNextHandler;
+
+		fNextHandler->fPrevHandler = last_handler;
+		last_handler->fNextHandler = fNextHandler;
+
+		if(last_handler->fNextHandler == fLooper)
+		{
+			// Before:	fLooper ... this, fNextHandler ... handler ... last_handler
+			// After:	fLooper ... this, handler ... last_handler, fNextHandler ...
+			handler->fPrevHandler->fNextHandler = fLooper;
+			fLooper->fPrevHandler = handler->fPrevHandler;
+		}
+		else // last_handler->fNextHandler == this
+		{
+			// Before:	fLooper ... handler ... last_handler, this, fNextHandler ...
+			// After:	fLooper ... this, handler ... last_handler, fNextHandler ...
+			handler->fPrevHandler->fNextHandler = this;
+			fPrevHandler = handler->fPrevHandler;
+		}
+
+		EHandler *save_handler = handler->fPrevHandler;
+
+		handler->fPrevHandler = this;
+		fNextHandler = handler;
+
+		// call virtual function
+		last_handler->SetNextHandler(last_handler->fNextHandler);
+		save_handler->SetNextHandler(save_handler->fNextHandler);
+	}
+}
+
+
+EHandler*
+EHandler::NextHandler() const
+{
+	return fNextHandler;
+}
+
+
+ELooper*
+EHandler::Looper() const
+{
+	return fLooper;
+}
+
+
+bool
+EHandler::LockLooper()
+{
+	return(LockLooperWithTimeout(E_INFINITE_TIMEOUT) == E_OK);
+}
+
+
+e_status_t
+EHandler::LockLooperWithTimeout(e_bigtime_t microseconds_timeout)
+{
+	EAutolock <ELocker>autolock(etk_get_handler_operator_locker());
+	return(fLooper == NULL ? E_BAD_VALUE : fLooper->LockWithTimeout(microseconds_timeout));
+}
+
+
+void
+EHandler::UnlockLooper()
+{
+	if(fLooper) fLooper->Unlock();
 }
 
 
@@ -700,15 +697,6 @@ EHandler::ResolveSpecifier(EMessage *msg, eint32 index, EMessage *specifier, ein
 
 e_status_t
 EHandler::GetSupportedSuites(EMessage *data)
-{
-	// TODO
-	ETK_WARNING("[APP]: %s --- TODO", __PRETTY_FUNCTION__);
-	return E_ERROR;
-}
-
-
-e_status_t
-EHandler::Perform(e_perform_code d, void *arg)
 {
 	// TODO
 	ETK_WARNING("[APP]: %s --- TODO", __PRETTY_FUNCTION__);

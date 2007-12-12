@@ -29,7 +29,9 @@ libetk_support_la_SOURCES =	\
 		ByteOrder.c		\
 		ByteOrder.h		\
 		DataIO.cpp		\
-		DataIO.h
+		DataIO.h		\
+		Flattenable.cpp		\
+		Flattenable.h
 
 etk_supportincludedir=$(includedir)/etkxx/etk/support
 etk_supportinclude_HEADERS =	\
@@ -44,7 +46,8 @@ etk_supportinclude_HEADERS =	\
 		Autolock.h	\
 		Archivable.h	\
 		ByteOrder.h	\
-		DataIO.h
+		DataIO.h	\
+		Flattenable.h
 
 DISTCLEANFILES =	\
 	Makefile.in

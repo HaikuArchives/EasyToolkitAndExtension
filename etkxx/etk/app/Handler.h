@@ -96,9 +96,6 @@ public:
 						  eint32 what, const char *property);
 	virtual e_status_t	GetSupportedSuites(EMessage *data);
 
-	// Reserved
-	virtual e_status_t	Perform(e_perform_code d, void *arg);
-
 private:
 	friend class ELooper;
 	friend class EMessage;

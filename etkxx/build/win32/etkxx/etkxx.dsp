@@ -333,6 +333,10 @@ SOURCE=..\..\..\etk\support\String.cpp
 
 SOURCE=..\..\..\etk\support\StringArray.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\support\Flattenable.cpp
+# End Source File
 # End Group
 # Begin Group "kernel"
 
@@ -608,6 +612,10 @@ SOURCE=..\..\..\etk\support\String.h
 # Begin Source File
 
 SOURCE=..\..\..\etk\support\StringArray.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\support\Flattenable.h
 # End Source File
 # Begin Source File
 

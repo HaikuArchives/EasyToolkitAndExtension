@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,21 +22,31 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: SupportKit.h
- * 
+ *
+ * File: Flattenable.h
+ *
  * --------------------------------------------------------------------------*/
 
+#ifndef __ETK_FLATTENABLE_H__
+#define __ETK_FLATTENABLE_H__
+
 #include <etk/support/SupportDefs.h>
-#include <etk/support/ByteOrder.h>
-#include <etk/support/ClassInfo.h>
-#include <etk/support/Errors.h>
-#include <etk/support/Archivable.h>
-#include <etk/support/Autolock.h>
-#include <etk/support/SimpleLocker.h>
-#include <etk/support/Locker.h>
-#include <etk/support/String.h>
-#include <etk/support/List.h>
-#include <etk/support/StringArray.h>
-#include <etk/support/Flattenable.h>
+
+#ifdef __cplusplus /* Just for C++ */
+
+class _IMPEXP_ETK EFlattenable {
+public:
+	virtual bool		IsFixedSize() const = 0;
+
+	virtual e_type_code	TypeCode() const = 0;
+	virtual bool		AllowsTypeCode(e_type_code code) const;
+
+	virtual ssize_t		FlattenedSize() const = 0;
+	virtual e_status_t	Flatten(void *buffer, ssize_t numBytes) = 0;
+	virtual e_status_t	Unflatten(e_type_code, const void *buffer, ssize_t numBytes) = 0;
+};
+
+#endif /* __cplusplus */
+
+#endif /* __ETK_FLATTENABLE_H__ */
 

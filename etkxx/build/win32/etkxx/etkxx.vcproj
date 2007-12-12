@@ -281,6 +281,10 @@
 					RelativePath="..\..\..\etk\support\StringArray.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\..\etk\support\Flattenable.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="kernel"
@@ -784,6 +788,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\StringArray.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\support\Flattenable.h"
 					>
 				</File>
 				<File

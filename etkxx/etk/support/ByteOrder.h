@@ -85,7 +85,7 @@ _IMPEXP_ETK double			e_swap_double(double value);
 #define E_BENDIAN_TO_HOST_FLOAT(v)	E_SWAP_FLOAT(v)
 #define E_BENDIAN_TO_HOST_DOUBLE(v)	E_SWAP_DOUBLE(v)
 
-#else
+#else /* ETK_BIG_ENDIAN */
 
 #define E_HOST_IS_LENDIAN		0
 #define E_HOST_IS_BENDIAN		1
