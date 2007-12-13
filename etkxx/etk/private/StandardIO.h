@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,23 +22,31 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: SupportKit.h
- * 
+ *
+ * File: StandardIO.h
+ *
  * --------------------------------------------------------------------------*/
 
-#include <etk/support/SupportDefs.h>
-#include <etk/support/ByteOrder.h>
-#include <etk/support/ClassInfo.h>
-#include <etk/support/Errors.h>
-#include <etk/support/Archivable.h>
-#include <etk/support/Autolock.h>
-#include <etk/support/SimpleLocker.h>
-#include <etk/support/Locker.h>
-#include <etk/support/String.h>
-#include <etk/support/List.h>
-#include <etk/support/StringArray.h>
-#include <etk/support/DataIO.h>
+#ifndef __ETK_PRIVATE_STANDARD_IO_H__
+#define __ETK_PRIVATE_STANDARD_IO_H__
+
 #include <etk/support/StreamIO.h>
-#include <etk/support/Flattenable.h>
+
+#ifdef __cplusplus /* Just for C++ */
+
+class _LOCAL EStandardIO : public EStreamIO {
+public:
+	EStandardIO(int fd);
+	virtual ~EStandardIO();
+
+	virtual ssize_t		Read(void *buffer, size_t size);
+	virtual ssize_t		Write(const void *buffer, size_t size);
+
+private:
+	int fFD;
+};
+
+#endif /* __cplusplus */
+
+#endif /* __ETK_PRIVATE_STANDARD_IO_H__ */
 

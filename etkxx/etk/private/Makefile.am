@@ -19,7 +19,11 @@ libetk_private_la_SOURCES =		\
 		PrivateApplication.cpp	\
 		PrivateApplication.h	\
 		PrivateHandler.cpp	\
-		PrivateHandler.h
+		PrivateHandler.h	\
+		StandardIO.cpp		\
+		StandardIO.h		\
+		MessageBody.cpp		\
+		MessageBody.h
 
 DISTCLEANFILES =	\
 	Makefile.in

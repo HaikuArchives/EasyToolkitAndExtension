@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,23 +22,45 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: SupportKit.h
- * 
+ *
+ * File: StandardIO.cpp
+ *
  * --------------------------------------------------------------------------*/
 
 #include <etk/support/SupportDefs.h>
-#include <etk/support/ByteOrder.h>
-#include <etk/support/ClassInfo.h>
-#include <etk/support/Errors.h>
-#include <etk/support/Archivable.h>
-#include <etk/support/Autolock.h>
-#include <etk/support/SimpleLocker.h>
-#include <etk/support/Locker.h>
-#include <etk/support/String.h>
-#include <etk/support/List.h>
-#include <etk/support/StringArray.h>
-#include <etk/support/DataIO.h>
-#include <etk/support/StreamIO.h>
-#include <etk/support/Flattenable.h>
+
+#ifndef _WIN32
+	#include <unistd.h>
+#else /* _WIN32 */
+	#include <io.h>
+	#define read(fd, buf, count)	((ssize_t)_read(fd, buf, count))
+	#define write(fd, buf, count)	((ssize_t)_write(fd, buf, count))
+#endif /* !_WIN32 */
+
+#include "StandardIO.h"
+
+
+EStandardIO::EStandardIO(int fd)
+	: EStreamIO(), fFD(fd)
+{
+}
+
+
+EStandardIO::~EStandardIO()
+{
+}
+
+
+ssize_t
+EStandardIO::Read(void *buffer, size_t size)
+{
+	return read(fFD, buffer, size);
+}
+
+
+ssize_t
+EStandardIO::Write(const void *buffer, size_t size)
+{
+	return write(fFD, buffer, size);
+}
 

@@ -245,6 +245,14 @@
 					RelativePath="..\..\..\etk\private\Token.cpp"
 					>
 				</File>
+				<File
+					RelativePath="..\..\..\etk\private\StandardIO.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\private\MessageBody.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="support"
@@ -259,6 +267,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\DataIO.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\support\StreamIO.cpp"
 					>
 				</File>
 				<File
@@ -742,6 +754,14 @@
 					RelativePath="..\..\..\etk\private\Token.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\..\etk\private\StandardIO.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\etk\private\MessageBody.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="support"
@@ -765,6 +785,10 @@
 				<File
 					RelativePath="..\..\..\etk\support\DataIO.h"
 					>
+				<File
+					RelativePath="..\..\..\etk\support\StreamIO.h"
+					>
+				</File>
 				</File>
 				<File
 					RelativePath="..\..\..\etk\support\Errors.h"

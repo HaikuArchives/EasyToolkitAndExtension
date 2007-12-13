@@ -30,6 +30,8 @@ libetk_support_la_SOURCES =	\
 		ByteOrder.h		\
 		DataIO.cpp		\
 		DataIO.h		\
+		StreamIO.cpp		\
+		StreamIO.h		\
 		Flattenable.cpp		\
 		Flattenable.h
 
@@ -47,6 +49,7 @@ etk_supportinclude_HEADERS =	\
 		Archivable.h	\
 		ByteOrder.h	\
 		DataIO.h	\
+		StreamIO.h	\
 		Flattenable.h
 
 DISTCLEANFILES =	\

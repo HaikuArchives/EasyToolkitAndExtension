@@ -297,6 +297,14 @@ SOURCE=..\..\..\etk\private\Object.cpp
 
 SOURCE=..\..\..\etk\private\Token.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\StandardIO.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\MessageBody.cpp
+# End Source File
 # End Group
 # Begin Group "support"
 
@@ -312,6 +320,10 @@ SOURCE=..\..\..\etk\support\ByteOrder.c
 # Begin Source File
 
 SOURCE=..\..\..\etk\support\DataIO.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\support\StreamIO.cpp
 # End Source File
 # Begin Source File
 
@@ -565,6 +577,14 @@ SOURCE=..\..\..\etk\private\PrivateApplication.h
 
 SOURCE=..\..\..\etk\private\PrivateHandler.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\StandardIO.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\private\MessageBody.h
+# End Source File
 # End Group
 # Begin Group "SupportKit"
 
@@ -588,6 +608,10 @@ SOURCE=..\..\..\etk\support\ClassInfo.h
 # Begin Source File
 
 SOURCE=..\..\..\etk\support\DataIO.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\etk\support\StreamIO.h
 # End Source File
 # Begin Source File
 

@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
- * 
+ *
  * ETK++ --- The Easy Toolkit for C++ programing
- * Copyright (C) 2004-2006, Anthony Lee, All Rights Reserved
+ * Copyright (C) 2004-2007, Anthony Lee, All Rights Reserved
  *
  * ETK++ library is a freeware; it may be used and distributed according to
  * the terms of The MIT License.
@@ -22,23 +22,47 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
  * IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
- * File: SupportKit.h
- * 
+ *
+ * File: StreamIO.h
+ *
  * --------------------------------------------------------------------------*/
 
-#include <etk/support/SupportDefs.h>
-#include <etk/support/ByteOrder.h>
-#include <etk/support/ClassInfo.h>
-#include <etk/support/Errors.h>
-#include <etk/support/Archivable.h>
-#include <etk/support/Autolock.h>
-#include <etk/support/SimpleLocker.h>
-#include <etk/support/Locker.h>
-#include <etk/support/String.h>
-#include <etk/support/List.h>
-#include <etk/support/StringArray.h>
+#ifndef __ETK_STREAM_IO_H__
+#define __ETK_STREAM_IO_H__
+
 #include <etk/support/DataIO.h>
-#include <etk/support/StreamIO.h>
-#include <etk/support/Flattenable.h>
+
+#ifdef __cplusplus /* Just for C++ */
+
+class _IMPEXP_ETK EStreamIO : public EDataIO {
+public:
+	EStreamIO();
+	virtual ~EStreamIO();
+
+	virtual ssize_t		Read(void *buffer, size_t size);
+	virtual ssize_t		Write(const void *buffer, size_t size);
+
+	EStreamIO 		&operator<<(const char *str);
+	EStreamIO 		&operator<<(char c);
+	EStreamIO 		&operator<<(eint8 value);
+	EStreamIO 		&operator<<(euint8 value);
+	EStreamIO 		&operator<<(eint16 value);
+	EStreamIO 		&operator<<(euint16 value);
+	EStreamIO 		&operator<<(eint32 value);
+	EStreamIO 		&operator<<(euint32 value);
+	EStreamIO 		&operator<<(eint64 value);
+	EStreamIO 		&operator<<(euint64 value);
+	EStreamIO 		&operator<<(float value);
+	EStreamIO 		&operator<<(double value);
+
+	/* TODO: operator>>() */
+};
+
+extern _IMPEXP_ETK EStreamIO& EIn;
+extern _IMPEXP_ETK EStreamIO& EOut;
+extern _IMPEXP_ETK EStreamIO& EErr;
+
+#endif /* __cplusplus */
+
+#endif /* __ETK_STREAM_IO_H__ */
 
