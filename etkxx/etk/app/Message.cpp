@@ -31,8 +31,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <etk/kernel/Kernel.h>
 #include <etk/private/Token.h>
+#include <etk/support/StreamIO.h>
 
 #include "Message.h"
 #include "Messenger.h"
@@ -422,6 +422,24 @@ EMessage::Unflatten(const char *buffer, size_t bufferSize)
 	fNoticeSource = false;
 
 	return true;
+}
+
+
+bool
+EMessage::IsSystem() const
+{
+#ifdef ETK_BIG_ENDIAN
+	return((what & 0xff) == '_');
+#else
+	return(((what >> 24) & 0xff) == '_');
+#endif
+}
+
+
+void
+EMessage::PrintToStream(EStreamIO &stream) const
+{
+	// TODO
 }
 
 

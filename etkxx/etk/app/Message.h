@@ -31,18 +31,18 @@
 #ifndef __ETK_MESSAGE_H__
 #define __ETK_MESSAGE_H__
 
-#include <etk/support/SupportDefs.h>
+#include <etk/kernel/OS.h>
 #include <etk/support/String.h>
 #include <etk/support/List.h>
 #include <etk/interface/Point.h>
 #include <etk/interface/Rect.h>
-#include <etk/kernel/OS.h>
 
 #ifdef __cplusplus /* Just for C++ */
 
 class EList;
 class EMessenger;
 class EHandler;
+class EStreamIO;
 
 class _IMPEXP_ETK EMessage {
 public:
@@ -210,6 +210,8 @@ public:
 	bool		ReplaceData(const char *name, e_type_code type, const void *data, size_t numBytes, bool is_fixed_size);
 	bool		ReplaceData(const char *name, e_type_code type, eint32 index, const void *data, size_t numBytes, bool is_fixed_size);
 
+	bool		IsSystem() const;
+	void		PrintToStream(EStreamIO &stream) const;
 	void		PrintToStream() const;
 
 	size_t		FlattenedSize() const;

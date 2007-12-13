@@ -403,12 +403,7 @@ EHandler::Name() const
 void
 EHandler::MessageReceived(EMessage *message)
 {
-	if(message == NULL || fNextHandler == NULL || fNextHandler == fLooper) return;
-#ifdef ETK_BIG_ENDIAN
-	if((message->what & 0xff) == '_') return;
-#else
-	if(((message->what >> 24) & 0xff) == '_') return;
-#endif
+	if(message == NULL || message->IsSystem() || fNextHandler == NULL || fNextHandler == fLooper) return;
 	fNextHandler->MessageReceived(message);
 }
 
