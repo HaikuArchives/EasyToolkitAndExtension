@@ -30,6 +30,11 @@
 #include "Flattenable.h"
 
 
+EFlattenable::~EFlattenable()
+{
+}
+
+
 bool
 EFlattenable::AllowsTypeCode(e_type_code code) const
 {

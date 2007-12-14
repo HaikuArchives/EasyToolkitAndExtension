@@ -36,6 +36,8 @@
 
 class _IMPEXP_ETK EFlattenable {
 public:
+	virtual ~EFlattenable();
+
 	virtual bool		IsFixedSize() const = 0;
 
 	virtual e_type_code	TypeCode() const = 0;

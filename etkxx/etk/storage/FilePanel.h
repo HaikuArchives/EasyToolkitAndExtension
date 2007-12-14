@@ -45,8 +45,10 @@ typedef enum e_file_panel_button {
 
 #ifdef __cplusplus /* Just for C++ */
 
-class EFilePanelFilter {
+class _IMPEXP_ETK EFilePanelFilter {
 public:
+	virtual ~EFilePanelFilter();
+
 	virtual bool		Filter(const EEntry *entry) = 0;
 };
 

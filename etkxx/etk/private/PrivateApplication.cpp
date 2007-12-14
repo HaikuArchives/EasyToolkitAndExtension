@@ -39,6 +39,7 @@ EApplicationConnector *etk_app_connector = NULL;
 EApplicationConnector::EApplicationConnector()
 	: fLocker(true), fPort(NULL), fThread(NULL)
 {
+#if 0
 	if(etk_get_current_team_id() == 0)
 		ETK_ERROR("[PRIVATE]: %s --- Unsupported system.", __PRETTY_FUNCTION__);
 
@@ -50,11 +51,14 @@ EApplicationConnector::EApplicationConnector()
 
 	if((fThread = etk_create_thread(this->task, E_NORMAL_PRIORITY, reinterpret_cast<void*>(this), NULL)) == NULL)
 		ETK_ERROR("[PRIVATE]: %s --- Unable to create thread.", __PRETTY_FUNCTION__);
+#endif
 
 	fHandlersDepot = new ETokensDepot(new ELocker(), true);
 
+#if 0
 	if(etk_resume_thread(fThread) != E_OK)
 		ETK_ERROR("[PRIVATE]: %s --- Unable to resume thread.", __PRETTY_FUNCTION__);
+#endif
 }
 
 

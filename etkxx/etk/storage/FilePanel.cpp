@@ -1527,6 +1527,11 @@ EFilePanelWindow::RefreshDirMenu()
 }
 
 
+EFilePanelFilter::~EFilePanelFilter()
+{
+}
+
+
 EFilePanel::EFilePanel(e_file_panel_mode mode,
 		       const EMessenger *target,
 		       const char *panel_directory,

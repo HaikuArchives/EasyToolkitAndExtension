@@ -184,13 +184,13 @@ EDFBRender::GetPixel(eint32 x, eint32 y, e_rgb_color &color) const
 					     ((dfbColor & 0x1c) << 3) | 0x1f,
 					     ((dfbColor & 0x03) << 6) | 0x3f);
 				break;
-
+#if 0
 			case DSPF_RGB15:
 				color.set_to(((dfbColor & 0x7c00) >> 7) | 0x0007,
 					     ((dfbColor & 0x03e0) >> 2) | 0x0007,
 					     ((dfbColor & 0x001f) << 3) | 0x0007);
 				break;
-
+#endif
 			case DSPF_RGB16:
 				color.set_to(((dfbColor & 0xf800) >> 8) | 0x0007,
 					     ((dfbColor & 0x07e0) >> 3) | 0x0003,
@@ -265,11 +265,11 @@ EDFBRender::PutRect(eint32 x, eint32 y, euint32 width, euint32 height, e_rgb_col
 #endif
 	for(eint32 i = 0; i < aRegion.CountRects(); i++)
 	{
+		ERect r = aRegion.RectAt(i).FloorCopy();
 #ifdef DFB_HAVE_FILLRECTANGLES
 		if(dfbRects == NULL)
 		{
 #endif
-			ERect r = aRegion.RectAt(i).FloorCopy();
 			fSurface->FillRectangle(fSurface, (int)r.left, (int)r.top, (int)r.Width() + 1, (int)r.Height() + 1);
 #ifdef DFB_HAVE_FILLRECTANGLES
 		}
