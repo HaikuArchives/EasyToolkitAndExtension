@@ -33,12 +33,14 @@ inline BBitmap::BBitmap(BRect bounds,
 			bool need_contiguous)
 	: EBitmap(bounds, true)
 {
+#if 0
 	bounds.OffsetTo(B_ORIGIN);
 	Lock();
 	AddChild(new BView(bounds, NULL, B_FOLLOW_NONE, 0));
 	ChildAt(0)->SetHighColor(255, 255, 255);
 	ChildAt(0)->FillRect(bounds);
 	Unlock();
+#endif
 }
 
 
