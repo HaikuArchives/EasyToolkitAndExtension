@@ -300,6 +300,15 @@ fi
 AM_CONDITIONAL(ETK_COMPILE_TEST, [test "$enable_debug" = "yes"])
 AC_MSG_RESULT([$ETK_DEBUG_FLAGS])
 
+# Test program for Win32API
+m4_define([etk_win32api_test],[
+#include <windows.h>
+int main()
+{
+	DWORD dwVersion = GetVersion();
+	exit(0);
+}])
+
 if test "x$etk_native_os" = xwin32; then
 AC_MSG_CHECKING([for Win32 Library])
 case $etk_native_os_extra in
@@ -327,6 +336,24 @@ AC_SUBST(ETK_WIN32_RESOURCE)
 AC_SUBST(ETK_DEF)
 ETK_LIBS="$ETK_LIBS $etk_win32_libs"
 ETK_EXTRA_LIBS="$ETK_EXTRA_LIBS $etk_win32_libs_extra"
+
+etk_save_LIBS="$LIBS"
+LIBS="$etk_save_LIBS -lkernel32"
+AC_MSG_CHECKING(for Win32API)
+AC_TRY_RUN(etk_win32api_test(0),
+	   have_win32api=yes,
+	   have_win32api=no,
+	   [AC_LINK_IFELSE(etk_win32api_test(0),
+	   have_win32api=yes,
+	   have_win32api=no)])
+AC_MSG_RESULT($have_win32api)
+LIBS="$etk_save_LIBS"
+if test "x$have_win32api" = xno; then
+  AC_MSG_ERROR([
+*** Unable to find Win32API runtime.
+])
+fi
+
 fi
 
 AC_MSG_CHECKING(whether make is GNU Make)
@@ -666,7 +693,6 @@ case $etk_native_os_extra in
 	;;
 esac
 if test "$etk_net_libs" = none; then
-	etk_save_CFLAGS="$CFLAGS"
 	etk_save_LIBS="$LIBS"
         for net_lib in none net socket; do
 		if test x"$net_lib" = xnone; then
@@ -677,7 +703,6 @@ if test "$etk_net_libs" = none; then
 			IN=" in -l$net_lib"
 		fi
 
-		CFLAGS="$etk_save_CFLAGS"
 		LIBS="$etk_save_LIBS $add_net_lib"
 
 		AC_MSG_CHECKING(for socket$IN)
@@ -696,7 +721,6 @@ if test "$etk_net_libs" = none; then
 			break
 		fi
 	done
-	CFLAGS="$etk_save_CFLAGS"
 	LIBS="$etk_save_LIBS"
 fi
 if test "$etk_net_libs" != "none" ; then

@@ -8,8 +8,13 @@ Copyright (C) 2004-2007 Anthony Lee, All rights reserved.
 How to compile ETK++ from source
 --------------------------------
  * First run "./autogen.sh --config" in current directory
+	autogen.sh requires:
+		autoconf >= 2.54
+		automake >= 1.7
+		libtool >= 1.5
+		pkg-config >= 0.14
 
- * Linux/MinGW/CygWin/FreeBSD/Solaris/Darwin:
+ * Linux/MinGW/CygWin/FreeBSD/Solaris/MacOSX/BeOS:
 	1. run the "./configue" to generate the config files for compiling.
 	2. run "make" to compile all.
 	3. run "make install" to install all.
@@ -31,9 +36,11 @@ How to compile ETK++ from source
 	3. compile the project named "etkxx"
 	4. the "build/win32/example.sln" just for compiling examples
 
- * BeOS
-	1. run the "./configue" to generate the config files for compiling.
-	2. open "build/beos/etkxx-x86.proj" or "build/beos/etkxx-ppc.proj" in BeIDE and compile it
+ * BeOS BeIDE:
+	1. run the "./configue --with-built-in-graphics=beos" to generate the config files for compiling.
+	2. open "build/beos/etkxx-x86.proj" or "build/beos/etkxx-x86-ppc.proj" in BeIDE and compile it
 	3. you'll get "build/beos/libetkxx.so".
 	4. the "build/beos/example/*.proj" just for compiling examples
+	5. special:
+		BeOS Exp/Dano --- copy "/boot/beos/system/lib/libnet.so" to "/boot/develop/lib/x86"
 

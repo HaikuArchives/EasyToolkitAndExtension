@@ -27,7 +27,7 @@
  *
  * --------------------------------------------------------------------------*/
 
-// for libtool as building library
+#if 0
 #ifdef NEED_MAIN
 extern "C" {
 int main(int argc, char **argv)
@@ -35,5 +35,6 @@ int main(int argc, char **argv)
 	return 0;
 }
 }
+#endif
 #endif
 
