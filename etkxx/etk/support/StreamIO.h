@@ -34,6 +34,8 @@
 
 #ifdef __cplusplus /* Just for C++ */
 
+class EString;
+
 class _IMPEXP_ETK EStreamIO : public EDataIO {
 public:
 	EStreamIO();
@@ -42,8 +44,6 @@ public:
 	virtual ssize_t		Read(void *buffer, size_t size);
 	virtual ssize_t		Write(const void *buffer, size_t size);
 
-	EStreamIO 		&operator<<(const char *str);
-	EStreamIO 		&operator<<(char c);
 	EStreamIO 		&operator<<(eint8 value);
 	EStreamIO 		&operator<<(euint8 value);
 	EStreamIO 		&operator<<(eint16 value);
@@ -54,9 +54,18 @@ public:
 	EStreamIO 		&operator<<(euint64 value);
 	EStreamIO 		&operator<<(float value);
 	EStreamIO 		&operator<<(double value);
+	EStreamIO 		&operator<<(const void *value);
+	EStreamIO 		&operator<<(bool value);
+	EStreamIO 		&operator<<(char c);
+	EStreamIO 		&operator<<(const char *str);
+	EStreamIO 		&operator<<(const EString &str);
+	EStreamIO 		&operator<<(EStreamIO &stream);
 
-	/* TODO: operator>>() */
+	// TODO: operator>>()
 };
+
+extern _IMPEXP_ETK EStreamIO& endl;
+extern _IMPEXP_ETK EStreamIO& ends;
 
 extern _IMPEXP_ETK EStreamIO& EIn;
 extern _IMPEXP_ETK EStreamIO& EOut;

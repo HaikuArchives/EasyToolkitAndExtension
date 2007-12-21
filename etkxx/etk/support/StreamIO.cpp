@@ -33,10 +33,14 @@
 #include "StreamIO.h"
 
 
+static EStreamIO _endl;
+static EStreamIO _ends;
 static EStandardIO _EIn(0);
 static EStandardIO _EOut(1);
 static EStandardIO _EErr(2);
 
+_IMPEXP_ETK EStreamIO &endl = _endl;
+_IMPEXP_ETK EStreamIO &ends = _ends;
 _IMPEXP_ETK EStreamIO &EIn = _EIn;
 _IMPEXP_ETK EStreamIO &EOut = _EOut;
 _IMPEXP_ETK EStreamIO &EErr = _EErr;
@@ -64,22 +68,6 @@ ssize_t
 EStreamIO::Write(const void *buffer, size_t size)
 {
 	return E_ERROR;
-}
-
-
-EStreamIO&
-EStreamIO::operator<<(const char *str)
-{
-	if(!(str == NULL || *str == 0)) Write(str, strlen(str));
-	return *this;
-}
-
-
-EStreamIO&
-EStreamIO::operator<<(char c)
-{
-	Write(&c, 1);
-	return *this;
 }
 
 
@@ -179,6 +167,71 @@ EStreamIO::operator<<(double value)
 	EString str;
 	str << value;
 	Write(str.String(), str.Length());
+	return *this;
+}
+
+
+EStreamIO&
+EStreamIO::operator<<(const void *value)
+{
+	EString str;
+	str.AppendFormat("%p", value);
+	Write(str.String(), str.Length());
+	return *this;
+}
+
+
+EStreamIO&
+EStreamIO::operator<<(bool value)
+{
+	return operator<<(value ? "ture" : "false");
+}
+
+
+EStreamIO&
+EStreamIO::operator<<(char c)
+{
+	Write(&c, 1);
+	return *this;
+}
+
+
+EStreamIO&
+EStreamIO::operator<<(const char *str)
+{
+	if(!(str == NULL || *str == 0)) Write(str, strlen(str));
+	return *this;
+}
+
+
+EStreamIO&
+EStreamIO::operator<<(const EString &str)
+{
+	if(str.Length() > 0) Write(str.String(), str.Length());
+	return *this;
+}
+
+
+EStreamIO&
+EStreamIO::operator<<(EStreamIO &stream)
+{
+	if(&stream == &endl || &stream == &ends)
+		return operator<<(&stream == &endl ? '\n' : ' ');
+
+	eint8 buf[512];
+	ssize_t len;
+
+	bzero(buf, sizeof(buf));
+	if((len = stream.Read(&buf[0], sizeof(buf))) > 0)
+	{
+		ssize_t nWritten;
+		while((nWritten = Write(&buf[0], (size_t)len)) > 0)
+		{
+			if(len - nWritten == 0 || (len -= nWritten) < 0) break;
+			memmove(&buf[0], &buf[nWritten], (size_t)len);
+		}
+	}
+
 	return *this;
 }
 

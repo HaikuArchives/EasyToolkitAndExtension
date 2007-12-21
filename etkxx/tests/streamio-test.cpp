@@ -31,8 +31,12 @@
 
 int main(int argc, char **argv)
 {
-	EOut << "Number of argument: " << argc << '\n';
-	for(int i = 0; i < argc; i++) EOut << "[" << i << "]: " << argv[i] << '\n';
+	EOut << "Number of argument:" << ends << argc << endl;
+	EOut << "Address of \"argv\":" << ends << argv << endl;
+	for(int i = 0; i < argc; i++) EOut << "[" << i << "]:" << ends << argv[i] << endl;
+
+	EOut << endl << "Type something to test standard input, please ..." << endl;
+	EOut << EIn;
 
 	return 0;
 }
