@@ -2,7 +2,7 @@ Source: etkxx
 Section: libs
 Priority: optional
 Maintainer: Anthony Lee <don.anthony.lee@gmail.com>
-Build-Depends: debhelper (>= 4.0.0), automake (>= 1.7), autoconf (>= 2.54), libtool (>= 1.5.6), libc6-dev
+Build-Depends: debhelper (>= 4.0.0), automake (>= 1.7), autoconf (>= 2.54), libtool (>= 1.5.24), libc6-dev
 Standards-Version: 3.6.0
 
 Package: libetkxx

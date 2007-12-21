@@ -11,7 +11,7 @@ How to compile ETK++ from source
 	autogen.sh requires:
 		autoconf >= 2.54
 		automake >= 1.7
-		libtool >= 1.5
+		libtool >= 1.5.24
 		pkg-config >= 0.14
 
  * Linux/MinGW/CygWin/FreeBSD/Solaris/MacOSX/BeOS:
@@ -23,6 +23,7 @@ How to compile ETK++ from source
 	5. special:
 	  IPC on Linux --- 2.6.x kernel
 	  IPC on FreeBSD 6.x --- Add "options P1003_1B_SEMAPHORES" to kernel config and recompile kernel
+	  Net on BeOS Exp/Dano --- copy "/boot/beos/system/lib/libnet.so" to "/boot/develop/lib/x86"
 
  * Windows MSVC++ 6.0:
 	1. run "./configure --with-built-in-graphics=win32" within MinGW to generate the files
@@ -41,6 +42,4 @@ How to compile ETK++ from source
 	2. open "build/beos/etkxx-x86.proj" or "build/beos/etkxx-x86-ppc.proj" in BeIDE and compile it
 	3. you'll get "build/beos/libetkxx.so".
 	4. the "build/beos/example/*.proj" just for compiling examples
-	5. special:
-		BeOS Exp/Dano --- copy "/boot/beos/system/lib/libnet.so" to "/boot/develop/lib/x86"
 
