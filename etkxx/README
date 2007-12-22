@@ -15,7 +15,7 @@ How to compile ETK++ from source
 		pkg-config >= 0.14
 
  * Linux/MinGW/CygWin/FreeBSD/Solaris/MacOSX/BeOS:
-	1. run the "./configue" to generate the config files for compiling.
+	1. run the "./configure" to generate the config files for compiling.
 	2. run "make" to compile all.
 	3. run "make install" to install all.
 	4. compile example:
