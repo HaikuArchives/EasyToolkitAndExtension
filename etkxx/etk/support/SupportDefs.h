@@ -63,7 +63,8 @@ enum {
 	E_UINT8_TYPE 				= 'UBYT',
 	E_POINT_TYPE				= 'SPNT',
 	E_RECT_TYPE				= 'RECT',
-	E_MIME_TYPE				= 'MIME'
+	E_MIME_TYPE				= 'MIME',
+	E_UNKNOWN_TYPE				= 'UNKN'
 };
 
 

@@ -153,6 +153,7 @@ _IMPEXP_ETK bool e_is_type_swapped(e_type_code type)
 		case E_POINT_TYPE:
 		case E_RECT_TYPE:
 		case E_MIME_TYPE:
+		case E_UNKNOWN_TYPE:
 			return true;
 
 		default:

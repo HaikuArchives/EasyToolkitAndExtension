@@ -30,15 +30,59 @@
 #ifndef __ETK_PRIVATE_MESSAGE_BODY_H__
 #define __ETK_PRIVATE_MESSAGE_BODY_H__
 
-#include <etk/support/SupportDefs.h>
+#include <etk/support/List.h>
+#include <etk/support/StreamIO.h>
 
 #ifdef __cplusplus /* Just for C++ */
+
+class EMessageBody;
+class EMessageNode;
+
+
+class _LOCAL EMessageItem
+{
+public:
+	EMessageItem(void *data, size_t nBytes, bool fixedSize = true);
+	~EMessageItem();
+
+	void		SetData(void *data, size_t nBytes, bool fixedSize = true);
+	void		*Data() const;
+	size_t		Bytes() const;
+	bool		IsFixedSize() const;
+
+private:
+	friend class EMessageBody;
+	friend class EMessageNode;
+
+	bool fFixedSize;
+	size_t fBytes;
+	void *fData;
+};
+
 
 class _LOCAL EMessageBody
 {
 public:
 	EMessageBody();
 	~EMessageBody();
+
+	bool		AddItem(const char *name, e_type_code type, EMessageItem *item);
+	void		RemoveItem(EMessageItem *item);
+
+	eint32		CountNames() const;
+	eint32		CountTypes() const;
+
+	size_t		FlattenedSize() const;
+	bool		Flatten(char *buffer, size_t size) const;
+	bool		Flatten(EDataIO *stream, ssize_t *size = NULL) const;
+	bool		Unflatten(const char *buffer, size_t size);
+	bool		Unflatten(EDataIO *stream, size_t size);
+
+	void		PrintToStream(EStreamIO *stream);
+
+private:
+	EList *fNames;
+	EList *fTypes;
 };
 
 #endif /* __cplusplus */
