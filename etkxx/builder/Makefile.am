@@ -1,6 +1,0 @@
-AUTOMAKE_OPTIONS = 1.7
-
-SUBDIRS =
-
-DISTCLEANFILES = Makefile.in
-

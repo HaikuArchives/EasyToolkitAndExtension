@@ -105,7 +105,7 @@ case $host in
     etk_native_os=unix
     etk_native_os_extra=darwin
     ;;
-  *-*-beos*)
+  *-*-beos*|*-*-haiku*)
     etk_native_os=beos
     ;;
   *-*-mingw*)
@@ -723,6 +723,14 @@ if test "$etk_net_libs" = none; then
 	done
 	LIBS="$etk_save_LIBS"
 fi
+case $etk_native_os in
+	beos)
+		if test "$etk_net_libs" = "socket" ; then
+			# Exp/Dano
+			etk_net_libs="-lsocket -lbinding"
+		fi
+	;;
+esac
 if test "$etk_net_libs" != "none" ; then
 	ETK_EXTRA_LIBS="$ETK_EXTRA_LIBS $etk_net_libs"
 fi
@@ -1791,8 +1799,6 @@ build/win32/Makefile
 build/win32/etkxx/Makefile
 build/win32/graphics/Makefile
 build/win32/example/Makefile
-build/beos/Makefile
-build/beos/example/Makefile
 etk/private/Makefile
 etk/kernel/Makefile
 etk/kernel/unix/Makefile
@@ -1829,7 +1835,6 @@ tools/etkxx-config
 manual/Makefile
 example/Makefile
 tests/Makefile
-builder/Makefile
 ])
 
 AC_OUTPUT

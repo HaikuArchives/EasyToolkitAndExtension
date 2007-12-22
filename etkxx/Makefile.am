@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = foreign 1.7 dist-bzip2
 DISTCHECK_CONFIGURE_FLAGS = "--enable-debug=medium --enable-mem-trace=yes --enable-freetype=yes"
 EFENCE = 
 
-SUBDIRS = build etk tools manual example builder
+SUBDIRS = build etk tools manual example
 
 if ETK_COMPILE_TEST
 SUBDIRS += tests
