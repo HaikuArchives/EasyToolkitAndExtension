@@ -259,7 +259,7 @@ EMessageBody::Unflatten(EDataIO *stream, size_t size)
 
 
 void
-EMessageBody::PrintToStream(EStreamIO *stream)
+EMessageBody::PrintToStream(EStreamIO &stream) const
 {
 	// TODO
 	ETK_WARNING("[PRIVATE]: %s --- TODO", __PRETTY_FUNCTION__);

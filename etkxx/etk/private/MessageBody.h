@@ -35,6 +35,7 @@
 
 #ifdef __cplusplus /* Just for C++ */
 
+
 class EMessageBody;
 class EMessageNode;
 
@@ -78,12 +79,21 @@ public:
 	bool		Unflatten(const char *buffer, size_t size);
 	bool		Unflatten(EDataIO *stream, size_t size);
 
-	void		PrintToStream(EStreamIO *stream);
+	void		PrintToStream(EStreamIO &stream) const;
+	void		PrintToStream() const;
 
 private:
 	EList *fNames;
 	EList *fTypes;
 };
+
+
+inline void
+EMessageBody::PrintToStream() const
+{
+	PrintToStream(EOut);
+}
+
 
 #endif /* __cplusplus */
 
