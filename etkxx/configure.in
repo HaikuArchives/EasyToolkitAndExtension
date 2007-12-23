@@ -727,7 +727,7 @@ case $etk_native_os in
 	beos)
 		if test "$etk_net_libs" = "socket" ; then
 			# Exp/Dano
-			etk_net_libs="-lsocket -lbinding"
+			etk_net_libs="-lsocket -lbind"
 		fi
 	;;
 esac
