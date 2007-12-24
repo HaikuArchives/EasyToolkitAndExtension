@@ -46,7 +46,9 @@
 #		ifdef BONE_VERSION
 #			include <arpa/inet.h>
 #		endif
-#		define socklen_t int
+#		ifndef __HAIKU__
+#			define socklen_t int
+#		endif
 #	else
 #		include <arpa/inet.h>
 #	endif
@@ -263,7 +265,7 @@ ENetEndpoint::_Close()
 {
 	if(fSocket != -1)
 	{
-#if defined(_WIN32) || (defined(__BEOS__) && !defined(BONE_VERSION))
+#if defined(_WIN32) || (defined(__BEOS__) && !(defined(BONE_VERSION) || defined(__HAIKU__)))
 		closesocket(fSocket);
 #else
 		close(fSocket);

@@ -69,7 +69,9 @@ enum {
 
 
 #ifndef HAVE_BZERO
+	#ifndef bzero
 	#define bzero(ptr, len) memset(ptr, 0, len)
+	#endif
 #endif /* HAVE_BZERO */
 
 #ifndef __cplusplus
@@ -132,7 +134,7 @@ typedef	eint8	bool;
  * properly get exported in windows dlls or Metrowerks'.
  */
 #ifndef _EXPORT
-#  if defined(ETK_OS_WIN32) || defined(ETK_OS_CYGWIN) || defined(ETK_OS_BEOS)
+#  if defined(ETK_OS_WIN32) || defined(ETK_OS_CYGWIN) || (defined(ETK_OS_BEOS) && defined(ETK_BIG_ENDIAN))
 #    define _EXPORT __declspec(dllexport)
 #  else
 #    define _EXPORT
@@ -141,7 +143,7 @@ typedef	eint8	bool;
 
 
 #ifndef _IMPORT
-#  if defined(ETK_OS_WIN32) || defined(ETK_OS_CYGWIN) || defined(ETK_OS_BEOS)
+#  if defined(ETK_OS_WIN32) || defined(ETK_OS_CYGWIN) || (defined(ETK_OS_BEOS) && defined(ETK_BIG_ENDIAN))
 #    define _IMPORT __declspec(dllimport)
 #  else
 #    define _IMPORT
