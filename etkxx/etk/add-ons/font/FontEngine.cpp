@@ -54,7 +54,7 @@ static EStringArray etk_font_families;
 #ifdef HAVE_FT2
 extern bool etk_font_freetype2_init(void);
 extern bool etk_font_freetype2_is_valid(void);
-extern void etk_font_freetype2_quit(void);
+extern void etk_font_freetype2_cancel(void);
 extern bool etk_update_freetype2_font_families(bool check_only);
 #endif // HAVE_FT2
 
