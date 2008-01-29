@@ -43,5 +43,27 @@
 #define B_LEFT_OPTION_KEY		E_LEFT_OPTION_KEY
 #define B_RIGHT_OPTION_KEY		E_RIGHT_OPTION_KEY
 
+#define B_BACKSPACE			E_BACKSPACE
+#define B_RETURN			E_RETURN
+#define B_ENTER				E_ENTER
+#define B_SPACE				E_SPACE
+#define B_TAB				E_TAB
+#define B_ESCAPE			E_ESCAPE
+#define B_LEFT_ARROW			E_LEFT_ARROW
+#define B_RIGHT_ARROW			E_RIGHT_ARROW
+#define B_UP_ARROW			E_UP_ARROW
+#define B_DOWN_ARROW			E_DOWN_ARROW
+#define B_INSERT			E_INSERT
+#define B_DELETE			E_DELETE
+#define B_HOME				E_HOME
+#define B_END				E_END
+#define B_PAGE_UP			E_PAGE_UP
+#define B_PAGE_DOWN			E_PAGE_DOWN
+#define B_FUNCTION_KEY			E_FUNCTION_KEY
+
+#define B_PANEL_BACKGROUND_COLOR	E_PANEL_BACKGROUND_COLOR
+#define B_PANEL_TEXT_COLOR		E_PANEL_TEXT_COLOR
+#define ui_color(which)			e_ui_color(which)
+
 #endif /* __LITE_BEAPI_INTERFACE_DEFS_H__ */
 
