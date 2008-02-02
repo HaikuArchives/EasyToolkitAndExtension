@@ -51,6 +51,7 @@ dnl
 #include <stdlib.h>
 
 #include <etk/support/String.h>
+#include <etk/support/StringArray.h>
 
 int
 main()
@@ -60,27 +61,28 @@ main()
 
 	system("touch conf.etkxxtest");
 
-	tmp_version = e_strdup_printf("%s", "$min_etkxx_version");
-
-	if(sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3)
+	EString tmpVersion("$min_etkxx_version");
+	EStringArray *array = tmpVersion.Split('.');
+	if(array == NULL || array->CountItems() != 3 ||
+	   array->ItemAt(0)->GetInteger(&major) == false ||
+	   array->ItemAt(1)->GetInteger(&minor) == false ||
+	   array->ItemAt(2)->GetInteger(&micro) == false)
 	{
 		printf("%s, bad version string\n", "$min_etkxx_version");
 		exit(1);
 	}
 
-	free(tmp_version);
-
-	if((etk_major_version != $etkxx_config_major_version) ||
-	   (etk_minor_version != $etkxx_config_minor_version) ||
-	   (etk_micro_version != $etkxx_config_micro_version))
+	if(etk_major_version != $etkxx_config_major_version ||
+	   etk_minor_version != $etkxx_config_minor_version ||
+	   etk_micro_version != $etkxx_config_micro_version)
 	{
 		printf("\n*** 'etkxx-config --version' returned %d.%d.%d, but ETK++ (%d.%d.%d) was found!\n", 
 		       $etkxx_config_major_version, $etkxx_config_minor_version, $etkxx_config_micro_version,
 		       etk_major_version, etk_minor_version, etk_micro_version);
 	}
-	else if((etk_major_version != ETK_MAJOR_VERSION) ||
-		(etk_minor_version != ETK_MINOR_VERSION) ||
-		(etk_micro_version != ETK_MICRO_VERSION))
+	else if(etk_major_version != ETK_MAJOR_VERSION ||
+		etk_minor_version != ETK_MINOR_VERSION ||
+		etk_micro_version != ETK_MICRO_VERSION)
 	{
 		printf("*** ETK++ header files (version %d.%d.%d) do not match\n",
 		       ETK_MAJOR_VERSION, ETK_MINOR_VERSION, ETK_MICRO_VERSION);
@@ -89,9 +91,9 @@ main()
 	}
 	else
 	{
-		if((etk_major_version > major) ||
-		   ((etk_major_version == major) && (etk_minor_version > minor)) ||
-		   ((etk_major_version == major) && (etk_minor_version == minor) && (etk_micro_version >= micro)))
+		if(etk_major_version > major ||
+		   (etk_major_version == major && etk_minor_version > minor) ||
+		   (etk_major_version == major && etk_minor_version == minor && etk_micro_version >= micro))
 		{
 			return 0;
 		}
