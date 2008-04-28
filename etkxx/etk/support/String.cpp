@@ -3590,7 +3590,7 @@ _IMPEXP_ETK eint32 e_utf8_strlen(const char *str)
 }
 
 
-_IMPEXP_ETK eint32 e_utf8_strlen_etc(const char *str, eint32 nbytes)
+_LOCAL eint32 _e_utf8_strlen_etc(const char *str, eint32 nbytes, bool check)
 {
 	if(str == NULL || *str == 0 || nbytes == 0) return 0;
 
@@ -3612,19 +3612,18 @@ _IMPEXP_ETK eint32 e_utf8_strlen_etc(const char *str, eint32 nbytes)
 		else if(*p < 0xfc) len = 5; // 111110xx : 5 bytes, it's invalid UTF8 util this wrote
 		else if(*p < 0xfe) len = 6; // 1111110x : 6 bytes, it's invalid UTF8 util this wrote
 
-		if(len == 4) // check UTF-16
+		if(!check)
 		{
-			eunichar high;
-			high = ((eunichar)(*p++) & 0x07) << 2;
-			high |= ((eunichar)(*p--) & 0x30) >> 4;
-			if(high == 0) len = 0;
+			p += max_c(len, 1);
 		}
-
-		for(eint8 i = len; i >= 0; i--)
+		else
 		{
-			p++;
-			if(i <= 1) break;
-			if(*p < 0x80 || *p >= 0xc0) i = len = 0; // 0xxxxxxx or 11xxxxxx : invalid UTF8
+			for(eint8 i = len; i >= 0; i--)
+			{
+				p++;
+				if(i <= 1) break;
+				if(*p < 0x80 || *p >= 0xc0) i = len = 0; // 0xxxxxxx or 11xxxxxx : invalid UTF8
+			}
 		}
 
 		if((eint32)(p - (const unsigned char*)str) > nbytes) break;
@@ -3636,36 +3635,15 @@ _IMPEXP_ETK eint32 e_utf8_strlen_etc(const char *str, eint32 nbytes)
 }
 
 
-// none checking
+_IMPEXP_ETK eint32 e_utf8_strlen_etc(const char *str, eint32 nbytes)
+{
+	return _e_utf8_strlen_etc(str, nbytes, true);
+}
+
+
 _IMPEXP_ETK eint32 e_utf8_strlen_fast(const char *str, eint32 nbytes)
 {
-	if(str == NULL || *str == 0 || nbytes == 0) return 0;
-
-	if(nbytes < 0) nbytes = (eint32)strlen(str);
-
-	const unsigned char *p = (const unsigned char*)str;
-	eint32 uLen = 0;
-
-	while(*p)
-	{
-		eint8 len = 0;
-
-		if(*p < 0x80) len = 1; // 0xxxxxxx : ASCII
-		else if(*p < 0xc0 || *p >= 0xfe) len = 0; // 10xxxxxx or 1111111x : invalid UTF8
-		else if(*p < 0xe0) len = 2; // 110xxxxx : 2 bytes
-		else if(*p < 0xf0) len = 3; // 1110xxxx : 3 bytes
-		else if(*p < 0xf8) len = 4; // 11110xxx : 4 bytes
-		else if(*p < 0xfc) len = 5; // 111110xx : 5 bytes, it's invalid UTF8 util this wrote
-		else if(*p < 0xfe) len = 6; // 1111110x : 6 bytes, it's invalid UTF8 util this wrote
-
-		p += max_c(len, 1);
-
-		if((eint32)(p - (const unsigned char*)str) > nbytes) break;
-
-		if(len > 0 && len <= 4) uLen++;
-	}
-
-	return uLen;
+	return _e_utf8_strlen_etc(str, nbytes, false);
 }
 
 
@@ -3687,14 +3665,6 @@ _IMPEXP_ETK const char* e_utf8_at(const char *str, eint32 index, euint8 *length)
 		else if(*p < 0xf8) len = 4; // 11110xxx : 4 bytes
 		else if(*p < 0xfc) len = 5; // 111110xx : 5 bytes, it's invalid UTF8 util this wrote
 		else if(*p < 0xfe) len = 6; // 1111110x : 6 bytes, it's invalid UTF8 util this wrote
-
-		if(len == 4) // check UTF-16
-		{
-			eunichar high;
-			high = ((eunichar)(*p++) & 0x07) << 2;
-			high |= ((eunichar)(*p--) & 0x30) >> 4;
-			if(high == 0) len = 0;
-		}
 
 		for(eint8 i = len; i >= 0; i--)
 		{
@@ -3737,14 +3707,6 @@ _IMPEXP_ETK const char* e_utf8_next(const char *str, euint8 *length)
 		else if(*p < 0xf8) len = 4; // 11110xxx : 4 bytes
 		else if(*p < 0xfc) len = 5; // 111110xx : 5 bytes, it's invalid UTF8 util this wrote
 		else if(*p < 0xfe) len = 6; // 1111110x : 6 bytes, it's invalid UTF8 util this wrote
-
-		if(len == 4) // check UTF-16
-		{
-			eunichar high;
-			high = ((eunichar)(*p++) & 0x07) << 2;
-			high |= ((eunichar)(*p--) & 0x30) >> 4;
-			if(high == 0) len = 0;
-		}
 
 		for(eint8 i = len; i >= 0; i--)
 		{
@@ -3813,26 +3775,30 @@ _IMPEXP_ETK eunichar* e_utf8_convert_to_unicode(const char *str, eint32 length)
 			else if(len == 2)
 			{
 				*tmp = ((eunichar)(*p++) & 0x1f) << 6;
-				*tmp |= ((eunichar)(*p++) & 0x3f);
+				*tmp |= (eunichar)(*p++) & 0x3f;
 			}
 			else if(len == 3)
 			{
 				*tmp = ((eunichar)(*p++) & 0x0f) << 12;
 				*tmp |= ((eunichar)(*p++) & 0x3f) << 6;
-				*tmp |= ((eunichar)(*p++) & 0x3f);
+				*tmp |= (eunichar)(*p++) & 0x3f;
 			}
-			else if(len == 4) // convert to UTF-16
+			else if(len == 4)
 			{
-				eunichar high, low;
-				high = ((eunichar)(*p++) & 0x07) << 2;
-				high |= ((eunichar)(*p) & 0x30) >> 4;
-				low = ((eunichar)(*p++) & 0x0f) << 12;
-				low |= ((eunichar)(*p++) & 0x3f) << 6;
-				low |= ((eunichar)(*p++) & 0x3f);
-				if(high == 0) continue; // invalid UTF-16
-				high -= 1;
-				*tmp = (0xd800 | (high << 6)); *tmp |= low >> 10; tmp++;
-				*tmp = (0xdc00 | (low & 0x03ff));
+				eunichar32 tmp32 = ((eunichar32)(*p++) & 0x07) << 18;
+				tmp32 |= ((eunichar32)(*p++) & 0x3f) << 12;
+				tmp32 |= ((eunichar32)(*p++) & 0x3f) << 6;
+				tmp32 |= (eunichar32)(*p++) & 0x3f;
+
+				if(tmp32 > 0xffff)
+				{
+					*tmp++ = 0xd800 | ((tmp32 - 0x10000) >> 10);
+					*tmp = 0xdc00 | ((tmp32 - 0x10000) & 0x03ff);
+				}
+				else
+				{
+					*tmp = tmp32;
+				}
 			}
 			else {p += len; continue;} // don't support the 5 or 6 bytes UTF-8
 
@@ -3889,24 +3855,20 @@ _IMPEXP_ETK eunichar32* e_utf8_convert_to_utf32(const char *str, eint32 length)
 			else if(len == 2)
 			{
 				*tmp = ((eunichar32)(*p++) & 0x1f) << 6;
-				*tmp |= ((eunichar32)(*p++) & 0x3f);
+				*tmp |= (eunichar32)(*p++) & 0x3f;
 			}
 			else if(len == 3)
 			{
 				*tmp = ((eunichar32)(*p++) & 0x0f) << 12;
 				*tmp |= ((eunichar32)(*p++) & 0x3f) << 6;
-				*tmp |= ((eunichar32)(*p++) & 0x3f);
+				*tmp |= (eunichar32)(*p++) & 0x3f;
 			}
-			else if(len == 4) // convert to UTF-16
+			else if(len == 4)
 			{
-				eunichar high, low;
-				high = ((eunichar)(*p++) & 0x07) << 2;
-				high |= ((eunichar)(*p) & 0x30) >> 4;
-				low = ((eunichar)(*p++) & 0x0f) << 12;
-				low |= ((eunichar)(*p++) & 0x3f) << 6;
-				low |= ((eunichar)(*p++) & 0x3f);
-				if(high == 0) continue; // invalid UTF-16
-				*tmp = (((eunichar32)high) << 16) | (eunichar32)low;
+				*tmp = ((eunichar32)(*p++) & 0x07) << 18;
+				*tmp |= ((eunichar32)(*p++) & 0x3f) << 12;
+				*tmp |= ((eunichar32)(*p++) & 0x3f) << 6;
+				*tmp |= (eunichar32)(*p++) & 0x3f;
 			}
 			else {p += len; continue;} // don't support the 5 or 6 bytes UTF-8
 
@@ -4037,6 +3999,7 @@ _IMPEXP_ETK char* e_unicode_convert_to_utf8(const eunichar *str, eint32 ulength)
 				// convert UTF-16 to UCS4
 				euint32 tmp = (euint32)(*p++ & 0x03ff) << 10;
 				tmp |= (euint32)(*p++ & 0x03ff);
+				tmp += 0x10000;
 
 				// convert UCS4 to UTF-8
 				euint8 ustr[5];
@@ -4111,8 +4074,9 @@ _IMPEXP_ETK eunichar32* e_unicode_convert_to_utf32(const eunichar *str, eint32 u
 				p--;
 
 				// convert UTF-16 to UCS4
-				euint32 tmp = (euint32)(*p++ & 0x03ff) << 10;
+				euint32 tmp = ((euint32)(*p++ & 0x03ff) << 10);
 				tmp |= (euint32)(*p++ & 0x03ff);
+				tmp += 0x10000;
 
 				utf32[ulen++] = tmp;
 
@@ -4147,7 +4111,7 @@ _IMPEXP_ETK eint32 e_utf32_strlen_etc(const eunichar32 *ustr, eint32 nchars)
 	while(*p)
 	{
 		if(nchars > 0) if((eint32)(p - ustr) > nchars - 1) break;
-		if(*p < 0xf8ffff) len++;
+		if(*p <= 0x10ffff) len++;
 		p++;
 	}
 
@@ -4164,7 +4128,7 @@ _IMPEXP_ETK const eunichar32* e_utf32_at(const eunichar32* ustr, eint32 index)
 
 	while(*p)
 	{
-		if(*p < 0xf8ffff)
+		if(*p <= 0x10ffff)
 		{
 			if(index == len) return p;
 			else len++;
@@ -4185,7 +4149,7 @@ _IMPEXP_ETK const eunichar32* e_utf32_next(const eunichar32* ustr)
 	while(*p)
 	{
 		p++;
-		if(*p > 0 && *p < 0xf8ffff) return p;
+		if(*p > 0 && *p <= 0x10ffff) return p;
 	}
 
 	return NULL;
@@ -4203,8 +4167,7 @@ _IMPEXP_ETK char* e_utf32_convert_to_utf8(const eunichar32 *str, eint32 ulength)
 
 	while(*p != 0 && (ulength > 0 ? ulength > ulen : true))
 	{
-		// refuse to convert to UTF-8 more than 4 bytes
-		if(*p > 0xffff && *p < 0xf8ffff)
+		if(*p > 0xffff && *p <= 0x10ffff)
 		{
 			euint32 tmp = *p;
 
@@ -4275,21 +4238,15 @@ _IMPEXP_ETK eunichar* e_utf32_convert_to_unicode(const eunichar32 *str, eint32 u
 
 	while(*p != 0 && (ulength > 0 ? ulength > ulen : true))
 	{
-		if(*p > 0xffff && *p < 0xf8ffff)
+		if(*p > 0xffff && *p <= 0x10ffff)
 		{
-			eunichar high = (eunichar)(*p >> 16);
-			eunichar low = (eunichar)(*p & 0xffff);
-
-			high -= 1;
-			*tmp = (0xd800 | (high << 6)); *tmp |= low >> 10; tmp++;
-			*tmp++ = (0xdc00 | (low & 0x03ff));
-
+			*tmp++ = 0xd800 | ((*p - 0x10000) >> 10);
+			*tmp++ = 0xdc00 | ((*p - 0x10000) & 0x03ff);
 			ulen++;
 		}
 		else if(*p <= 0xffff)
 		{
 			*tmp++ = (eunichar)(*p);
-
 			ulen++;
 		}
 

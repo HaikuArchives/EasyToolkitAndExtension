@@ -1,3 +1,6 @@
+2008-04-28  anthonylee
+	Fixed UTF-8/16/32 convertor.
+
 2007-12-14  anthonylee
 	Added EStreamIO of Support Kit.
 
