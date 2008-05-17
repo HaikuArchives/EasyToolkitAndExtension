@@ -52,7 +52,7 @@ public:
 	eint32			CountAttributes() const;
 
 	ESimpleXmlNode		*NodeAt(eint32 index) const;
-	bool			AddNode(ESimpleXmlNode *node);
+	bool			AddNode(ESimpleXmlNode *node, eint32 atIndex = -1);
 	bool			RemoveNode(ESimpleXmlNode *node);
 	bool			RemoveSelf();
 	eint32			FindNode(const char *name, eint32 fromIndex = 0) const;

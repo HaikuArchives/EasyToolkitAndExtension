@@ -1994,7 +1994,7 @@ EView::SetFont(const EFont *font, euint8 mask)
 {
 	if(font == NULL) return;
 
-	if(mask & E_FONT_ALL)
+	if(mask == E_FONT_ALL)
 	{
 		((EViewState*)fStates)->Font = *font;
 	}

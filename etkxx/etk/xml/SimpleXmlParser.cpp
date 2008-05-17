@@ -200,11 +200,11 @@ ESimpleXmlNode::RemoveAttribute(const char *name)
 
 
 bool
-ESimpleXmlNode::AddNode(ESimpleXmlNode *node)
+ESimpleXmlNode::AddNode(ESimpleXmlNode *node, eint32 atIndex)
 {
 	if(node == NULL || node->fSuperNode != NULL) return false;
 
-	if(fNodes.AddItem(node) == false) return false;
+	if(fNodes.AddItem(node, atIndex < 0 ? fNodes.CountItems() : atIndex) == false) return false;
 
 	node->fSuperNode = this;
 
