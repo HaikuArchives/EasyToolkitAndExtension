@@ -44,6 +44,10 @@
 
 #include <etk/support/String.h>
 
+#ifdef _WIN32
+extern "C" char* etk_win32_convert_utf8_to_active(const char *str, eint32 length);
+#endif // _WIN32
+
 #include "Path.h"
 #include "File.h"
 
@@ -190,6 +194,12 @@ EFile::SetTo(const char *path, euint32 open_mode, euint32 access_mode)
 	*((int*)fFD) = newFD;
 #else
 	strPath.ReplaceAll("/", "\\");
+	char *active_str = etk_win32_convert_utf8_to_active(strPath.String(), -1);
+	if(active_str != NULL)
+	{
+		strPath = active_str;
+		free(active_str);
+	}
 	HANDLE newFD = CreateFile(strPath.String(),
 				  (open_mode & E_READ_WRITE) ? (GENERIC_WRITE | GENERIC_READ) :
 				  	(open_mode & E_WRITE_ONLY ? GENERIC_WRITE : GENERIC_READ),

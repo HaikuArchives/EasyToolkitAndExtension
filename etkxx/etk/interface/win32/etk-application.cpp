@@ -114,7 +114,8 @@ static e_filter_result etk_win32_clipboard_filter(EMessage *message, EHandler **
 			eunichar *wStr = e_utf8_convert_to_unicode(str.String(), -1);
 			if(wStr)
 			{
-				eint32 len = ((const char*)e_unicode_at(wStr, e_unicode_strlen(wStr) - 1, NULL) - (const char*)wStr) + 2;
+				eint32 len = 0;
+				for(eunichar *tmp = wStr; *tmp != 0; tmp++) len += 2;
 				if((hMem = GlobalAlloc(GMEM_MOVEABLE, (size_t)len + 2)) != NULL)
 				{
 					void *addr = GlobalLock(hMem);
