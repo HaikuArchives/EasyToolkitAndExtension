@@ -398,6 +398,7 @@ EApplication::MessageReceived(EMessage *msg)
 				EMessenger msgr;
 				if(msg->FindMessenger("etk:msg_for_target", &msgr))
 				{
+					// TODO: Floating window shouldt receive the MOUSE event
 					ELocker *hLocker = etk_get_handler_operator_locker();
 					hLocker->Lock();
 					EMessenger *tMsgr = (EMessenger*)fModalWindows.ItemAt(0);
