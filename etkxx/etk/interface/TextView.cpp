@@ -1519,7 +1519,7 @@ ETextView::Draw(ERect updateRect)
 				EView::SetHighColor(fgColor);
 				_DrawString(*etk_plain_font, str, penLocation, line->length);
 
-				if(cursorPos >= 0)
+				if(cursorPos >= 0 && IsFocus()) 
 				{
 					e_rgb_color color = e_ui_color(E_DOCUMENT_CURSOR_COLOR);
 					if(!IsEnabled()) color.disable(ViewColor());
@@ -1611,7 +1611,7 @@ ETextView::Draw(ERect updateRect)
 				_DrawString(curFont, str + curRun->offset, penLocation, len);
 				if(curRun->underline) StrokeLine(penLocation, penLocation + EPoint(strWidth, 0), E_SOLID_HIGH);
 
-				if(cursorPos >= curRun->offset && (nextRun == NULL || cursorPos < nextRun->offset))
+				if(cursorPos >= curRun->offset && (nextRun == NULL || cursorPos < nextRun->offset) && IsFocus())
 				{
 					e_rgb_color color = e_ui_color(E_DOCUMENT_CURSOR_COLOR);
 					if(!IsEnabled()) color.disable(ViewColor());
@@ -1639,7 +1639,7 @@ ETextView::Draw(ERect updateRect)
 		} while(!(line->length == 0 || line->array == NULL || ++k >= line->array->count || penLocation.x > r.right));
 	}
 
-	if(fLines.CountItems() <= 0 && fEditable)
+	if(fLines.CountItems() <= 0 && fEditable && IsFocus())
 	{
 		EFont font(*etk_plain_font);
 		e_font_height fontHeight;
