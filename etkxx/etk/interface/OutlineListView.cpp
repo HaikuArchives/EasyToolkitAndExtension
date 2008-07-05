@@ -85,7 +85,7 @@ EOutlineListView::AddItem(EListItem *item, eint32 fullListIndex)
 		else while(index > 0)
 		{
 			EListItem *aItem = (EListItem*)fFullItems.ItemAt(--index);
-			if(aItem->fLevel == item->fLevel || aItem->fOwner == NULL) continue;
+			if((aItem->fLevel == item->fLevel && item->fLevel > 0) || aItem->fOwner == NULL) continue;
 
 			index = IndexOf(aItem);
 			EListView::AddItem(item, ++index);
