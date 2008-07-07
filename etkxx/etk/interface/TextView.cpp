@@ -999,7 +999,6 @@ ETextView::RunArray(eint32 _startPos, eint32 endPos, eint32 *length, bool utf8) 
 void
 ETextView::Insert(const char *text, const e_text_run_array *runs, bool utf8)
 {
-	if(text == NULL || *text == 0) return;
 	Insert(fSelectStart, text, (utf8 ? e_utf8_strlen(text) : strlen(text)), runs, utf8);
 }
 
@@ -1007,7 +1006,6 @@ ETextView::Insert(const char *text, const e_text_run_array *runs, bool utf8)
 void
 ETextView::Insert(const char *text, eint32 length, const e_text_run_array *runs, bool utf8)
 {
-	if(text == NULL || *text == 0 || length == 0) return;
 	Insert(fSelectStart, text, length, runs, utf8);
 }
 
@@ -1015,6 +1013,8 @@ ETextView::Insert(const char *text, eint32 length, const e_text_run_array *runs,
 void
 ETextView::Insert(eint32 offset, const char *text, eint32 length, const e_text_run_array *runs, bool utf8)
 {
+	if(text == NULL || *text == 0 || length == 0) return;
+
 	eint32 oldStart = fSelectStart, oldEnd = fSelectEnd;
 
 	InsertText(text, length, offset, (fStylable ? runs : NULL), utf8);
