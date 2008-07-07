@@ -1114,6 +1114,12 @@ EView::_FrameChanged(ERect oldFrame, ERect newFrame)
 				MessageReceived(&aMsg);
 		}
 	}
+
+	if(!(e_is_kind_of(Parent(), EScrollView) == false || e_cast_as(Parent(), EScrollView)->fTarget != this))
+	{
+		ERect rect = Parent()->Frame();
+		e_cast_as(Parent(), EScrollView)->FrameResized(rect.Width(), rect.Height());
+	}
 }
 
 
