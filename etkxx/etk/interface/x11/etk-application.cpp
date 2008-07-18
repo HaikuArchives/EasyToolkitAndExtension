@@ -844,8 +844,9 @@ static void etk_process_x_event(EXGraphicsEngine *x11Engine, XEvent *event)
 					char *st_buf = XKeysymToString(keysym);
 					if(!(st_buf == NULL || *st_buf == 0 || st_buf[1] != 0))
 					{
-						bzero(keybuffer, sizeof(keybuffer));
-						memcpy(&keybuffer[0], st_buf, keynum = 1);
+						keybuffer[0] = *st_buf;
+						keybuffer[1] = '\0';
+						keynum = 1;
 					}
 				}
 #if 0
