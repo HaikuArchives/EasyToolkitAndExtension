@@ -839,7 +839,15 @@ static void etk_process_x_event(EXGraphicsEngine *x11Engine, XEvent *event)
 
 				x11Engine->Lock();
 				keynum = XLookupString(&event->xkey, keybuffer, 16, &keysym, &status);
-
+				if(event->xkey.state & (ControlMask | Mod1Mask))
+				{
+					char *st_buf = XKeysymToString(keysym);
+					if(!(st_buf == NULL || *st_buf == 0 || st_buf[1] != 0))
+					{
+						bzero(keybuffer, sizeof(keybuffer));
+						memcpy(&keybuffer[0], st_buf, keynum = 1);
+					}
+				}
 #if 0
 				if(event->type == KeyRelease)
 					ETK_DEBUG("event->xkey.state & ShiftMask --- %s",
